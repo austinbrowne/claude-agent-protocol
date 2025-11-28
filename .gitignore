@@ -1,0 +1,22 @@
+# Local session data
+debug/
+file-history/
+history.jsonl
+projects/
+session-env/
+shell-snapshots/
+statsig/
+todos/
+
+# OS files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Secrets and environment files
+.env
+.env.*
+*.key
+*.pem
+credentials.json

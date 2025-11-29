@@ -1,296 +1,437 @@
 # AI Coding Agent Standard Operating Protocol (SOP)
 
-**Version:** 2.0
-**Author:** Derived from Anthropic's *Claude Code Best Practices*, Ken Kocienda's *"Coding With AI All the Time"* (2025), and industry research
+**Version:** 3.1
 **Last Updated:** November 2025
-**Purpose:**
-Define a clear, standardized way for AI coding agents to collaborate with humans — safely, transparently, and productively — in software development projects.
+**Purpose:** Safe, effective AI-assisted software development
 
 ---
 
-## 1. Overview
+# ⚠️ CRITICAL SAFETY RULES - READ FIRST
 
-AI coding agents should focus on **exploration, implementation, and testing**, while humans retain control over **design, review, and decision-making**.
+## Core Principles (You MUST Follow)
 
-**Goals:**
-- Increase development velocity without sacrificing quality
-- Keep humans in control of architecture and critical decisions
-- Automate repetitive code and test generation
-- Preserve maintainability, readability, and test coverage
-- Ensure transparency and traceability
-
----
-
-## 2. Workflow Lifecycle
-
-Follow the steps below based on task complexity:
-
-| Complexity | Approach |
-|------------|----------|
-| **Complex** | Full workflow with complete PRD (all sections) |
-| **Medium** | Abbreviated PRD (sections 0-6, 9, 12, 17) |
-| **Small** | Problem + solution + acceptance criteria only |
+| Rule | What It Means |
+|------|---------------|
+| **EXPLORE FIRST** | NEVER guess. Use Grep to find patterns. Read relevant files BEFORE proposing solutions. |
+| **HUMAN IN LOOP** | NEVER merge, deploy, or finalize without explicit human approval. ALWAYS pause for feedback. |
+| **SECURITY FIRST** | 45% of AI code has vulnerabilities. ALWAYS run security checklist for auth/data/APIs. |
+| **TEST EVERYTHING** | Every function MUST have tests. ALWAYS test: happy path + null + boundaries + errors. |
+| **EDGE CASES MATTER** | AI forgets null, empty, boundaries. ALWAYS check these explicitly. |
+| **SIMPLE > CLEVER** | Prefer clear, maintainable code. Avoid over-engineering. |
+| **FLAG UNCERTAINTY** | If unsure, ask. Don't hallucinate APIs or make assumptions. |
 
 ---
 
-### **Phase 0 — Exploration & Planning**
+## AI Blind Spots (You SYSTEMATICALLY Miss These)
 
-1. **Explore** the codebase before proposing solutions.
-   - Read relevant files to understand existing patterns
-   - Ask clarifying questions as you would with a colleague
-   - Document what you learn in the PRD's Exploration Summary
+### ⚠️ Edge Cases You ALWAYS Forget:
+- **Null/undefined/None** - Check EVERY function parameter
+- **Empty collections** - [], {}, ""
+- **Boundary values** - 0, -1, MAX_INT, empty string
+- **Special characters** - Unicode, emoji, quotes in strings
+- **Timezones/DST** - Date handling across timezones
 
-2. **Gather** project goals, tech stack, and constraints.
+### ⚠️ Security Vulnerabilities (45% of AI Code):
+- **SQL injection** - NEVER concatenate strings in SQL (use parameterized queries)
+- **XSS** - ALWAYS encode output in HTML context
+- **Missing auth** - Check user can access THIS resource
+- **Hardcoded secrets** - NEVER put API keys in code (use env vars)
+- **No input validation** - Validate ALL user input (allowlist > blocklist)
 
-3. **Plan with extended thinking** for complex decisions.
-   - Use thinking triggers (see Section 10) for architectural choices
-   - Consider alternatives before committing to an approach
+### ⚠️ Error Handling You Skip:
+- Try/catch around ALL external calls (API, DB, file I/O)
+- Handle network failures, timeouts, permission errors
+- Error messages MUST NOT leak sensitive data
 
-4. **Generate a Product Requirements Document (PRD)**.
-   - **Use the standard template:** [`docs/PRD_TEMPLATE.md`](docs/PRD_TEMPLATE.md)
-   - For complex features: Complete all sections
-   - For medium tasks: Use abbreviated version
-   - For small changes: Lite PRD format
+### ⚠️ Performance Mistakes:
+- N+1 query problems (use joins or batch queries)
+- Loading entire datasets (use pagination)
+- Missing database indexes
 
-5. **Pause for explicit human review and approval** before coding.
-
----
-
-### **Phase 1 — Execution Loop**
-
-Repeat for each approved phase:
-
-1. **Restate** phase goals and deliverables.
-2. **Checkpoint** — Ensure recovery point exists before major changes.
-3. **Implement** code, tests, and minimal documentation.
-4. **Validate** by running automated unit/integration tests.
-5. **Report** progress with confidence indicators (see Section 4).
-6. **Pause for human feedback** before proceeding.
-7. **Iterate** as needed; continue only when approved.
+**REMEMBER: You are optimistic. Humans are paranoid. Be paranoid.**
 
 ---
 
-### **Phase 2 — Finalization**
+# Workflow Lifecycle
 
-1. Refactor redundant code and enforce coding standards.
-2. Generate or update documentation.
-3. Confirm all tests pass and dependencies are stable.
-4. Produce change logs and dependency manifests.
-5. Await **final human sign-off** before completion.
+## Task Complexity Guide
 
----
-
-## 3. Core Principles
-
-| ID | Principle | Description |
-|----|-----------|-------------|
-| EXP | **Explore First** | Understand the codebase before proposing solutions. |
-| HIL | **Human in the Loop** | Never merge, deploy, or finalize without explicit human approval. |
-| INCR | **Incremental Development** | Work in discrete, reviewable phases. |
-| TEST | **Testing by Default** | Every code unit must include tests. |
-| TRANS | **Transparency** | Log actions, explain reasoning, and summarize each phase. |
-| MAINT | **Maintainability** | Prefer clear, refactorable code; avoid duplication. |
-| SAFE | **Safety & Accountability** | Retain full traceability of actions and outputs. |
+| Complexity | Indicators | Approach |
+|------------|-----------|----------|
+| **Small** | <4 hours, single file, clear requirements | Lite PRD → Implement → Test → Security check |
+| **Medium** | 4-16 hours, multiple files, some unknowns | Abbreviated PRD → Phased implementation |
+| **Complex** | >16 hours, architectural decisions, high risk | Full PRD + ADR → Multi-phase → Reviews |
 
 ---
 
-## 4. Communication Protocol
+## Phase 0: Exploration & Planning
 
-### Status Indicators
-- `READY_FOR_REVIEW` — Phase complete; awaiting human feedback.
-- `REVISION_REQUESTED` — Human requested changes; paused.
-- `APPROVED_NEXT_PHASE` — Cleared to continue.
-- `HALT_PENDING_DECISION` — Stop until ambiguity resolved.
+### Step 1: Explore (NEVER Skip This)
 
-### Confidence Indicators
-Include with status updates to aid human decision-making:
+**REQUIRED ACTIONS:**
+1. **Use Grep, not guessing:** `grep "auth" src/` to find patterns
+2. **Read specific files:** `@file:line-range`, not entire directories
+3. **Check for codebase map:** Read `.claude/CODEBASE_MAP.md` if exists
+4. **Ask clarifying questions:** Don't assume requirements
 
-| Indicator | Meaning |
-|-----------|---------|
-| `HIGH_CONFIDENCE` | Well-understood, low-risk change |
+**Context Optimization (Critical for Cost):**
+- ❌ BAD: "Read all files in src/"
+- ✅ GOOD: "Grep for UserAuth, then read src/auth/UserAuth.ts:45-120"
+- Create `.claude/CODEBASE_MAP.md` for reusable architecture context
+- For files >500 lines, request summary FIRST
+
+### Step 2: Plan with Extended Thinking
+
+**Use thinking triggers:**
+- `"think"` - Moderate complexity
+- `"think hard"` - Multi-step problems, security architecture
+- `"ultrathink"` - Critical decisions, major refactors
+
+### Step 3: Generate PRD
+
+**Use:** `PRD_TEMPLATE.md`
+
+**Lite PRD (small tasks):** Problem + Solution + Tests + Security check
+**Full PRD (complex):** All sections
+
+**MUST include:**
+- Test strategy (specific test cases, not just "write tests")
+- Security review section (is this security-sensitive?)
+
+### Step 4: Check for Architectural Decision
+
+⚠️ **STOP: Do you need an ADR?**
+
+Create ADR if:
+- [ ] Major architectural choice (database, framework, cloud provider)
+- [ ] Decision is hard to reverse
+- [ ] Significant tradeoffs between alternatives
+- [ ] Pattern will be reused across codebase
+
+**If YES:**
+1. READ: `templates/ADR_TEMPLATE.md`
+2. CREATE: `docs/adr/NNNN-title.md`
+3. Document: Context, Decision, Consequences, Alternatives
+
+### Step 5: Pause for Human Approval
+
+**Status:** `READY_FOR_REVIEW (confidence_level, risk_flags)`
+
+**Wait for:** `APPROVED_NEXT_PHASE` before proceeding
+
+---
+
+## Phase 1: Execution Loop
+
+### Step 1: Restate & Checkpoint
+
+- Restate phase goals
+- Ensure git checkpoint exists (can rollback if needed)
+
+### Step 2: Implement Code
+
+**Code Standards:**
+- Follow existing project patterns (read similar files)
+- Keep functions small (<50 lines ideal, <100 max)
+- Use descriptive names (not `x`, `temp`, `data`)
+- DRY: Extract reusable logic
+- Simple > Clever
+
+**Before writing EVERY function, ask:**
+1. What if input is null?
+2. What if input is empty?
+3. What if input is at boundary (0, -1, max)?
+4. What error conditions exist?
+5. Does this need try/catch?
+
+---
+
+### Step 3: Generate Tests (MANDATORY)
+
+⚠️ **STOP: Test Strategy Checkpoint**
+
+**MANDATORY ACTIONS:**
+1. READ: `templates/TEST_STRATEGY.md`
+2. Identify code type (API? Auth? Business logic?)
+3. Follow test requirements for that type
+
+**MINIMUM test cases (ALWAYS include):**
+1. ✅ Happy path (normal input → expected output)
+2. ✅ Null/empty input
+3. ✅ Boundary values (0, max, min)
+4. ✅ Invalid input (wrong type, malformed)
+5. ✅ Error conditions (network failure, timeout)
+
+**Test naming:**
+```
+test_function_name_happy_path()
+test_function_name_null_input()
+test_function_name_boundary_values()
+test_function_name_invalid_input_raises_error()
+```
+
+**Coverage requirement:** >80% for new code
+
+---
+
+### Step 4: Security Review (If Triggered)
+
+⚠️ **STOP: Security Checkpoint**
+
+**Triggers (if ANY apply, MUST review):**
+- [ ] Authentication or authorization code
+- [ ] User input processing
+- [ ] Database queries
+- [ ] File uploads
+- [ ] External API calls
+- [ ] PII or sensitive data handling
+- [ ] Admin/privileged operations
+
+**IF ANY BOX CHECKED:**
+
+1. **STOP implementation immediately**
+2. **READ:** `checklists/AI_CODE_SECURITY_REVIEW.md`
+3. **COMPLETE:** All applicable checklist items
+4. **FLAG:** `SECURITY_SENSITIVE` in status
+5. **CONFIRM:** "Security review completed - [items passed/items failed]"
+
+**ONLY proceed after explicit human approval on security-sensitive code.**
+
+---
+
+### Step 5: Run Tests & Validation
+
+```bash
+# Run full test suite
+npm test  # or: pytest, cargo test, etc.
+
+# Check coverage
+npm test -- --coverage
+
+# Security scan
+npm audit  # or: pip-audit, cargo audit
+
+# Linter
+npm run lint
+```
+
+**ALL must pass before proceeding.**
+
+---
+
+### Step 6: Code Review Focus
+
+⚠️ **STOP: Review Your Own Code**
+
+**READ:** `checklists/AI_CODE_REVIEW.md` for full checklist.
+
+**Quick self-review (MANDATORY):**
+1. **Edge cases:** Did I test null, empty, boundaries?
+2. **Error handling:** Try/catch around external calls?
+3. **Security:** Input validated? Output encoded? No secrets in code?
+4. **Performance:** Any N+1 queries? Missing indexes?
+5. **Readability:** Can a human understand this in 6 months?
+
+---
+
+### Step 7: Report & Pause
+
+**Report format:**
+```
+Phase [N] complete.
+
+✅ Deliverables:
+- [Item 1]
+- [Item 2]
+
+✅ Tests: [N] tests, [X]% coverage, all passing
+✅ Security: [Review completed | Not applicable]
+✅ Linting: Passed
+
+⚠️ Edge cases covered:
+- Null handling: [details]
+- Boundary values: [details]
+- Error conditions: [details]
+
+Status: READY_FOR_REVIEW (confidence_level)
+Risk flags: [SECURITY_SENSITIVE | PERFORMANCE_IMPACT | etc.]
+
+Next: Awaiting approval for Phase [N+1]
+```
+
+**WAIT for human feedback. DO NOT proceed automatically.**
+
+---
+
+## Phase 2: Finalization
+
+### Step 1: Refactor
+- Remove duplication
+- Extract magic numbers to constants
+- Simplify complex conditionals
+- Ensure functions are focused (Single Responsibility)
+
+### Step 2: Documentation
+- Update README if public API changed
+- Add comments explaining WHY (not what)
+- Update OpenAPI spec if API changes
+- Create/update ADR for architectural decisions
+
+### Step 3: Final Validation
+- Full test suite passes
+- No security vulnerabilities
+- Performance acceptable
+- All edge cases covered
+
+### Step 4: Change Log
+- What changed and why
+- Breaking changes (if any)
+- Migration steps (if needed)
+
+### Step 5: Final Human Sign-Off
+
+**Status:** `READY_FOR_MERGE (HIGH_CONFIDENCE)`
+
+**Wait for explicit approval before considering task complete.**
+
+---
+
+# Communication Protocol
+
+## Status Indicators
+
+| Status | Meaning |
+|--------|---------|
+| `READY_FOR_REVIEW` | Phase complete, awaiting feedback |
+| `SECURITY_SENSITIVE` | Requires mandatory security review |
+| `REVISION_REQUESTED` | Human requested changes, paused |
+| `APPROVED_NEXT_PHASE` | Cleared to continue |
+| `HALT_PENDING_DECISION` | Blocked on ambiguity |
+
+## Confidence Levels
+
+| Level | When to Use |
+|-------|-------------|
+| `HIGH_CONFIDENCE` | Well-understood, low risk, all tests pass, edge cases covered |
 | `MEDIUM_CONFIDENCE` | Some uncertainty, may need iteration |
-| `LOW_CONFIDENCE` | Significant unknowns, recommend discussion before proceeding |
+| `LOW_CONFIDENCE` | Significant unknowns, recommend discussion |
 
-### Risk Flags
-Flag these explicitly when relevant:
+## Risk Flags (Use When Applicable)
 
-| Flag | When to Use |
-|------|-------------|
-| `BREAKING_CHANGE` | May affect existing functionality |
-| `SECURITY_SENSITIVE` | Touches auth, data handling, or external APIs |
-| `PERFORMANCE_IMPACT` | May affect latency or resource usage |
-| `DEPENDENCY_CHANGE` | Adds, removes, or upgrades dependencies |
-
-### Interaction Rules
-- Provide concise, context-aware summaries.
-- Always confirm before overwriting or deleting work.
-- End each phase with a clear next-step query.
-- Accept reordering, skipping, or editing of phases at human request.
-- Flag uncertainty rather than guessing.
+- `BREAKING_CHANGE` - May affect existing functionality
+- `SECURITY_SENSITIVE` - Auth, data, APIs
+- `PERFORMANCE_IMPACT` - Latency or resource concerns
+- `DEPENDENCY_CHANGE` - New/updated dependencies
 
 ---
 
-## 5. Quality Assurance
+# Context Optimization (Critical for Cost/Quality)
 
-Before phase completion or merge:
+## Core Rules
 
-- [ ] All tests pass
-- [ ] Code conforms to style guide (project-specific)
-- [ ] Documentation matches implementation
-- [ ] Dependencies resolved and stable
-- [ ] No security vulnerabilities introduced
+1. **Be Surgical:** Read `@file:45-120`, not entire files
+2. **Grep First:** Find exact locations before reading
+3. **Summarize Large Files:** Request summary for files >500 lines
+4. **Use Codebase Maps:** Create `.claude/CODEBASE_MAP.md` (saves 50%+ tokens)
+5. **Clear Between Tasks:** Use `/clear` when switching topics
+6. **Batch Questions:** Ask related questions together
+
+## Token Budgets
+
+| Task Type | Target | Max | Strategy |
+|-----------|--------|-----|----------|
+| Bug fix | <10k | 20k | Read affected file only |
+| Small feature | <30k | 50k | Codebase map + targeted files |
+| Large feature | <80k | 120k | Explore agent first |
+
+**If exceeding budget:** You're reading too much. Be more surgical.
+
+---
+
+# Multi-Agent Patterns (For Complex Tasks)
+
+**Use when:** >15 hours, multiple domains, parallel work possible
+
+**Patterns:**
+1. **Research → Execute:** Explore agent gathers context, Execute agent implements
+2. **Specialists:** Frontend agent + Backend agent + Test agent work in parallel
+3. **Review Chain:** Security agent + Performance agent + Quality agent review
+
+**Coordinate manually:** Run agents in sequence, share context via handoff docs
+
+---
+
+# Workflow Variants
+
+## Test-Driven Development (TDD)
+1. Write failing tests FIRST
+2. Implement until tests pass
+3. Refactor
+4. Commit
+
+## Bug Fix Workflow
+1. **Reproduce bug** - Follow exact steps
+2. **Write failing test** - Captures the bug
+3. **Fix minimally**
+4. **Verify test passes**
+5. **Ask:** What caused this? How prevent similar bugs?
+
+---
+
+# Final Verification (Before Completion)
+
+⚠️ **MANDATORY - Complete Before Marking Task Done**
+
+- [ ] All tests pass (unit + integration + security)
+- [ ] Test coverage >80%
+- [ ] Security review completed (if triggered)
+- [ ] No vulnerabilities (`npm audit` clean)
+- [ ] Edge cases tested (null, empty, boundaries)
+- [ ] Error handling present (try/catch around externals)
+- [ ] No performance issues (N+1 queries, missing indexes)
+- [ ] Code readable and maintainable
+- [ ] Documentation updated
+- [ ] ADR created (if architectural decision)
 - [ ] Human review approved
 
----
-
-## 6. Audit and Traceability
-
-- Maintain logs of PRD versions, code diffs, and human approvals.
-- Use git commits as primary audit trail.
-- Ensure full reproducibility of each development phase.
-- Document key decisions and their rationale.
+**If ANY item unchecked: Task is NOT complete.**
 
 ---
 
-## 7. Example Interaction Flow
+# Remember These Throughout
 
-```
-Human: Build a lightweight Flask API for a notes app.
+## NEVER Do These:
+- ❌ Skip exploration (always understand codebase first)
+- ❌ Skip security review when triggered
+- ❌ Skip edge case testing (null, empty, boundaries)
+- ❌ Proceed without human approval
+- ❌ Hardcode secrets in code
+- ❌ Use string concatenation in SQL
+- ❌ Trust user input without validation
+- ❌ Read entire directories (be surgical)
 
-AI: [Explores existing codebase structure]
-AI: "I've reviewed the project. I see you're using SQLAlchemy elsewhere.
-     Should I follow that pattern? Any auth requirements?"
-
-Human: Yes to SQLAlchemy. No auth for MVP.
-
-AI: [Thinks hard about architecture]
-AI: Generates PRD with 3 phases (Setup, CRUD Endpoints, Testing/Docs).
-AI: READY_FOR_REVIEW (HIGH_CONFIDENCE)
-
-Human: Approve PRD.
-
-AI: Proceeds to Phase 1...
-```
----
-
-## 8. Governance and Versioning
-
-- **Versioning Policy:** Semantic (MAJOR.MINOR.PATCH).
-- **Compliance:**
-  - Agents must declare protocol version on startup.
-  - Major updates require re-validation.
-- **Allowed Extensions:**
-  - Security Policies
-  - Ethical Guidelines
-  - CI/CD Integrations
-- **Associated Templates:**
-  - PRD Template: `docs/PRD_TEMPLATE.md`
+## ALWAYS Do These:
+- ✅ Ask when uncertain (don't hallucinate)
+- ✅ Test edge cases explicitly
+- ✅ Wrap external calls in try/catch
+- ✅ Validate user input
+- ✅ Encode output (prevent XSS)
+- ✅ Use parameterized SQL queries
+- ✅ Pause for human feedback
+- ✅ Flag security-sensitive code
 
 ---
 
-## 9. Recommended Prompts for Agents
+**This protocol is your core workflow. Detailed checklists in:**
+- `checklists/AI_CODE_SECURITY_REVIEW.md` - OWASP Top 10 2025
+- `checklists/AI_CODE_REVIEW.md` - Code quality review
+- `templates/TEST_STRATEGY.md` - Comprehensive testing guide
+- `templates/ADR_TEMPLATE.md` - Architecture decisions
+- `guides/CONTEXT_OPTIMIZATION.md` - Advanced context techniques
+- `guides/MULTI_AGENT_PATTERNS.md` - Complex coordination
 
-- "Confirm goals and constraints before coding."
-- "Generate a PRD divided into sequential, reviewable phases."
-- "Pause for explicit human approval before continuing."
-- "Include test generation and validation at every step."
-- "Summarize phase outcomes and await feedback."
-
----
-
-## 10. Extended Thinking Triggers
-
-Use these phrases to allocate more reasoning time for complex decisions:
-
-| Phrase | When to Use |
-|--------|-------------|
-| `"think"` | Standard reasoning for moderate complexity |
-| `"think hard"` | Complex multi-step problems |
-| `"think harder"` | Architectural decisions with tradeoffs |
-| `"ultrathink"` | Critical design choices, major refactors |
-
-**Example:**
-- "Think hard about how to structure the database schema for scalability."
-- "Ultrathink about the security implications of this authentication flow."
+**Reference these at the marked checkpoints. They are MANDATORY, not optional.**
 
 ---
 
-## 11. Context Management
-
-Effective context management improves quality and reduces costs:
-
-- **Clear between tasks:** Use `/clear` when switching to unrelated work.
-- **Be surgical:** Reference specific files with `@filename` rather than entire directories.
-- **Summarize large files:** For files over 500 lines, request a summary first.
-- **Keep CLAUDE.md concise:** Under 100 lines is ideal; treat it like a frequently-used prompt.
-- **Use checkpoints:** Before major refactors, ensure you can roll back.
-
----
-
-## 12. Workflow Variants
-
-Different tasks benefit from different workflows:
-
-### Standard: Explore, Plan, Code, Commit
-For most features and enhancements. Follow Phase 0-2 as documented.
-
-### Test-Driven Development (TDD)
-1. Write tests for expected inputs/outputs.
-2. Confirm tests fail (no implementation yet).
-3. Commit the tests.
-4. Implement code until tests pass.
-5. Refactor if needed, keeping tests green.
-6. Commit implementation.
-
-### Visual Iteration
-1. Receive screenshot or design mock as reference.
-2. Implement the UI.
-3. Screenshot the result.
-4. Compare and iterate until matching.
-5. Commit when approved.
-
-### Bug Fix
-1. Reproduce the bug and document steps.
-2. Write a failing test that captures the bug.
-3. Fix the code.
-4. Verify the test passes.
-5. Commit with issue reference.
-
----
-
-## 13. Checkpoints and Recovery
-
-Checkpoints provide safety nets for ambitious changes:
-
-- **Automatic checkpoints:** Claude Code creates checkpoints before significant edits.
-- **Manual checkpoints:** Use git commits before risky operations.
-- **Rollback options:** If changes go wrong, request restoration to last checkpoint.
-- **Scope:** Checkpoints apply to Claude's edits, not shell commands or manual changes.
-
-**When to checkpoint explicitly:**
-- Before large refactors
-- Before deleting files
-- Before changing core architecture
-- When experimenting with uncertain approaches
-
----
-
-## 14. Slash Commands
-
-Store reusable workflows in `.claude/commands/` as Markdown files:
-
-```
-.claude/commands/
-  review-agent-protocol.md   # Review the SOP
-  run-tests.md                # Standard test workflow
-  deploy-staging.md           # Deployment checklist
-```
-
-**Usage:**
-- Type `/` to see available commands.
-- Commands become available to the whole team when checked into git.
-- Use `$ARGUMENTS` in templates for parameterized commands.
-
----
-
-*This protocol is a living document. Update it as workflows evolve.*
+*Last Updated: November 2025 | Version: 3.1 | Next Review: Quarterly*

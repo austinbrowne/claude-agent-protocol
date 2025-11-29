@@ -2,7 +2,7 @@
 description: Review the AI Coding Agent Protocol and confirm compliance
 ---
 
-Read and internalize the guidelines from `~/.claude/AI_CODING_AGENT_GODMODE.md`.
+Read and internalize the guidelines from `../AI_CODING_AGENT_GODMODE.md`.
 
 Then provide a brief status report:
 

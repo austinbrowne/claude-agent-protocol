@@ -332,7 +332,30 @@ Dependencies: None
 Ready to proceed?"
 ```
 
-### Step 6: Jump to Phase 1
+### Step 6: Setup Git Branch and Assign
+
+Before implementation:
+
+```bash
+# 1. Assign issue to yourself
+gh issue edit 45 --add-assignee @me
+
+# 2. Create issue-specific branch
+git checkout -b issue-45-password-hashing
+
+# 3. Push branch to remote
+git push -u origin issue-45-password-hashing
+
+# 4. Comment on issue
+gh issue comment 45 --body "🚧 Starting implementation on branch \`issue-45-password-hashing\`"
+```
+
+**Branch naming:**
+- Format: `issue-NNN-brief-description`
+- Example: `issue-45-password-hashing`
+- Lowercase with hyphens
+
+### Step 7: Jump to Phase 1
 
 Claude skips Phase 0 (already planned) and goes straight to Phase 1:
 - Implement code
@@ -340,28 +363,83 @@ Claude skips Phase 0 (already planned) and goes straight to Phase 1:
 - Security review (if flagged)
 - Code review
 
-### Step 7: Complete and Close Issue
+### Step 8: Implement (Phase 1)
 
-When done:
+Claude implements the feature following GODMODE Phase 1:
+- Write code following standards
+- Generate tests (unit, integration, edge cases)
+- Security review (if flagged)
+- Code self-review
+
+### Step 9: Commit Changes and Create PR
+
+When implementation is complete:
+
 ```bash
-# Add progress comments during work
-gh issue comment 45 --body "Implementing hashPassword function..."
+# 1. Commit all changes
+git add .
+git commit -m "$(cat <<'EOF'
+feat: Implement password hashing
 
-# Close when complete
-gh issue close 45 --comment "✅ Implementation complete.
+- Add bcrypt-based hashPassword function
+- Add verifyPassword function
+- 15 unit tests covering edge cases
 
-Deliverables:
-- passwordHash.ts with hashPassword() and verifyPassword()
-- 15 unit tests covering happy path + edge cases
+Closes #45
 
-Tests: 15/15 passing, 98% coverage
-Security: Reviewed against OWASP checklist - PASSED
-Edge cases: Null, empty, unicode, max length - all tested
+🤖 Generated with Claude Code (https://claude.com/claude-code)
 
-All acceptance criteria met ✓"
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+
+# 2. Push to remote branch
+git push origin issue-45-password-hashing
+
+# 3. Ask user for approval to create PR
+# "Ready to create Pull Request? (yes/no)"
+
+# 4. If approved, create PR
+gh pr create \
+  --title "feat: Implement password hashing (Closes #45)" \
+  --body "$(cat <<'EOF'
+## Summary
+Implements bcrypt-based password hashing for user authentication.
+
+## Changes
+- Add hashPassword function with bcrypt rounds = 12
+- Add verifyPassword function
+- 15 unit tests covering edge cases
+
+## Testing
+- ✅ Unit tests: 15/15 passing, 98% coverage
+- ✅ Edge cases: Null, empty, unicode, max length
+- ✅ Security review: OWASP checklist completed
+
+## Acceptance Criteria
+- [x] hashPassword returns bcrypt hash
+- [x] verifyPassword validates correctly
+- [x] Edge cases tested
+
+## PRD Reference
+Source: `docs/prds/45-2025-11-29-user-authentication.md`
+
+Closes #45
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)" \
+  --base main
+
+# Output: https://github.com/owner/repo/pull/123
 ```
 
-### Step 8: Pick Next Issue
+**What happens next:**
+- Issue #45 gets a link to PR in comments (automatic)
+- When PR is merged, issue #45 auto-closes (via "Closes #45" keyword)
+- Branch `issue-45-password-hashing` can be deleted after merge
+
+### Step 10: Pick Next Issue
 
 ```bash
 # List remaining ready issues

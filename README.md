@@ -229,16 +229,23 @@ Starting Point: 10 issues waiting in backlog
 2. Pick an issue ("Let's work on issue #45")
 3. Load issue context (description, acceptance criteria, technical requirements, PRD reference)
 4. Verify dependencies and readiness
-5. Jump directly to Phase 1 implementation
-6. Reference PRD if needed for broader context (file path in issue)
-7. Close issue when complete
-8. Pick next issue from backlog
-9. Repeat
+5. Assign issue + create branch (issue-45-feature-name)
+6. Jump directly to Phase 1 implementation
+7. Reference PRD if needed for broader context (file path in issue)
+8. Commit changes to branch
+9. Ask: "Create Pull Request?"
+10. If yes: Create PR (auto-links to issue)
+11. User reviews & merges PR on GitHub
+12. Issue auto-closes on merge
+13. Pick next issue from backlog
+14. Repeat
 
 Benefits:
 - Skip planning for pre-planned work
 - Quick context switch between issues
 - All context in issue (self-contained)
+- Feature branch per issue
+- PR review before merge
 - PRD available if broader context needed
 - Visual kanban board for tracking
 - Can work through backlog systematically

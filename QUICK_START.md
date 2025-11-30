@@ -47,11 +47,24 @@ gh project item-list PROJECT_NUM --owner OWNER
 1. Loads issue context (including PRD reference)
 2. Checks dependencies
 3. Restates the task
-4. Jumps to Phase 1 implementation
-5. References PRD if needed for broader context
-6. Closes issue when done
-7. Pick next issue
+4. Assigns issue to you
+5. Creates branch: issue-45-feature-name
+6. Jumps to Phase 1 implementation
+7. References PRD if needed for broader context
+8. Commits changes to branch
+9. Asks: "Create Pull Request?"
+10. If yes: Creates PR (auto-links to issue)
+11. You review & merge PR on GitHub
+12. Issue auto-closes on merge
+13. Pick next issue
 ```
+
+**Git branching workflow:**
+- Branch naming: `issue-NNN-brief-description`
+- Example: `issue-45-password-hashing`
+- All work happens on feature branch
+- PR created for review before merge
+- Issue auto-closes when PR merged
 
 **PRD reference:**
 - Each issue includes path to source PRD

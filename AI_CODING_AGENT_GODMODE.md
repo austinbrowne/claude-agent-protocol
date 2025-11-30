@@ -295,7 +295,38 @@ Create ADR if:
 
 - Restate phase goals (from PRD or from issue context)
 - Ensure git checkpoint exists (can rollback if needed)
-- If from existing issue: Update issue status to `in-progress` (if using GitHub Projects)
+
+**If working from GitHub issue:**
+
+1. **Assign issue to user:**
+   ```bash
+   # Assign to yourself (the prompter)
+   gh issue edit ISSUE_NUM --add-assignee @me
+   ```
+
+2. **Create issue-specific branch:**
+   ```bash
+   # Branch naming: issue-NNN-brief-description
+   # Example: issue-123-user-authentication
+   git checkout -b issue-ISSUE_NUM-feature-name
+
+   # Push branch to remote
+   git push -u origin issue-ISSUE_NUM-feature-name
+   ```
+
+3. **Update issue status** (if using GitHub Projects):
+   ```bash
+   gh issue comment ISSUE_NUM --body "🚧 Starting implementation on branch \`issue-ISSUE_NUM-feature-name\`"
+   ```
+
+**Branch naming convention:**
+- Format: `issue-NNN-brief-description`
+- Examples:
+  - `issue-123-user-authentication`
+  - `issue-456-api-rate-limiting`
+  - `issue-789-password-reset`
+- Lowercase with hyphens
+- Keep brief but descriptive
 
 ### Step 2: Implement Code
 
@@ -439,24 +470,107 @@ Next: Awaiting approval for Phase [N+1]
 
 **WAIT for human feedback. DO NOT proceed automatically.**
 
-**If from Entry Point B (existing issue):**
-- Update issue with progress comment
-- If work is complete and all acceptance criteria met: Close issue
-- Move to next issue in backlog OR proceed to Phase 2 if refinement needed
+---
 
-**Example issue closure:**
-```bash
-gh issue close ISSUE_NUM --comment "✅ Implementation complete.
+### Step 8: Commit Changes & Create PR
 
-Deliverables:
-- [List what was built]
+⚠️ **CHECKPOINT: Implementation Complete**
 
-Tests: [N] tests, [X]% coverage, all passing
-Security: [Review completed | Not applicable]
-Edge cases: Null, empty, boundaries, errors - all tested
+**If working from GitHub issue:**
 
-All acceptance criteria met ✓"
-```
+1. **Commit all changes:**
+   ```bash
+   # Stage all changes
+   git add .
+
+   # Commit with descriptive message linking to issue
+   git commit -m "$(cat <<'EOF'
+   feat: Implement [feature description]
+
+   - [Key change 1]
+   - [Key change 2]
+   - [Key change 3]
+
+   Closes #ISSUE_NUM
+
+   🤖 Generated with Claude Code (https://claude.com/claude-code)
+
+   Co-Authored-By: Claude <noreply@anthropic.com>
+   EOF
+   )"
+
+   # Push to remote branch
+   git push origin issue-ISSUE_NUM-feature-name
+   ```
+
+2. **Ask for PR creation approval:**
+   ```
+   ✅ All changes committed to branch `issue-ISSUE_NUM-feature-name`
+
+   Summary:
+   - [What was implemented]
+   - Tests: [N] passing, [X]% coverage
+   - Security: [Review status]
+   - Edge cases: Covered
+
+   Ready to create Pull Request?
+   - PR will link to issue #ISSUE_NUM (auto-closes on merge)
+   - Reviewable on GitHub before merging
+   - Can be merged when approved
+
+   Proceed with PR creation? (yes/no)
+   ```
+
+3. **If approved, create PR:**
+   ```bash
+   gh pr create \
+     --title "feat: [Brief description] (Closes #ISSUE_NUM)" \
+     --body "$(cat <<'EOF'
+   ## Summary
+   [Brief description of what was implemented]
+
+   ## Changes
+   - [Key change 1]
+   - [Key change 2]
+   - [Key change 3]
+
+   ## Testing
+   - ✅ Unit tests: [N] tests, [X]% coverage
+   - ✅ Integration tests: [Status]
+   - ✅ Edge cases: Null, empty, boundaries, errors
+   - ✅ Security review: [Completed | Not applicable]
+
+   ## Acceptance Criteria
+   - [x] [Criterion 1]
+   - [x] [Criterion 2]
+   - [x] [Criterion 3]
+
+   ## PRD Reference
+   Source: `docs/prds/ISSUE_NUM-YYYY-MM-DD-feature-name.md`
+
+   Closes #ISSUE_NUM
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   EOF
+   )" \
+     --base main
+   ```
+
+4. **Report PR creation:**
+   ```
+   ✅ Pull Request created: https://github.com/owner/repo/pull/XXX
+
+   Next steps:
+   1. Review PR on GitHub
+   2. Approve and merge when ready
+   3. Issue #ISSUE_NUM will auto-close on merge
+   4. Branch issue-ISSUE_NUM-feature-name can be deleted after merge
+   ```
+
+**If NOT using GitHub issues:**
+- Commit changes with standard commit message
+- Push to feature branch
+- Create PR manually or skip to Phase 2 for direct merge
 
 ---
 

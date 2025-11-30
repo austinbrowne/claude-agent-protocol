@@ -12,6 +12,7 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 
 ### 📋 Core Protocol
 - **AI_CODING_AGENT_GODMODE.md** - Standard Operating Procedure (SOP) for AI agents
+- **QUICK_START.md** - Quick reference for two entry points and common commands
 - **CLAUDE.md** - Global user instructions and communication style
 - **PRD_TEMPLATE.md** - Product Requirements Document template (Lite + Full)
 
@@ -22,13 +23,16 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 ### 📝 Templates
 - **TEST_STRATEGY.md** - Comprehensive test strategy matrix (unit, integration, E2E, security, performance)
 - **ADR_TEMPLATE.md** - Architecture Decision Records (prevent "why did we do this?" 6 months later)
+- **GITHUB_ISSUE_TEMPLATE.md** - Standard issue structure for AI-assisted development
 
 ### 📚 Guides
 - **CONTEXT_OPTIMIZATION.md** - Reduce token usage by 30-50%
 - **MULTI_AGENT_PATTERNS.md** - Coordinate multiple agents for complex tasks
+- **GITHUB_PROJECT_INTEGRATION.md** - GitHub Projects workflow with gh CLI
 
 ### ⚙️ Commands
 - **review-agent-protocol.md** - Slash command to review protocol compliance
+- **create-issue-from-prd.md** - Generate GitHub issues from approved PRD
 
 ---
 
@@ -38,6 +42,7 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 ~/.claude/
 ├── README.md                           # This file
 ├── AI_CODING_AGENT_GODMODE.md         # Main SOP
+├── QUICK_START.md                      # Quick reference guide
 ├── CLAUDE.md                           # Global instructions
 ├── PRD_TEMPLATE.md                     # PRD template
 │
@@ -47,14 +52,17 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 │
 ├── templates/
 │   ├── TEST_STRATEGY.md               # Test strategy matrix
-│   └── ADR_TEMPLATE.md                # Architecture decisions
+│   ├── ADR_TEMPLATE.md                # Architecture decisions
+│   └── GITHUB_ISSUE_TEMPLATE.md       # GitHub issue structure
 │
 ├── guides/
 │   ├── CONTEXT_OPTIMIZATION.md        # Reduce token usage
-│   └── MULTI_AGENT_PATTERNS.md        # Multi-agent coordination
+│   ├── MULTI_AGENT_PATTERNS.md        # Multi-agent coordination
+│   └── GITHUB_PROJECT_INTEGRATION.md  # GitHub Projects workflow
 │
 └── commands/
-    └── review-agent-protocol.md       # /review-agent-protocol command
+    ├── review-agent-protocol.md       # /review-agent-protocol command
+    └── create-issue-from-prd.md       # /create-issue-from-prd command
 ```
 
 ---
@@ -74,6 +82,7 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 - **ADR Template**: Loaded for architectural decisions
 - **Context Optimization**: Loaded when starting complex tasks
 - **Multi-Agent Patterns**: Loaded for coordinating specialized agents
+- **GitHub Project Integration**: Loaded when creating issues from PRD (Phase 0, Step 6)
 
 **Why this structure?**
 - Research shows LLMs have limited "attention budget" - every token depletes attention
@@ -87,12 +96,21 @@ This ensures agents pay full attention to critical safety rules while accessing 
 
 ## Quick Start
 
+### 0. Quick Reference
+
+**See `QUICK_START.md`** for:
+- Two entry points (new feature vs existing issue)
+- Common gh CLI commands
+- Typical workflows
+- Critical safety reminders
+
 ### 1. Review the Core Documents
 
 **Start here:**
-1. Read `AI_CODING_AGENT_GODMODE.md` - Understand the workflow
-2. Review `CLAUDE.md` - See communication guidelines
-3. Familiarize yourself with `PRD_TEMPLATE.md` - Know when to use Lite vs Full PRD
+1. Read `QUICK_START.md` - Understand the two entry points
+2. Read `AI_CODING_AGENT_GODMODE.md` - Full workflow details
+3. Review `CLAUDE.md` - Communication guidelines
+4. Familiarize yourself with `PRD_TEMPLATE.md` - Lite vs Full PRD
 
 ### 2. Use the Checklists
 
@@ -180,6 +198,61 @@ Phase 2: Finalize
 4. Deploy
 ```
 
+### For GitHub Projects Workflow
+
+**Two entry points:**
+
+**Entry Point A: New Feature (Start at Phase 0)**
+```
+Phase 0: Explore & Plan
+1. Explore codebase
+2. Generate Full PRD
+3. Save PRD to docs/prds/YYYY-MM-DD-feature-name.md
+4. Human review & approval
+5. Create GitHub issues (/create-issue-from-prd docs/prds/...)
+   a. Create first issue, note issue number (e.g., #123)
+   b. Rename PRD to docs/prds/123-YYYY-MM-DD-feature-name.md
+   c. Update issue to reference renamed PRD
+   - Each issue includes renamed PRD file reference
+   - Fork A: Immediate execution (assign & start Phase 1)
+   - Fork B: Backlog mode (park in "Ready" column, exit)
+
+If Fork A: Continue to Phase 1 with first issue
+If Fork B: Exit (pick up later via Entry Point B)
+```
+
+**Entry Point B: Pick Existing Issue (Start at Phase 1)**
+```
+Starting Point: 10 issues waiting in backlog
+
+1. List ready issues (gh project item-list)
+2. Pick an issue ("Let's work on issue #45")
+3. Load issue context (description, acceptance criteria, technical requirements, PRD reference)
+4. Verify dependencies and readiness
+5. Jump directly to Phase 1 implementation
+6. Reference PRD if needed for broader context (file path in issue)
+7. Close issue when complete
+8. Pick next issue from backlog
+9. Repeat
+
+Benefits:
+- Skip planning for pre-planned work
+- Quick context switch between issues
+- All context in issue (self-contained)
+- PRD available if broader context needed
+- Visual kanban board for tracking
+- Can work through backlog systematically
+```
+
+**Overall Benefits:**
+- Visual kanban board for tracking
+- Issues persist between sessions
+- Clear acceptance criteria for each unit of work
+- Can @claude tag for assignment
+- Full audit trail of decisions
+- Two workflows: plan-then-execute OR pick-from-backlog
+```
+
 ---
 
 ## When to Use What
@@ -206,6 +279,14 @@ Phase 2: Finalize
 - User input processing
 - File uploads
 - Database queries with user input
+
+### Use GitHub Projects workflow when:
+- Multi-phase PRD with multiple work units
+- Want persistent issue tracking between sessions
+- Working with team (issues can be assigned to different developers/agents)
+- Need visual board for stakeholder visibility
+- Building backlog for future work
+- Want audit trail of implementation decisions
 
 ---
 

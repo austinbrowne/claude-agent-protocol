@@ -64,7 +64,82 @@
 
 ---
 
+## Workflow Entry Points
+
+⚠️ **DECISION: New Feature or Existing Issue?**
+
+### Entry Point A: New Feature (Start at Phase 0)
+**Use when:** Starting a new feature from scratch
+- Proceed to **Phase 0: Exploration & Planning** (below)
+- Complete PRD, create issues (optional), then execute
+
+### Entry Point B: Pick Existing Issue from Backlog (Start at Phase 1)
+**Use when:** Picking up a pre-planned issue from GitHub Projects backlog
+
+**Required actions:**
+
+1. **Load the issue:**
+   ```bash
+   # View issue details
+   gh issue view ISSUE_NUMBER
+
+   # Or list ready issues
+   gh project item-list PROJECT_NUM --owner OWNER
+   ```
+
+2. **Extract context from issue:**
+   - **Description**: Understand what needs to be built and why
+   - **Acceptance Criteria**: Know what "done" looks like
+   - **Technical Requirements**: Architecture, technologies, patterns
+   - **Testing Notes**: What tests are required
+   - **Security Considerations**: Check for `flag: security-sensitive` label
+   - **Performance Considerations**: Check for `flag: performance-critical` label
+   - **Related Issues**: Check dependencies (must be unblocked)
+   - **PRD Reference**: Note the linked PRD file path (e.g., `docs/prds/123-2025-11-29-user-auth.md`)
+
+3. **Verify issue is ready:**
+   - [ ] Not blocked by dependencies
+   - [ ] Has clear acceptance criteria
+   - [ ] Technical requirements are understood
+   - [ ] All context needed is in issue (no need to reference original PRD)
+
+4. **Restate the task:**
+   - In your own words, summarize what needs to be built
+   - Confirm with user if anything is unclear
+
+5. **Skip to Phase 1, Step 1** (below)
+
+**Example:**
+```
+User: "Let's work on issue #45"
+
+AI: [Loads issue via gh issue view 45]
+
+AI: "I'll implement issue #45: Implement password hashing
+
+Summary:
+- Build bcrypt-based password hashing service
+- Hash passwords on user registration
+- Verify passwords on login
+- Must use bcrypt rounds = 12
+- Security-sensitive (will run security checklist)
+
+Acceptance criteria:
+✓ hashPassword(plaintext) returns bcrypt hash
+✓ verifyPassword(plaintext, hash) returns boolean
+✓ Minimum 12 rounds
+✓ All edge cases tested (null, empty, unicode)
+
+Dependencies: None (issue #44 already complete)
+
+Ready to proceed to Phase 1 implementation?"
+```
+
+---
+
 ## Phase 0: Exploration & Planning
+
+**Use Entry Point A (above) to start here.**
 
 ### Step 1: Explore (NEVER Skip This)
 
@@ -98,6 +173,44 @@
 - Test strategy (specific test cases, not just "write tests")
 - Security review section (is this security-sensitive?)
 
+### Step 3a: Save PRD to File
+
+⚠️ **MANDATORY: Always save PRD to local file**
+
+**Initial file location:** `docs/prds/YYYY-MM-DD-feature-name.md`
+
+**Example:**
+```bash
+# Check for existing PRDs
+ls docs/prds/
+
+# Create directory if needed
+mkdir -p docs/prds
+
+# Save PRD with date + descriptive name
+# Example: docs/prds/2025-11-29-user-authentication.md
+```
+
+**Naming convention:**
+- Date format: `YYYY-MM-DD`
+- Feature name: lowercase-with-hyphens
+- Examples:
+  - `docs/prds/2025-11-29-user-authentication.md`
+  - `docs/prds/2025-11-29-api-rate-limiting.md`
+  - `docs/prds/2025-11-29-password-reset-flow.md`
+
+**After GitHub issue creation (Step 6):**
+- Rename PRD to prepend issue number: `NNN-YYYY-MM-DD-feature-name.md`
+- Example: Issue #123 created → Rename to `docs/prds/123-2025-11-29-user-authentication.md`
+- Update issue to reference renamed file
+
+**Why save PRD:**
+- Reference during implementation (Phase 1)
+- Link from GitHub issues
+- Historical record of decisions
+- Context for future developers
+- Issue number creates direct link between PRD and implementation
+
 ### Step 4: Check for Architectural Decision
 
 ⚠️ **STOP: Do you need an ADR?**
@@ -121,14 +234,79 @@ Create ADR if:
 
 ---
 
+### Step 6: Create GitHub Issues (Optional)
+
+⚠️ **DECISION POINT: Immediate Execution or Backlog Mode?**
+
+**If using GitHub Projects workflow:**
+
+1. **Generate issues from approved PRD:**
+   - Use: `/create-issue-from-prd docs/prds/2025-11-29-feature-name.md`
+   - See: `guides/GITHUB_PROJECT_INTEGRATION.md` for full workflow
+
+2. **Create first issue and rename PRD:**
+   - Create first GitHub issue with `gh issue create`
+   - Note the issue number returned (e.g., #123)
+   - Rename PRD file to prepend issue number:
+     ```bash
+     # Example: Issue #123 created
+     mv docs/prds/2025-11-29-user-authentication.md \
+        docs/prds/123-2025-11-29-user-authentication.md
+     ```
+   - Update issue body to reference renamed PRD
+
+3. **Choose execution mode:**
+
+   **FORK A: Immediate Execution**
+   - Create issues with labels (see standard label system in guide)
+   - Assign to current session (`--assignee @me`)
+   - Pick first issue and proceed to Phase 1
+   - Work through issues sequentially in current session
+
+   **FORK B: Backlog Mode**
+   - Create issues without assignee
+   - Add to GitHub Project "Ready" column
+   - Exit GODMODE workflow
+   - Issues remain in backlog for later pickup (via @claude tag or manual selection)
+
+3. **Label each issue** using standard system:
+   - `type:` - bug | feature | enhancement | docs | refactor | test | infrastructure
+   - `priority:` - critical | high | medium | low
+   - `area:` - frontend | backend | infrastructure | security | testing
+   - `flag:` (if applicable) - security-sensitive | performance-critical | breaking-change
+
+**If NOT using GitHub Projects:** Skip to Phase 1 directly.
+
+**See:** `guides/GITHUB_PROJECT_INTEGRATION.md` for:
+- GitHub CLI commands (`gh issue create`, `gh project item-list`)
+- Standard label system setup
+- Project board workflow
+- Assigning issues to Claude Code
+
+---
+
 ## Phase 1: Execution Loop
+
+**Entry paths:**
+- **From Phase 0**: After PRD approval and optional issue creation
+- **From Entry Point B**: Picked existing issue from backlog (skipped Phase 0)
 
 ### Step 1: Restate & Checkpoint
 
-- Restate phase goals
+- Restate phase goals (from PRD or from issue context)
 - Ensure git checkpoint exists (can rollback if needed)
+- If from existing issue: Update issue status to `in-progress` (if using GitHub Projects)
 
 ### Step 2: Implement Code
+
+**Reference PRD if needed:**
+- If from Phase 0: PRD context is fresh in memory
+- If from Entry Point B: PRD file path is in issue (e.g., `docs/prds/123-2025-11-29-user-auth.md`)
+- Read PRD if:
+  - Issue context is unclear
+  - Need broader architectural context
+  - Want to understand tradeoffs considered
+  - Checking if change aligns with original requirements
 
 **Code Standards:**
 - Follow existing project patterns (read similar files)
@@ -260,6 +438,25 @@ Next: Awaiting approval for Phase [N+1]
 ```
 
 **WAIT for human feedback. DO NOT proceed automatically.**
+
+**If from Entry Point B (existing issue):**
+- Update issue with progress comment
+- If work is complete and all acceptance criteria met: Close issue
+- Move to next issue in backlog OR proceed to Phase 2 if refinement needed
+
+**Example issue closure:**
+```bash
+gh issue close ISSUE_NUM --comment "✅ Implementation complete.
+
+Deliverables:
+- [List what was built]
+
+Tests: [N] tests, [X]% coverage, all passing
+Security: [Review completed | Not applicable]
+Edge cases: Null, empty, boundaries, errors - all tested
+
+All acceptance criteria met ✓"
+```
 
 ---
 

@@ -255,7 +255,27 @@ Create ADR if:
      ```
    - Update issue body to reference renamed PRD
 
-3. **Choose execution mode:**
+3. **Commit and push PRD to repository:**
+   ```bash
+   # CRITICAL: Push PRD to git so it's available to anyone picking up the issue
+   git add docs/prds/123-2025-11-29-user-authentication.md
+   git commit -m "docs: Add PRD for user authentication (Issue #123)
+
+   Generated PRD for user authentication feature.
+   Linked to issue #123.
+
+   🤖 Generated with Claude Code"
+
+   git push origin main  # or current branch
+   ```
+
+   **Why this is critical:**
+   - PRD must be in repository for other developers
+   - PRD must be available if you pick up issue later in different session
+   - Issue references PRD file path - must exist in repo
+   - Enables team collaboration on backlog
+
+4. **Choose execution mode:**
 
    **FORK A: Immediate Execution**
    - Create issues with labels (see standard label system in guide)
@@ -428,18 +448,23 @@ npm run lint
 
 ---
 
-### Step 6: Code Review Focus
+### Step 6: Fresh Eyes Code Review
 
-⚠️ **STOP: Review Your Own Code**
+⚠️ **STOP - MANDATORY CHECKPOINT**
 
-**READ:** `checklists/AI_CODE_REVIEW.md` for full checklist.
+You MUST read and execute:
 
-**Quick self-review (MANDATORY):**
-1. **Edge cases:** Did I test null, empty, boundaries?
-2. **Error handling:** Try/catch around external calls?
-3. **Security:** Input validated? Output encoded? No secrets in code?
-4. **Performance:** Any N+1 queries? Missing indexes?
-5. **Readability:** Can a human understand this in 6 months?
+**`~/.claude/guides/MULTI_AGENT_PATTERNS.md`** - Section "Pattern 6: Fresh Eyes Code Review"
+
+This launches specialized review agents with **NO conversation context** for unbiased code review.
+
+**CRITICAL:**
+- Do NOT skip this step
+- Review agents have zero conversation history (no confirmation bias)
+- Supervisor agent consolidates findings
+- Must fix CRITICAL/HIGH issues before proceeding
+
+**Read the file now and follow the pattern exactly.**
 
 ---
 

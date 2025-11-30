@@ -16,6 +16,7 @@
    a. Creates first issue #123
    b. Renames PRD: docs/prds/123-YYYY-MM-DD-feature-name.md
    c. Updates issue to reference renamed PRD
+   d. **Commits and pushes PRD to git** (critical for team/later access)
    → Fork A: Start working immediately
    → Fork B: Park in backlog, work later
 7. Claude implements Phase 1
@@ -29,6 +30,12 @@
   - `2025-11-29` = Date created
   - `user-authentication` = Feature name
 - Creates direct link between PRD and implementation
+
+**⚠️ Critical:** PRD is committed and pushed to git after issue creation
+- Ensures PRD is available to other developers
+- Ensures PRD is available in future sessions/machines
+- Required for team collaboration on backlog
+- Without this, PRD only exists locally
 
 ---
 

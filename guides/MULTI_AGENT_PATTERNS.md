@@ -286,6 +286,333 @@ Review Agent:
 
 ---
 
+### Pattern 6: Fresh Eyes Code Review
+
+**Concept:** Specialized review agents with NO conversation context provide unbiased code review via supervisor pattern.
+
+**Purpose:** Eliminate confirmation bias by using agents that only see the code changes, not the implementation reasoning.
+
+**Structure:**
+```
+Main Agent (Phase 1, Step 6)
+    │
+    ├─ Parallel Launch ──────────┐
+    │                             │
+    ├─ Security Review Agent ─────┤
+    │  (No conversation context)  │
+    │  (Returns security findings)│
+    │                             │
+    └─ Code Review Agent ─────────┤
+       (No conversation context)  │
+       (Returns quality findings) │
+                                  ↓
+                        Supervisor Agent
+                    (Validates findings,
+                     filters false positives,
+                     consolidates duplicates,
+                     prioritizes by severity)
+                                  │
+                                  ↓
+                         Final Report
+                    (Back to main context)
+                                  │
+                                  ↓
+                    Main Agent Implements Fixes
+```
+
+**When to Use:**
+- Phase 1, Step 6 (before commit)
+- After implementation and testing complete
+- Before any code review or commit
+- Mandatory for all code changes
+
+**Workflow:**
+
+#### Step 1: Get Staged Changes
+
+```bash
+# Get diff of all changes to review
+git diff --staged > /tmp/review-diff.txt
+
+# Or if not yet staged
+git diff > /tmp/review-diff.txt
+```
+
+#### Step 2: Launch Specialized Review Agents (Parallel)
+
+Use Task tool with `subagent_type: "general-purpose"` for each review agent.
+
+**Agent 1: Security Review Agent**
+
+**Input:**
+- File: `/tmp/review-diff.txt` (the code diff)
+- Checklist: `~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md`
+
+**Prompt:**
+```
+You are a security review specialist with NO knowledge of why this code was written.
+
+Review this code diff for OWASP Top 10 2025 security violations.
+
+Read the security checklist at ~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md
+
+Check for:
+- SQL injection
+- XSS vulnerabilities
+- Authentication/authorization issues
+- Input validation
+- Hardcoded secrets
+- Insecure dependencies
+
+Return findings in this format:
+
+SECURITY REVIEW FINDINGS:
+
+CRITICAL:
+- [Finding with file:line reference]
+
+HIGH:
+- [Finding with file:line reference]
+
+MEDIUM:
+- [Finding with file:line reference]
+
+LOW:
+- [Finding with file:line reference]
+
+PASSED:
+- [List of checks that passed]
+
+Total issues: N
+Recommendation: BLOCK | FIX_BEFORE_COMMIT | APPROVED
+```
+
+**Agent 2: Code Quality Review Agent**
+
+**Input:**
+- File: `/tmp/review-diff.txt` (the code diff)
+- Checklist: `~/.claude/checklists/AI_CODE_REVIEW.md`
+
+**Prompt:**
+```
+You are a code quality review specialist with NO knowledge of why this code was written.
+
+Review this code diff for code quality issues.
+
+Read the code review checklist at ~/.claude/checklists/AI_CODE_REVIEW.md
+
+Check for:
+- Edge cases (null, empty, boundaries)
+- Error handling (try/catch around external calls)
+- Code clarity and maintainability
+- Performance concerns (N+1 queries, missing indexes)
+- Design patterns and architecture (SOLID, anti-patterns, separation of concerns)
+- Test coverage
+
+Return findings in this format:
+
+CODE QUALITY REVIEW FINDINGS:
+
+CRITICAL:
+- [Finding with file:line reference]
+
+HIGH:
+- [Finding with file:line reference]
+
+MEDIUM:
+- [Finding with file:line reference]
+
+LOW:
+- [Finding with file:line reference]
+
+PASSED:
+- [List of checks that passed]
+
+Total issues: N
+Recommendation: BLOCK | FIX_BEFORE_COMMIT | APPROVED
+```
+
+**Key Point:** These agents have ZERO conversation history. They only see:
+- The diff file
+- The checklist file
+- The prompt you give them
+
+This provides fresh, unbiased perspective on the code.
+
+#### Step 3: Launch Supervisor Agent
+
+Once both review agents return their findings:
+
+**Agent 3: Review Supervisor Agent**
+
+**Input:**
+- Security review findings
+- Code quality review findings
+- Original diff file: `/tmp/review-diff.txt`
+
+**Prompt:**
+```
+You are a senior technical reviewer and supervisor.
+
+You have received findings from two specialized review agents:
+
+SECURITY REVIEW FINDINGS:
+[Paste security agent findings]
+
+CODE QUALITY REVIEW FINDINGS:
+[Paste code quality agent findings]
+
+Your job is to:
+1. Validate each finding against the code diff
+2. Remove false positives (findings that don't apply)
+3. Consolidate duplicate findings
+4. Prioritize by severity AND impact
+5. Create single coherent action plan
+
+Return a consolidated report in this format:
+
+CONSOLIDATED CODE REVIEW REPORT:
+
+MUST FIX (CRITICAL/HIGH - blocking):
+1. [Issue description with file:line]
+   - Severity: CRITICAL | HIGH
+   - Impact: [Why this matters]
+   - Fix: [Specific action to take]
+
+SHOULD FIX (MEDIUM - recommended):
+1. [Issue description with file:line]
+   - Severity: MEDIUM
+   - Impact: [Why this matters]
+   - Fix: [Specific action to take]
+
+CONSIDER (LOW - optional):
+1. [Issue description with file:line]
+   - Severity: LOW
+   - Impact: [Why this matters]
+   - Fix: [Specific action to take]
+
+PASSED CHECKS:
+- [List of all checks that passed]
+
+FALSE POSITIVES REMOVED:
+- [Any findings that were invalid]
+
+OVERALL VERDICT: BLOCK | FIX_CRITICAL_HIGH | APPROVED
+
+ACTION PLAN:
+1. [First priority fix]
+2. [Second priority fix]
+...
+
+CONFIDENCE: HIGH | MEDIUM | LOW
+```
+
+**Key Point:** Supervisor validates findings and creates single source of truth.
+
+#### Step 4: Present Final Report to Main Context
+
+Main agent receives supervisor's consolidated report and:
+
+1. **Shows report to user:**
+   ```
+   Code Review Complete:
+
+   [Display consolidated report]
+
+   Found N CRITICAL/HIGH issues that MUST be fixed before commit.
+   Found M MEDIUM issues recommended to fix.
+   Found P LOW issues to consider.
+   ```
+
+2. **Implements CRITICAL/HIGH fixes immediately:**
+   - Address each MUST FIX item
+   - Make code changes
+   - Re-stage changes
+
+3. **Discusses MEDIUM/LOW with user:**
+   ```
+   MEDIUM priority items:
+   1. [Issue 1] - Fix now? (yes/no)
+   2. [Issue 2] - Fix now? (yes/no)
+
+   LOW priority items logged for future consideration.
+   ```
+
+4. **Re-runs review if significant changes made:**
+   - If fixed >3 critical issues, re-run entire review
+   - If only 1-2 fixes, proceed
+
+#### Step 5: Proceed to Step 7 (Commit)
+
+Once all CRITICAL/HIGH issues resolved and user approves:
+- Mark status: `READY_FOR_REVIEW`
+- Continue to Step 7 (Report & Pause)
+
+**Example Workflow:**
+
+```
+Main Agent (Phase 1, Step 6):
+
+1. Get staged changes:
+   git diff --staged > /tmp/review-diff.txt
+
+2. Launch Security Agent (Task tool):
+   → Reviews diff against OWASP checklist
+   → Returns: 1 CRITICAL (hardcoded API key), 2 HIGH issues
+
+3. Launch Code Quality Agent (Task tool):
+   → Reviews diff against code quality checklist
+   → Returns: 1 HIGH (missing null check), 3 MEDIUM issues
+
+4. Launch Supervisor Agent (Task tool):
+   → Receives both reports
+   → Validates findings
+   → Removes 1 false positive
+   → Consolidates duplicate finding
+   → Returns: MUST FIX: 3 items, SHOULD FIX: 2 items
+
+5. Main Agent presents to user:
+   "Code review found 3 critical issues that must be fixed:
+    1. Hardcoded API key in config.ts:45
+    2. SQL injection risk in users.ts:123
+    3. Missing null check in auth.ts:67"
+
+6. Main Agent fixes all 3 critical issues
+
+7. Main Agent re-runs review:
+   → All critical issues resolved
+   → Verdict: APPROVED
+
+8. Proceed to Step 7
+```
+
+**Benefits:**
+
+- **Unbiased:** Review agents have zero conversation context
+- **Thorough:** Specialized agents focus on their domain
+- **Validated:** Supervisor filters false positives
+- **Actionable:** Single consolidated action plan
+- **Automated:** No manual review checklist needed
+
+**Cost Optimization:**
+
+- Review agents use lightweight prompts (small context)
+- Only triggered once per implementation
+- Prevents costly bugs in production
+- ~$0.10-0.30 per review (minimal cost vs. value)
+
+**When Review Agents See:**
+- ✅ Code diff only
+- ✅ Checklist files
+- ✅ Their specific prompt
+- ❌ NOT conversation history
+- ❌ NOT PRD context
+- ❌ NOT implementation rationale
+
+This ensures truly fresh eyes on the code.
+
+---
+
 ## Multi-Agent Communication Protocols
 
 ### Agent2Agent Protocol (A2A)

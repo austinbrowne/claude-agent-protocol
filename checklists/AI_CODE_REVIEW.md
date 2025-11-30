@@ -286,6 +286,208 @@ Watch for these AI hallucination patterns:
 
 ---
 
+## 12. Design Patterns & Architecture
+
+AI often chooses suboptimal architectural patterns or over-engineers solutions.
+
+### SOLID Principles
+
+- [ ] **Single Responsibility:** Each class/module has one clear purpose
+- [ ] **Open/Closed:** Can extend behavior without modifying existing code
+- [ ] **Liskov Substitution:** Subclasses don't break base class contracts
+- [ ] **Interface Segregation:** Interfaces are focused, not bloated
+- [ ] **Dependency Inversion:** High-level code doesn't depend on low-level details
+
+**Example violation (Single Responsibility):**
+```javascript
+// BAD: UserService does too much
+class UserService {
+    createUser() { }
+    sendWelcomeEmail() { }    // Should be EmailService
+    logUserCreation() { }     // Should be Logger
+    validateUserData() { }    // Should be Validator
+}
+
+// GOOD: Focused responsibility
+class UserService {
+    constructor(emailService, logger, validator) { }
+    createUser() { }  // Delegates email, logging, validation
+}
+```
+
+### Common Design Patterns (Use When Appropriate)
+
+- [ ] **Strategy Pattern:** Algorithms are interchangeable (not hardcoded if/else)
+- [ ] **Factory Pattern:** Object creation is abstracted (when multiple types exist)
+- [ ] **Observer Pattern:** Event handling is decoupled (pub/sub)
+- [ ] **Repository Pattern:** Data access is abstracted (if using)
+- [ ] **Decorator Pattern:** Behavior added without inheritance (when needed)
+
+**Warning:** Don't force patterns where simple code works. YAGNI applies.
+
+### Anti-Patterns to Avoid
+
+- [ ] **God Object:** No single class/file doing everything
+- [ ] **Spaghetti Code:** Control flow is clear, not tangled
+- [ ] **Copy-Paste Programming:** Duplication extracted to shared functions
+- [ ] **Premature Optimization:** Code is simple first, optimized only when needed
+- [ ] **Golden Hammer:** Not forcing one pattern/library everywhere
+- [ ] **Magic Strings:** No repeated literal strings, use constants
+- [ ] **Tight Coupling:** Modules can be changed independently
+
+**Example (God Object):**
+```python
+# BAD: God Object
+class Application:
+    def handle_request(self):
+        # Parsing
+        # Validation
+        # Business logic
+        # Database access
+        # Email sending
+        # Logging
+        # All in one 500-line method
+
+# GOOD: Separated concerns
+class Application:
+    def __init__(self, parser, validator, service, repo, mailer, logger):
+        # Dependencies injected
+
+    def handle_request(self):
+        data = self.parser.parse(request)
+        self.validator.validate(data)
+        result = self.service.process(data)
+        self.repo.save(result)
+        self.mailer.send_confirmation(result)
+        self.logger.log(result)
+```
+
+### Composition Over Inheritance
+
+- [ ] **Favor composition:** Uses composition unless inheritance clearly fits
+- [ ] **Shallow hierarchies:** Inheritance depth ≤3 levels
+- [ ] **Interface over abstract:** Prefers interfaces to abstract classes (when available)
+- [ ] **Has-a vs Is-a:** Composition for "has-a", inheritance only for "is-a"
+
+**Example:**
+```typescript
+// BAD: Deep inheritance for behavior reuse
+class Animal { }
+class Mammal extends Animal { }
+class Dog extends Mammal { }
+class Labrador extends Dog { }  // 4 levels deep
+
+// GOOD: Composition for behavior
+class Dog {
+    private mobility: WalkBehavior
+    private sound: BarkBehavior
+
+    constructor() {
+        this.mobility = new WalkBehavior()
+        this.sound = new BarkBehavior()
+    }
+}
+```
+
+### Separation of Concerns
+
+- [ ] **Business logic isolated:** Not mixed with UI or data access
+- [ ] **Configuration external:** Not hardcoded in business logic (use env vars, config files)
+- [ ] **Cross-cutting concerns consistent:** Logging, auth, validation handled uniformly
+- [ ] **Layers respected:** Presentation → Business → Data (no skipping layers)
+- [ ] **Pure functions preferred:** Side effects isolated to boundaries
+
+**Example (Layers):**
+```javascript
+// BAD: Controller directly accesses database
+class UserController {
+    async getUser(req, res) {
+        const user = await db.query('SELECT * FROM users WHERE id = ?', [req.params.id])
+        res.json(user)
+    }
+}
+
+// GOOD: Proper layering
+class UserController {
+    constructor(userService) { this.userService = userService }
+
+    async getUser(req, res) {
+        const user = await this.userService.getUserById(req.params.id)
+        res.json(user)
+    }
+}
+
+class UserService {
+    constructor(userRepository) { this.userRepository = userRepository }
+
+    async getUserById(id) {
+        // Business logic here
+        return this.userRepository.findById(id)
+    }
+}
+
+class UserRepository {
+    async findById(id) {
+        return db.query('SELECT * FROM users WHERE id = ?', [id])
+    }
+}
+```
+
+### Dependency Injection
+
+- [ ] **Dependencies injectable:** Database, API clients passed as parameters (not hardcoded)
+- [ ] **Testability:** Easy to mock dependencies in tests
+- [ ] **No global state:** Avoid global variables, singletons where possible
+
+### Code Organization
+
+- [ ] **Related code together:** Features grouped by domain, not by type
+- [ ] **Clear module boundaries:** Each module has well-defined interface
+- [ ] **Cyclic dependencies avoided:** No A → B → C → A
+- [ ] **Public API minimal:** Only necessary functions/classes exported
+
+**Example (Feature-based vs Type-based):**
+```
+BAD (Type-based):
+/controllers
+  - UserController.js
+  - OrderController.js
+/services
+  - UserService.js
+  - OrderService.js
+/repositories
+  - UserRepository.js
+  - OrderRepository.js
+
+GOOD (Feature-based):
+/features
+  /user
+    - UserController.js
+    - UserService.js
+    - UserRepository.js
+    - user.types.ts
+  /order
+    - OrderController.js
+    - OrderService.js
+    - OrderRepository.js
+    - order.types.ts
+```
+
+### When Patterns Are Over-Engineering
+
+- [ ] **Complexity justified:** Pattern solves a real problem, not hypothetical
+- [ ] **Team understands it:** Pattern is familiar to team (or documented well)
+- [ ] **Future-proofing is minimal:** Solve today's problem, not next year's
+- [ ] **Simple alternative considered:** Asked "can we just use a function?"
+
+**Red flags:**
+- Abstract factory for 1 concrete type
+- Strategy pattern with only 1 strategy
+- Repository pattern for read-only data
+- Observer pattern for 1 listener
+
+---
+
 ## Review Process
 
 ### Step 1: Automated Checks
@@ -298,11 +500,12 @@ npm audit             # Dependency vulnerabilities
 ```
 
 ### Step 2: Code Review Checklist
-Use sections 1-11 above. Focus on:
+Use sections 1-12 above. Focus on:
 1. **Security** (section 2) - ALWAYS human review
 2. **Correctness** (section 1) - Does it work?
 3. **Edge Cases** (section 3) - AI's biggest weakness
 4. **Error Handling** (section 4) - AI is optimistic
+5. **Design Patterns** (section 12) - Architecture and SOLID principles
 
 ### Step 3: Test the Code
 - [ ] **Run locally:** Actually execute the code

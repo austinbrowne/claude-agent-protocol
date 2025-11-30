@@ -78,10 +78,10 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 **Detailed files are REQUIRED at checkpoints** (not optional reference material):
 - **Security Review**: Loaded when code touches auth/data/APIs
 - **Test Strategy**: Loaded when generating tests
-- **Code Review**: Loaded during self-review
+- **Fresh Eyes Code Review**: Loaded at Phase 1, Step 6 (multi-agent review with no conversation context)
 - **ADR Template**: Loaded for architectural decisions
 - **Context Optimization**: Loaded when starting complex tasks
-- **Multi-Agent Patterns**: Loaded for coordinating specialized agents
+- **Multi-Agent Patterns**: Loaded for coordinating specialized agents (includes Fresh Eyes Review pattern)
 - **GitHub Project Integration**: Loaded when creating issues from PRD (Phase 0, Step 6)
 
 **Why this structure?**

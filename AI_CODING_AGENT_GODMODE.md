@@ -597,8 +597,19 @@ Next: Awaiting approval for Phase [N+1]
    Proceed with PR creation? (yes/no)
    ```
 
-3. **If approved, create PR:**
+3. **If approved, ask for base branch:**
+   ```
+   Which branch should this PR target?
+   - main (production/stable branch)
+   - experimental (testing/development branch)
+   - other (specify)
+
+   Target branch: _____
+   ```
+
+4. **Create PR with specified base branch:**
    ```bash
+   # Replace BASE_BRANCH with user's choice (main, experimental, etc.)
    gh pr create \
      --title "feat: [Brief description] (Closes #ISSUE_NUM)" \
      --body "$(cat <<'EOF'
@@ -629,10 +640,15 @@ Next: Awaiting approval for Phase [N+1]
    🤖 Generated with [Claude Code](https://claude.com/claude-code)
    EOF
    )" \
-     --base main
+     --base BASE_BRANCH
    ```
 
-4. **Report PR creation:**
+   **Common base branches:**
+   - `--base main` - For production-ready changes
+   - `--base experimental` - For testing/development changes
+   - `--base develop` - If using GitFlow workflow
+
+5. **Report PR creation:**
    ```
    ✅ Pull Request created: https://github.com/owner/repo/pull/XXX
 

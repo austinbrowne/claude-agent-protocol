@@ -210,6 +210,51 @@ Single Session:
 
 ---
 
+## What If Implementation Fails?
+
+**Q: What if Phase 1 implementation isn't working?**
+
+**A:** Use the Failure Recovery Framework
+
+**Read:** `~/.claude/guides/FAILURE_RECOVERY.md`
+
+**Quick decision tree:**
+1. **Can fix in <30 min?** → Continue (iterate normally)
+2. **Approach fundamentally flawed?** → Abandon (partial save, return to Phase 0)
+3. **Fixable with different approach?** → Rollback & Retry
+
+**Common scenarios:**
+
+### Tests Keep Failing
+- **Minor edge cases:** Fix and continue
+- **Major logic issues:** Rollback and refactor
+- **Architecture wrong:** Abandon, revise PRD
+
+### Fresh Eyes Review Found Critical Issues
+- **Can fix quickly:** Fix and re-review
+- **Requires major refactor:** Rollback & retry with different approach
+- **Impossible to fix:** Abandon, return to Phase 0
+
+### Performance Too Slow
+- **Simple optimization:** Add index, fix N+1 queries, continue
+- **Algorithm needs changing:** Rollback, use different algorithm
+- **Requirement impossible:** Abandon, discuss requirements with stakeholder
+
+### Security Unfixable
+- **Missing validation:** Add validation, continue
+- **Architecture insecure:** Rollback & retry with secure architecture
+- **Requirement conflicts with security:** Abandon, revise requirements
+
+**Recovery procedures available:**
+- Soft reset (preserve changes for reference)
+- Hard reset (clean slate)
+- Stash (temporary parking)
+- Partial save (commit useful artifacts before abandoning)
+
+**Status indicator:** `RECOVERY_MODE`
+
+---
+
 ## Files Reference
 
 | File | Purpose |
@@ -217,12 +262,15 @@ Single Session:
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
-| `templates/TEST_STRATEGY.md` | Testing guidance |
-| `templates/ADR_TEMPLATE.md` | Architecture decisions |
-| `templates/GITHUB_ISSUE_TEMPLATE.md` | Issue structure |
+| `guides/FAILURE_RECOVERY.md` | Recovery procedures (rollback, abandon) |
+| `guides/FRESH_EYES_REVIEW.md` | Mandatory code review process |
 | `guides/GITHUB_PROJECT_INTEGRATION.md` | Full gh CLI guide |
 | `guides/CONTEXT_OPTIMIZATION.md` | Token reduction |
 | `guides/MULTI_AGENT_PATTERNS.md` | Multi-agent workflows |
+| `templates/TEST_STRATEGY.md` | Testing guidance |
+| `templates/ADR_TEMPLATE.md` | Architecture decisions |
+| `templates/GITHUB_ISSUE_TEMPLATE.md` | Issue structure |
+| `templates/RECOVERY_REPORT.md` | Document implementation failures |
 
 ---
 

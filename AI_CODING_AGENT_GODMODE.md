@@ -478,7 +478,44 @@ This document contains the complete Fresh Eyes Review process - a specialized mu
 - [ ] Fresh Eyes Review completed
 - [ ] All CRITICAL findings addressed
 - [ ] All HIGH findings addressed or documented why skipped
-- [ ] Ready to proceed to Step 7 (Commit)
+- [ ] Ready to proceed to Step 6.5 (Recovery Decision Point)
+
+---
+
+### Step 6.5: Recovery Decision Point
+
+⚠️ **CHECKPOINT: Implementation Working or Needs Recovery?**
+
+If Fresh Eyes Review found issues that cannot be quickly fixed (<30 minutes), or implementation is fundamentally flawed, you may need to recover.
+
+**Evaluate using the decision tree:**
+
+**Read:** `~/.claude/guides/FAILURE_RECOVERY.md`
+
+**Quick decision tree:**
+```
+Can all issues be fixed in <30 minutes? → YES → Continue to Step 7
+                                        ↓ NO
+Is approach fundamentally flawed? → YES → ABANDON (Partial Save → Phase 0)
+                                  ↓ NO
+                            ROLLBACK & RETRY (Different approach)
+```
+
+**Recovery actions:**
+- **Continue:** Proceed to Step 7 (normal flow)
+- **Rollback & Retry:** Use git to rollback, try different approach, restart Phase 1
+- **Abandon:** Partial save useful artifacts, document learnings, return to Phase 0
+
+**Status indicator when in recovery:**
+- Set status to: `RECOVERY_MODE`
+- Document recovery action taken
+- Follow procedures in FAILURE_RECOVERY.md
+
+**After recovery decision:**
+- [ ] Decision made: Continue | Rollback | Abandon
+- [ ] Recovery procedure executed (if applicable)
+- [ ] Recovery report created (if Rollback or Abandon)
+- [ ] Ready to proceed to Step 7 (if Continue) or exit Phase 1 (if Rollback/Abandon)
 
 ---
 
@@ -657,6 +694,7 @@ Next: Awaiting approval for Phase [N+1]
 | `REVISION_REQUESTED` | Human requested changes, paused |
 | `APPROVED_NEXT_PHASE` | Cleared to continue |
 | `HALT_PENDING_DECISION` | Blocked on ambiguity |
+| `RECOVERY_MODE` | Implementation failed, evaluating rollback/abandon |
 
 ## Confidence Levels
 

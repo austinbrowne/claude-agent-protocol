@@ -77,8 +77,7 @@ The GODMODE protocol implements comprehensive review mechanisms (Fresh Eyes mult
 **Non-Goals (out of scope):**
 1. Real-time dashboards (simple reports sufficient for v1)
 2. Machine learning models for predictions (rule-based improvements first)
-3. Cross-project aggregation (single project focus for v1)
-4. Automated checklist updates (suggestions only, human approval required)
+3. Automated checklist updates (suggestions only, human approval required)
 
 **Success Metric:**
 | Metric | Baseline | Target |
@@ -96,6 +95,14 @@ The GODMODE protocol implements comprehensive review mechanisms (Fresh Eyes mult
 
 Implement a Learning Loop & Metrics system that captures review findings, tracks patterns over time, measures effectiveness, and suggests improvements. The system operates in three layers: (1) Data capture during Fresh Eyes reviews, (2) Analysis and pattern detection, and (3) Feedback to improve checklists and procedures.
 
+**Protocol-Centric Architecture:**
+
+Review data is stored in the protocol home directory (`~/.claude/review-data/`), NOT in individual project directories. When an agent executes GODMODE on any project, findings flow back to the protocol directory. This enables:
+- Protocol maintainer benefits from dogfooding across all projects
+- Continuous protocol improvement from real-world usage
+- Other users can optionally contribute data via PR or manual sharing
+- Centralized learning without complex infrastructure
+
 **Key Features:**
 
 | Feature | Description | Priority |
@@ -110,28 +117,24 @@ Implement a Learning Loop & Metrics system that captures review findings, tracks
 **User Flow:**
 
 **Stage 1: Data Capture (During Fresh Eyes Review)**
-1. Fresh Eyes Review executes (Security Agent + Code Quality Agent + Supervisor)
-2. Supervisor consolidates findings: 3 CRITICAL, 2 HIGH, 4 MEDIUM
-3. **NEW**: Findings logged to `docs/metrics/review-findings.json`:
-   ```json
-   {
-     "date": "2025-11-30",
-     "issue": "#45",
-     "findings": [
-       {"severity": "CRITICAL", "type": "null-check-missing", "file": "auth.ts:67", "agent": "code-quality"},
-       {"severity": "HIGH", "type": "sql-injection", "file": "users.ts:123", "agent": "security"}
-     ]
-   }
+1. User works on project `~/projects/my-app/`
+2. Agent reads protocol from `~/.claude/`
+3. Fresh Eyes Review executes (Security Agent + Code Quality Agent + Supervisor)
+4. Supervisor consolidates findings: 3 CRITICAL, 2 HIGH, 4 MEDIUM
+5. **NEW**: Agent detects protocol home directory and logs to `~/.claude/review-data/review-findings.jsonl`:
+   ```jsonl
+   {"date":"2025-11-30","project":"my-app","issue":"#45","findings":[{"severity":"CRITICAL","type":"null-check-missing","file":"auth.ts:67","agent":"code-quality"},{"severity":"HIGH","type":"sql-injection","file":"users.ts:123","agent":"security"}]}
    ```
-4. Agent implements fixes
-5. **NEW**: User/agent marks if any findings were false positives:
+   *(Uses JSONL format - one JSON object per line for easy appending)*
+6. Agent implements fixes
+7. **NEW**: User/agent marks if any findings were false positives:
    - "Finding #3 (magic-string) was false positive - constant was justified"
 
 **Stage 2: Pattern Analysis (Weekly/Monthly)**
-6. Analysis script (or manual review) processes `review-findings.json`
-7. Generates pattern report:
+8. Protocol maintainer (or analysis script) processes `~/.claude/review-data/review-findings.jsonl`
+9. Generates pattern report:
    ```
-   TOP ISSUES FOUND (Last 30 days):
+   TOP ISSUES FOUND (Last 30 days, across all projects):
    1. Missing null checks: 12 occurrences (35% of findings)
    2. SQL injection risk: 8 occurrences (24%)
    3. Missing error handling: 6 occurrences (18%)
@@ -147,12 +150,19 @@ Implement a Learning Loop & Metrics system that captures review findings, tracks
    - Clarify magic string guidance (when constants are justified)
    ```
 
-**Stage 3: Continuous Improvement**
-8. Protocol maintainer reviews suggestions
-9. Updates checklists based on data:
-   - Emphasize null checks (most common issue)
-   - Clarify magic string guidance (reduce false positives)
-10. Track improvement: Did null check findings decrease after emphasis?
+**Stage 3: Continuous Improvement (Protocol Maintainer)**
+10. Review suggestions from pattern analysis
+11. Update checklists based on data:
+    - Emphasize null checks (most common issue)
+    - Clarify magic string guidance (reduce false positives)
+12. Commit improvements to protocol repo:
+    ```bash
+    cd ~/.claude  # Protocol repo
+    git add checklists/AI_CODE_REVIEW.md review-data/
+    git commit -m "learning: Update checklist based on 30-day review data"
+    git push origin main
+    ```
+13. Track improvement: Did null check findings decrease after emphasis?
 
 **Mockups:**
 
@@ -202,34 +212,60 @@ SUGGESTED IMPROVEMENTS:
 **Architecture:**
 
 ```
-Fresh Eyes Review (Step 6)
+User Project (~/projects/my-app/)
     │
-    ├─ Security Agent → Findings
-    ├─ Code Quality Agent → Findings
-    └─ Supervisor Agent → Consolidated Report
+    └─ GODMODE execution
             │
-            ├─ [NEW] Log to review-findings.json
+            ├─ Reads protocol from ~/.claude/
             │
-            └─ Present to user
+            └─ Fresh Eyes Review (Step 6)
+                    │
+                    ├─ Security Agent → Findings
+                    ├─ Code Quality Agent → Findings
+                    └─ Supervisor Agent → Consolidated Report
+                            │
+                            ├─ [NEW] Detects protocol home (~/.claude/)
+                            ├─ [NEW] Logs to ~/.claude/review-data/review-findings.jsonl
+                            │
+                            └─ Present to user
+
+Protocol Directory (~/.claude/)
+    │
+    ├─ review-data/
+    │   ├─ review-findings.jsonl (accumulates from all projects)
+    │   └─ bug-escapes.jsonl
+    │
+    └─ .git/ (austinbrowne/claude-agent-protocol repo)
 
 Metrics Analysis (Weekly/Monthly)
     │
-    ├─ Read review-findings.json
-    ├─ Aggregate patterns
+    ├─ cd ~/.claude
+    ├─ Run analysis script
+    ├─ Read review-data/review-findings.jsonl
+    ├─ Aggregate patterns across all projects
     ├─ Calculate metrics (top issues, false positive rate, trends)
     └─ Generate report + suggestions
 
-Continuous Improvement Loop
+Continuous Improvement Loop (Protocol Maintainer)
     │
     ├─ Human reviews suggestions
-    ├─ Updates checklists/GODMODE
+    ├─ Updates checklists/GODMODE in ~/.claude/
+    ├─ Commits review data + checklist improvements
+    ├─ Push to origin (protocol repo)
     └─ Monitor: Did changes improve outcomes?
 ```
 
 **Key Decisions:**
 
-- **JSON storage** for simplicity (no database required)
-  - *Rationale*: Easy to inspect, version control, migrate later if needed
+- **Protocol-centric storage** in `~/.claude/review-data/`
+  - *Rationale*: Data flows back to protocol maintainer, enables continuous improvement
+  - *Alternative considered*: Project-local storage would prevent cross-project learning
+- **JSONL format** (JSON Lines) for easy appending
+  - *Rationale*: One JSON object per line, no need to parse entire file to append
+  - *Alternative considered*: Single JSON array requires parsing/rewriting entire file
+- **Protocol home detection**: Agent finds `~/.claude/` automatically
+  - *Rationale*: No manual configuration, works across all projects
+  - *Implementation*: Check for `AI_CODING_AGENT_GODMODE.md` in parent directories
 - **Manual analysis** (v1), not automated dashboard
   - *Rationale*: Start simple, understand patterns before building tooling
 - **Finding types taxonomy**: Predefined list (null-check, sql-injection, etc.)
@@ -241,11 +277,11 @@ Continuous Improvement Loop
 
 | File | Type | Description |
 |------|------|-------------|
-| `docs/metrics/review-findings.json` | New | All review findings with metadata |
-| `docs/metrics/bug-escapes.json` | New | Production bugs that reviews missed |
-| `guides/LEARNING_LOOP.md` | New | How to use metrics, analysis procedures |
-| `scripts/analyze-metrics.js` (or .py) | New | Generate pattern reports from JSON |
-| `MULTI_AGENT_PATTERNS.md` | Modified | Add logging step to Pattern 6 (Fresh Eyes) |
+| `~/.claude/review-data/review-findings.jsonl` | New | All review findings with metadata (JSONL format) |
+| `~/.claude/review-data/bug-escapes.jsonl` | New | Production bugs that reviews missed |
+| `guides/LEARNING_LOOP.md` | New | How to use metrics, analysis procedures, contribution workflow |
+| `scripts/analyze-metrics.js` (or .py) | New | Generate pattern reports from JSONL data |
+| `guides/MULTI_AGENT_PATTERNS.md` | Modified | Add logging step to Pattern 6 (Fresh Eyes) with protocol home detection |
 
 **Dependencies:**
 - Node.js or Python (for analysis script)
@@ -258,16 +294,18 @@ Continuous Improvement Loop
 ### Phase 1: Data Capture — 4-6 hours
 
 **Deliverables:**
-- JSON schema for review findings
+- JSONL schema for review findings
+- Protocol home detection logic
 - Logging integration into Fresh Eyes Review (Pattern 6)
 - False positive marking mechanism
 
 **Acceptance Criteria:**
-- [ ] `review-findings.json` schema defined with fields: date, issue, findings array, false_positives
+- [ ] Agent detects protocol home directory (`~/.claude/`) by searching for `AI_CODING_AGENT_GODMODE.md`
+- [ ] JSONL schema defined with fields: date, project, issue, findings array, false_positives
 - [ ] Each finding has: severity, type, file:line, agent, description
-- [ ] Supervisor agent logs findings after consolidation
+- [ ] Supervisor agent logs findings to `~/.claude/review-data/review-findings.jsonl` after consolidation
 - [ ] User can mark findings as false positive (simple prompt)
-- [ ] JSON file appends (doesn't overwrite)
+- [ ] JSONL file appends (one line per review session)
 
 ---
 
@@ -277,13 +315,17 @@ Continuous Improvement Loop
 - Analysis script (Node.js or Python)
 - Pattern detection logic
 - Monthly report template
+- Contribution workflow documentation
 
 **Acceptance Criteria:**
-- [ ] Script reads `review-findings.json`
+- [ ] Script reads `~/.claude/review-data/review-findings.jsonl`
+- [ ] Aggregates data across all projects (uses `project` field)
 - [ ] Calculates: top issue types, severity distribution, false positive rate
 - [ ] Identifies trends (comparing time periods)
 - [ ] Generates markdown report
-- [ ] Report includes: metrics summary, top issues, false positives, suggestions
+- [ ] Report includes: metrics summary, top issues, false positives, actionable suggestions
+- [ ] Documentation explains workflow for protocol maintainer (commit/push cycle)
+- [ ] Documentation explains optional contribution workflow for other users (PR or manual sharing)
 
 ---
 
@@ -328,10 +370,11 @@ Continuous Improvement Loop
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
-| Data privacy (sensitive code patterns logged) | Low | High | Log issue types only, not actual code; add .gitignore guidance |
+| Data privacy (review data committed to protocol repo) | Medium | High | Log issue types only, not code snippets; file paths relative to project (not absolute); document privacy considerations in LEARNING_LOOP.md |
+| Other users reluctant to contribute data | Medium | Medium | Make contribution optional; provide anonymization guidance; show clear value exchange (better protocol) |
 | Manual false positive marking is burdensome | Medium | Medium | Keep simple (yes/no per finding); automate in v2 if needed |
 | Metrics not actionable (unclear next steps) | Medium | High | Focus on top 5 issues; link suggestions to specific checklist sections |
-| JSON becomes unwieldy with many reviews | Low | Medium | Implement rotation/archival after 100 reviews |
+| JSONL becomes unwieldy with many reviews | Low | Medium | Implement rotation/archival after 100 reviews; consider compression |
 
 ---
 
@@ -343,19 +386,22 @@ Continuous Improvement Loop
 
 ## 9. Security Review
 
-**Moderate security consideration** - Logs contain file paths and issue types.
+**Moderate security consideration** - Review data stored in protocol repo and potentially committed to GitHub.
 
 - [ ] Authentication or authorization
-- [x] Handling PII or sensitive data - *File paths and code patterns (low sensitivity)*
+- [x] Handling PII or sensitive data - *File paths, project names, and issue types (moderate sensitivity)*
 - [ ] External API integrations
 - [ ] User input processing
 - [ ] File uploads
 - [ ] Database queries with user input
 
 **Mitigation:**
-- Don't log actual code snippets, only types and file:line references
-- Add to `.gitignore` if storing sensitive project data
-- Document privacy considerations in LEARNING_LOOP.md
+- Don't log actual code snippets, only finding types and relative file paths
+- Project names are logged but can be anonymized before contribution
+- Protocol maintainer controls what gets committed to public repo
+- Other users can review/anonymize data before submitting PRs
+- Document privacy considerations and anonymization workflow in LEARNING_LOOP.md
+- Recommend `.gitignore` for `review-data/` if users clone protocol but don't want to share data
 
 ---
 
@@ -373,12 +419,14 @@ Continuous Improvement Loop
 ## 11. Future Considerations
 
 *Out of scope for this version, but worth noting:*
-- **Real-time dashboard**: Web UI showing current metrics
+- **Real-time dashboard**: Web UI showing current metrics (hosted at docs site)
 - **ML-powered predictions**: "This code likely has null check issues" before review
-- **Cross-project aggregation**: Learn from multiple codebases
-- **Automated checklist updates**: AI suggests and applies checklist edits
+- **Automated anonymization**: Script to anonymize project names and file paths before contribution
+- **Automated checklist updates**: AI suggests and applies checklist edits (with human approval)
 - **Integration with Complexity Budgets**: Correlate complexity scores with issue frequency
 - **GitHub API integration**: Auto-detect bug escapes from production issues
+- **Opt-in telemetry**: Automated data submission with user consent (vs. manual PR workflow)
+- **Community contributions**: Public dashboard showing aggregated (anonymized) patterns from all users
 
 ---
 

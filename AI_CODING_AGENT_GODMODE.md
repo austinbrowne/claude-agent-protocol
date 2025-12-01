@@ -450,21 +450,35 @@ npm run lint
 
 ### Step 6: Fresh Eyes Code Review
 
-⚠️ **STOP - MANDATORY CHECKPOINT**
+🚫 **MANDATORY CHECKPOINT - CANNOT PROCEED WITHOUT COMPLETING THIS STEP**
 
-You MUST read and execute:
+**You MUST read and execute:**
 
-**`~/.claude/guides/MULTI_AGENT_PATTERNS.md`** - Section "Pattern 6: Fresh Eyes Code Review"
+**`~/.claude/guides/FRESH_EYES_REVIEW.md`**
 
-This launches specialized review agents with **NO conversation context** for unbiased code review.
+This document contains the complete Fresh Eyes Review process - a specialized multi-agent review system that provides unbiased code review using agents with **ZERO conversation context**.
 
-**CRITICAL:**
-- Do NOT skip this step
-- Review agents have zero conversation history (no confirmation bias)
-- Supervisor agent consolidates findings
-- Must fix CRITICAL/HIGH issues before proceeding
+**Choose your review tier based on change size:**
+- **Lite Review** (<4 hours, <100 LOC): Code Quality agent only, 5-10 min
+- **Standard Review** (4-15 hours, 100-500 LOC): Security + Code Quality + Supervisor, 10-15 min
+- **Full Review** (>15 hours, >500 LOC): Security + Code Quality + Performance + Supervisor, 15-20 min
 
-**Read the file now and follow the pattern exactly.**
+**CRITICAL - You CANNOT skip this step:**
+- This is a MANDATORY protocol step for ALL code changes
+- Skipping this step is a protocol violation
+- Review agents have zero conversation history (eliminates confirmation bias)
+- Catches security vulnerabilities (45% of AI code has security issues)
+- Must fix all CRITICAL/HIGH issues before proceeding to commit
+
+**Read the file now and follow the review process exactly.**
+
+---
+
+**After completing Fresh Eyes Review, verify checkpoint:**
+- [ ] Fresh Eyes Review completed
+- [ ] All CRITICAL findings addressed
+- [ ] All HIGH findings addressed or documented why skipped
+- [ ] Ready to proceed to Step 7 (Commit)
 
 ---
 

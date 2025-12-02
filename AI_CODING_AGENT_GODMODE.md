@@ -1,10 +1,29 @@
 # AI Coding Agent Standard Operating Protocol (SOP)
 
-**Version:** 3.1
-**Last Updated:** November 2025
+**Version:** 3.2
+**Last Updated:** December 2025
 **Purpose:** Safe, effective AI-assisted software development
 
 **NEW:** 13 modular slash commands available for flexible workflows - see `~/.claude/commands/*.md` and `QUICK_START.md`
+
+---
+
+## Document Role
+
+This is the **comprehensive reference document** for the GODMODE protocol.
+
+**For quick access:**
+- Critical safety rules → `~/.claude/CLAUDE.md` (auto-loaded with highest priority)
+- Modular commands → `~/.claude/commands/*.md` (13 commands)
+- Quick reference → `~/.claude/QUICK_START.md`
+
+**Use this document when:**
+- Learning the full protocol for the first time
+- Need detailed phase-by-phase guidance
+- Want comprehensive entry point documentation
+- Reference for architectural decisions
+
+**Note:** Critical safety rules and AI blind spots are duplicated in CLAUDE.md to ensure they're always loaded with system priority.
 
 ---
 

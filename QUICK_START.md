@@ -127,6 +127,119 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 
 ---
 
+## Modular Commands
+
+**13 reusable slash commands** for flexible workflows. Use individually or compose custom workflows.
+
+### Phase 0: Planning (4 commands)
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `/explore` | Codebase exploration | `/explore authentication patterns` |
+| `/generate-prd` | Create PRD | `/generate-prd --full "OAuth support"` |
+| `/create-adr` | Document architecture decision | `/create-adr "Use PostgreSQL"` |
+| `/create-issues` | Generate GitHub issues from PRD | `/create-issues docs/prds/2025-12-01-oauth.md --immediate` |
+
+### Phase 1: Execution (7 commands)
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `/start-issue` | Begin work on issue | `/start-issue 123` |
+| `/generate-tests` | Generate comprehensive tests | `/generate-tests --path src/auth/AuthService.ts` |
+| `/security-review` | Run security checklist | `/security-review` |
+| `/run-validation` | Run tests + coverage + lint + security | `/run-validation` |
+| `/fresh-eyes-review` | Multi-agent unbiased code review | `/fresh-eyes-review --standard` |
+| `/recovery` | Handle failed implementations | `/recovery` |
+| `/commit-and-pr` | Commit and create PR | `/commit-and-pr --base experimental` |
+
+### Phase 2: Finalization (2 commands)
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `/refactor` | Guided refactoring | `/refactor` |
+| `/finalize` | Update docs and final checks | `/finalize --all` |
+
+### Example Workflows with Commands
+
+**Full GODMODE workflow:**
+```bash
+/explore authentication
+/generate-prd --full "OAuth 2.0 authentication"
+# Creates: docs/prds/2025-12-01-oauth-auth.md
+
+/create-issues docs/prds/2025-12-01-oauth-auth.md --immediate
+# Creates issue #123, renames PRD to: docs/prds/123-2025-12-01-oauth-auth.md
+
+/start-issue 123
+# [Implement code]
+/generate-tests
+/security-review
+/run-validation
+/fresh-eyes-review
+/commit-and-pr --base experimental
+/refactor
+/finalize --all
+```
+
+**Quick Bug Fix workflow:**
+```bash
+# Assumes issue #456 already exists (created manually or via /create-issues)
+/start-issue 456
+# [Fix bug]
+/generate-tests --path src/auth/bugfix.ts
+/fresh-eyes-review --lite
+/commit-and-pr --base main
+```
+
+**Just Review Existing Changes workflow:**
+```bash
+# [Already have code changes staged]
+/fresh-eyes-review --standard
+# [Fix issues found]
+/commit-and-pr --base experimental
+```
+
+**Mid-Workflow Entry (Have PRD, Skip Explore):**
+```bash
+# Assumes PRD already exists: docs/prds/2025-11-28-existing-feature.md
+/create-issues docs/prds/2025-11-28-existing-feature.md --immediate
+# Creates issue #789, renames PRD to: docs/prds/789-2025-11-28-existing-feature.md
+
+/start-issue 789
+# [Implement]
+/generate-tests
+/run-validation
+/fresh-eyes-review
+/commit-and-pr
+```
+
+### Command Invocation Patterns
+
+All commands support **hybrid invocation**:
+
+**Interactive mode** (command asks questions):
+```bash
+/explore
+# Claude: What would you like to explore? _____
+```
+
+**Direct mode** (command executes immediately):
+```bash
+/explore authentication patterns
+# Claude: [Immediately explores authentication patterns]
+```
+
+### Command Help
+
+For details on any command:
+```bash
+cat ~/.claude/commands/explore.md
+cat ~/.claude/commands/generate-prd.md
+# etc.
+```
+
+---
+
 ## GitHub Projects Setup
 
 **One-time setup:**
@@ -210,19 +323,68 @@ Single Session:
 
 ---
 
+## What If Implementation Fails?
+
+**Q: What if Phase 1 implementation isn't working?**
+
+**A:** Use the Failure Recovery Framework
+
+**Read:** `~/.claude/guides/FAILURE_RECOVERY.md`
+
+**Quick decision tree:**
+1. **Can fix in <30 min?** → Continue (iterate normally)
+2. **Approach fundamentally flawed?** → Abandon (partial save, return to Phase 0)
+3. **Fixable with different approach?** → Rollback & Retry
+
+**Common scenarios:**
+
+### Tests Keep Failing
+- **Minor edge cases:** Fix and continue
+- **Major logic issues:** Rollback and refactor
+- **Architecture wrong:** Abandon, revise PRD
+
+### Fresh Eyes Review Found Critical Issues
+- **Can fix quickly:** Fix and re-review
+- **Requires major refactor:** Rollback & retry with different approach
+- **Impossible to fix:** Abandon, return to Phase 0
+
+### Performance Too Slow
+- **Simple optimization:** Add index, fix N+1 queries, continue
+- **Algorithm needs changing:** Rollback, use different algorithm
+- **Requirement impossible:** Abandon, discuss requirements with stakeholder
+
+### Security Unfixable
+- **Missing validation:** Add validation, continue
+- **Architecture insecure:** Rollback & retry with secure architecture
+- **Requirement conflicts with security:** Abandon, revise requirements
+
+**Recovery procedures available:**
+- Soft reset (preserve changes for reference)
+- Hard reset (clean slate)
+- Stash (temporary parking)
+- Partial save (commit useful artifacts before abandoning)
+
+**Status indicator:** `RECOVERY_MODE`
+
+---
+
 ## Files Reference
 
 | File | Purpose |
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
+| `commands/*.md` | **13 modular slash commands** (explore, generate-prd, create-adr, create-issues, start-issue, generate-tests, security-review, run-validation, fresh-eyes-review, recovery, commit-and-pr, refactor, finalize) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
-| `templates/TEST_STRATEGY.md` | Testing guidance |
-| `templates/ADR_TEMPLATE.md` | Architecture decisions |
-| `templates/GITHUB_ISSUE_TEMPLATE.md` | Issue structure |
+| `guides/FAILURE_RECOVERY.md` | Recovery procedures (rollback, abandon) |
+| `guides/FRESH_EYES_REVIEW.md` | Mandatory code review process |
 | `guides/GITHUB_PROJECT_INTEGRATION.md` | Full gh CLI guide |
 | `guides/CONTEXT_OPTIMIZATION.md` | Token reduction |
 | `guides/MULTI_AGENT_PATTERNS.md` | Multi-agent workflows |
+| `templates/TEST_STRATEGY.md` | Testing guidance |
+| `templates/ADR_TEMPLATE.md` | Architecture decisions |
+| `templates/GITHUB_ISSUE_TEMPLATE.md` | Issue structure |
+| `templates/RECOVERY_REPORT.md` | Document implementation failures |
 
 ---
 

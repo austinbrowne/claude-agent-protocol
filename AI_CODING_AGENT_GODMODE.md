@@ -4,6 +4,8 @@
 **Last Updated:** November 2025
 **Purpose:** Safe, effective AI-assisted software development
 
+**NEW:** 13 modular slash commands available for flexible workflows - see `~/.claude/commands/*.md` and `QUICK_START.md`
+
 ---
 
 # ⚠️ CRITICAL SAFETY RULES - READ FIRST
@@ -478,7 +480,44 @@ This document contains the complete Fresh Eyes Review process - a specialized mu
 - [ ] Fresh Eyes Review completed
 - [ ] All CRITICAL findings addressed
 - [ ] All HIGH findings addressed or documented why skipped
-- [ ] Ready to proceed to Step 7 (Commit)
+- [ ] Ready to proceed to Step 6.5 (Recovery Decision Point)
+
+---
+
+### Step 6.5: Recovery Decision Point
+
+⚠️ **CHECKPOINT: Implementation Working or Needs Recovery?**
+
+If Fresh Eyes Review found issues that cannot be quickly fixed (<30 minutes), or implementation is fundamentally flawed, you may need to recover.
+
+**Evaluate using the decision tree:**
+
+**Read:** `~/.claude/guides/FAILURE_RECOVERY.md`
+
+**Quick decision tree:**
+```
+Can all issues be fixed in <30 minutes? → YES → Continue to Step 7
+                                        ↓ NO
+Is approach fundamentally flawed? → YES → ABANDON (Partial Save → Phase 0)
+                                  ↓ NO
+                            ROLLBACK & RETRY (Different approach)
+```
+
+**Recovery actions:**
+- **Continue:** Proceed to Step 7 (normal flow)
+- **Rollback & Retry:** Use git to rollback, try different approach, restart Phase 1
+- **Abandon:** Partial save useful artifacts, document learnings, return to Phase 0
+
+**Status indicator when in recovery:**
+- Set status to: `RECOVERY_MODE`
+- Document recovery action taken
+- Follow procedures in FAILURE_RECOVERY.md
+
+**After recovery decision:**
+- [ ] Decision made: Continue | Rollback | Abandon
+- [ ] Recovery procedure executed (if applicable)
+- [ ] Recovery report created (if Rollback or Abandon)
+- [ ] Ready to proceed to Step 7 (if Continue) or exit Phase 1 (if Rollback/Abandon)
 
 ---
 
@@ -560,8 +599,19 @@ Next: Awaiting approval for Phase [N+1]
    Proceed with PR creation? (yes/no)
    ```
 
-3. **If approved, create PR:**
+3. **If approved, ask for base branch:**
+   ```
+   Which branch should this PR target?
+   - main (production/stable branch)
+   - experimental (testing/development branch)
+   - other (specify)
+
+   Target branch: _____
+   ```
+
+4. **Create PR with specified base branch:**
    ```bash
+   # Replace BASE_BRANCH with user's choice (main, experimental, etc.)
    gh pr create \
      --title "feat: [Brief description] (Closes #ISSUE_NUM)" \
      --body "$(cat <<'EOF'
@@ -592,10 +642,15 @@ Next: Awaiting approval for Phase [N+1]
    🤖 Generated with [Claude Code](https://claude.com/claude-code)
    EOF
    )" \
-     --base main
+     --base BASE_BRANCH
    ```
 
-4. **Report PR creation:**
+   **Common base branches:**
+   - `--base main` - For production-ready changes
+   - `--base experimental` - For testing/development changes
+   - `--base develop` - If using GitFlow workflow
+
+5. **Report PR creation:**
    ```
    ✅ Pull Request created: https://github.com/owner/repo/pull/XXX
 
@@ -657,6 +712,7 @@ Next: Awaiting approval for Phase [N+1]
 | `REVISION_REQUESTED` | Human requested changes, paused |
 | `APPROVED_NEXT_PHASE` | Cleared to continue |
 | `HALT_PENDING_DECISION` | Blocked on ambiguity |
+| `RECOVERY_MODE` | Implementation failed, evaluating rollback/abandon |
 
 ## Confidence Levels
 

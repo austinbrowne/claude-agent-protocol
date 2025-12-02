@@ -102,53 +102,92 @@ Then run: `/fresh-eyes-review`
 
 **Launch review agents using Task tool:**
 
-**Important:** Each agent has ZERO conversation context (fresh eyes)
+**Important:**
+- Each agent has ZERO conversation context (fresh eyes)
+- **CRITICAL: Launch ALL specialist agents IN PARALLEL using a single message with multiple Task tool calls**
+- Only the Supervisor runs AFTER specialists complete (it needs their findings)
 
 **For Lite tier:**
-1. Launch Security Agent
+1. **PARALLEL:** Launch Security Agent
    - Reviews /tmp/review-diff.txt
    - Applies security checklist
    - Returns security findings
-2. Launch Supervisor Agent
-   - Reviews /tmp/review-diff.txt
-   - Reviews Security Agent findings
+2. **AFTER Security completes:** Launch Supervisor Agent
+   - Reviews /tmp/review-diff.txt + Security findings
    - Consolidates final verdict
 
 **For Standard tier:**
-1. Launch Security Agent (as above)
-2. Launch Code Quality Agent
-   - Reviews /tmp/review-diff.txt
-   - Checks code quality (naming, structure, complexity, edge cases)
-   - Returns code quality findings
-3. Launch Supervisor Agent
+1. **PARALLEL (single message, multiple Task calls):**
+   - Security Agent - security checklist review
+   - Code Quality Agent - naming, structure, complexity, edge cases
+2. **AFTER both complete:** Launch Supervisor Agent
    - Reviews diff + both agent findings
    - Consolidates final verdict
 
 **For Full tier:**
-1. Launch Security Agent (as above)
-2. Launch Code Quality Agent (as above)
-3. Launch Performance Agent
-   - Reviews /tmp/review-diff.txt
-   - Checks performance (N+1 queries, inefficient algorithms, memory leaks)
-   - Returns performance findings
-4. Launch Supervisor Agent
+1. **PARALLEL (single message, multiple Task calls):**
+   - Security Agent - security checklist review
+   - Code Quality Agent - naming, structure, complexity, edge cases
+   - Performance Agent - N+1 queries, inefficient algorithms, memory leaks
+2. **AFTER all three complete:** Launch Supervisor Agent
    - Reviews diff + all agent findings
    - Consolidates final verdict
 
-**Agent launch using Task tool:**
+**Parallel agent launch pattern (MUST use single message):**
 ```
-Task tool with:
+In ONE response, call Task tool THREE times:
+
+Task 1:
 - subagent_type: "general-purpose"
 - description: "Fresh Eyes Security Review"
-- prompt: "You are a security specialist with zero context about this project.
+- prompt: "You are a security specialist..."
+
+Task 2:
+- subagent_type: "general-purpose"
+- description: "Fresh Eyes Code Quality Review"
+- prompt: "You are a code quality specialist..."
+
+Task 3:
+- subagent_type: "general-purpose"
+- description: "Fresh Eyes Performance Review"
+- prompt: "You are a performance specialist..."
+
+All three run simultaneously. Wait for all to complete before launching Supervisor.
+```
+
+**Individual agent prompts:**
+
+**Security Agent:**
+```
+You are a security specialist with zero context about this project.
 
 Review the code changes in /tmp/review-diff.txt for security issues.
 
 Apply the security checklist from ~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md.
 
 Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
+```
 
-Return your findings in this format: [findings format]"
+**Code Quality Agent:**
+```
+You are a code quality specialist with zero context about this project.
+
+Review the code changes in /tmp/review-diff.txt for code quality issues.
+
+Check: naming conventions, code structure, cyclomatic complexity, edge case handling, error handling.
+
+Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
+```
+
+**Performance Agent:**
+```
+You are a performance specialist with zero context about this project.
+
+Review the code changes in /tmp/review-diff.txt for performance issues.
+
+Check: N+1 queries, inefficient algorithms, memory leaks, unnecessary allocations, missing pagination.
+
+Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
 ```
 
 ### Step 5: Consolidate findings from all agents

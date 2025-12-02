@@ -10,24 +10,49 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 
 ## Installation
 
-**Quick install:**
+### Quick Install
+
 ```bash
-git clone https://github.com/austinbrowne/claude-agent-protocol.git ~/.claude
+git clone https://github.com/austinbrowne/claude-agent-protocol.git
+cd claude-agent-protocol
+./install.sh
 ```
 
-**Pin to specific version:**
+This installs slash commands, checklists, guides, and templates to `~/.claude/`.
+
+### What the Installer Does
+
+- **Symlinks files** to `~/.claude/` (updates auto-propagate when you `git pull`)
+- **Preserves your existing `CLAUDE.md`** - creates `CLAUDE.md.example` instead if you already have one
+- **Creates directory structure** for commands, checklists, guides, and templates
+
+### If You Already Have a CLAUDE.md
+
+The installer won't overwrite it. Instead, it creates `~/.claude/CLAUDE.md.example`. You can:
+
+1. **Merge manually** - Copy sections you want from `CLAUDE.md.example` into your existing `CLAUDE.md`
+2. **Replace entirely** - `cp ~/.claude/CLAUDE.md.example ~/.claude/CLAUDE.md`
+
+### Uninstall
+
 ```bash
-git clone --branch v3.2 https://github.com/austinbrowne/claude-agent-protocol.git ~/.claude
+./uninstall.sh
 ```
 
-**Update to latest:**
-```bash
-cd ~/.claude && git pull
-```
+Removes all installed files but preserves your `CLAUDE.md`.
 
-**Requirements:**
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed
-- GitHub CLI (`gh`) for issue/PR workflows (optional)
+### Manual Installation
+
+If you prefer not to use the installer:
+
+```bash
+# Copy files to ~/.claude/
+cp -r commands checklists guides templates ~/.claude/
+cp AI_CODING_AGENT_GODMODE.md PRD_TEMPLATE.md QUICK_START.md ~/.claude/
+
+# Optionally copy CLAUDE.md (or merge with your existing one)
+cp CLAUDE.md ~/.claude/
+```
 
 ---
 
@@ -207,38 +232,44 @@ This ensures agents pay full attention to critical safety rules while accessing 
 
 ## Quick Start
 
-### 0. Quick Reference
+### 1. Install
 
-**See `QUICK_START.md`** for:
+```bash
+git clone https://github.com/austinbrowne/claude-agent-protocol.git
+cd claude-agent-protocol
+./install.sh
+```
+
+### 2. Try It Out
+
+Open Claude Code in any project and run:
+
+```bash
+/explore           # Explore the codebase
+/generate-prd      # Create a PRD for a new feature
+/security-review   # Review code for security issues
+```
+
+### 3. Learn the Workflows
+
+**See `~/.claude/QUICK_START.md`** for:
 - Two entry points (new feature vs existing issue)
 - Common gh CLI commands
 - Typical workflows
 - Critical safety reminders
 
-### 1. Review the Core Documents
+### 4. Review Core Documents
 
-**Start here:**
-1. Read `QUICK_START.md` - Understand the two entry points
-2. Read `AI_CODING_AGENT_GODMODE.md` - Full workflow details
-3. Review `CLAUDE.md` - Communication guidelines
-4. Familiarize yourself with `PRD_TEMPLATE.md` - Lite vs Full PRD
+1. `QUICK_START.md` - Understand the two entry points
+2. `AI_CODING_AGENT_GODMODE.md` - Full workflow details
+3. `CLAUDE.md` - Communication guidelines
+4. `PRD_TEMPLATE.md` - Lite vs Full PRD
 
-### 2. Use the Checklists
+### 5. Use the Checklists
 
 **Before merging any AI-generated code:**
-- Run through `AI_CODE_SECURITY_REVIEW.md` (especially for auth, data handling, APIs)
+- Run `/security-review` or use `AI_CODE_SECURITY_REVIEW.md` manually
 - Use `AI_CODE_REVIEW.md` for general code quality
-
-### 3. Start Small
-
-**First task: Try a small feature**
-1. Generate a Lite PRD
-2. Implement with AI
-3. Run tests (use TEST_STRATEGY.md for guidance)
-4. Security review checklist
-5. Deploy
-
-**Then scale up to complex features** using the full protocol.
 
 ---
 

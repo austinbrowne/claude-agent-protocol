@@ -4,6 +4,8 @@
 **Last Updated:** November 2025
 **Purpose:** Safe, effective AI-assisted software development
 
+**NEW:** 13 modular slash commands available for flexible workflows - see `~/.claude/commands/*.md` and `QUICK_START.md`
+
 ---
 
 # ⚠️ CRITICAL SAFETY RULES - READ FIRST

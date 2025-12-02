@@ -30,9 +30,10 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 - **MULTI_AGENT_PATTERNS.md** - Coordinate multiple agents for complex tasks
 - **GITHUB_PROJECT_INTEGRATION.md** - GitHub Projects workflow with gh CLI
 
-### ⚙️ Commands
-- **review-agent-protocol.md** - Slash command to review protocol compliance
-- **create-issue-from-prd.md** - Generate GitHub issues from approved PRD
+### ⚙️ Commands & Workflows
+- **FRESH_EYES_REVIEW.md** - Multi-agent unbiased code review process
+- **FAILURE_RECOVERY.md** - Recovery procedures for failed implementations
+- **13 modular slash commands** - Reusable workflow commands (see below)
 
 ---
 
@@ -60,9 +61,22 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 │   ├── MULTI_AGENT_PATTERNS.md        # Multi-agent coordination
 │   └── GITHUB_PROJECT_INTEGRATION.md  # GitHub Projects workflow
 │
-└── commands/
-    ├── review-agent-protocol.md       # /review-agent-protocol command
-    └── create-issue-from-prd.md       # /create-issue-from-prd command
+├── commands/                           # 13 modular slash commands
+│   ├── explore.md                     # Codebase exploration
+│   ├── generate-prd.md                # PRD generation
+│   ├── create-adr.md                  # Architecture Decision Records
+│   ├── create-issues.md               # GitHub issue generation
+│   ├── start-issue.md                 # Begin issue implementation
+│   ├── generate-tests.md              # Test generation
+│   ├── security-review.md             # Security checklist review
+│   ├── run-validation.md              # Tests + coverage + lint + security
+│   ├── fresh-eyes-review.md           # Multi-agent code review
+│   ├── recovery.md                    # Failure recovery decision tree
+│   ├── commit-and-pr.md               # Commit and PR creation
+│   ├── refactor.md                    # Guided refactoring
+│   └── finalize.md                    # Final docs and validation
+│
+└── review-data/                        # Fresh Eyes Review data (gitignored)
 ```
 
 ---
@@ -91,6 +105,82 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 - Mandatory checkpoints ensure agents don't skip safety reviews
 
 This ensures agents pay full attention to critical safety rules while accessing detailed checklists exactly when needed.
+
+---
+
+## Modular Commands
+
+**NEW:** 13 reusable slash commands for flexible workflows. Use individually or compose custom workflows.
+
+### Command Categories
+
+**Phase 0: Planning (4 commands)**
+- `/explore` - Codebase exploration and context gathering
+- `/generate-prd` - Create PRD from exploration or description
+- `/create-adr` - Document architectural decisions
+- `/create-issues` - Generate GitHub issues from approved PRD
+
+**Phase 1: Execution (7 commands)**
+- `/start-issue` - Begin work on a GitHub issue
+- `/generate-tests` - Generate comprehensive tests
+- `/security-review` - Run security checklist review
+- `/run-validation` - Run tests + coverage + lint + security scan
+- `/fresh-eyes-review` - Multi-agent unbiased code review
+- `/recovery` - Evaluate Continue/Rollback/Abandon decision
+- `/commit-and-pr` - Commit changes and create pull request
+
+**Phase 2: Finalization (2 commands)**
+- `/refactor` - Guided refactoring pass
+- `/finalize` - Final documentation and validation
+
+### Key Features
+
+**Hybrid invocation:** All commands support interactive (asks questions) AND direct (executes with args) modes.
+
+**Interactive mode:**
+```bash
+/explore
+# Claude: What would you like to explore? _____
+```
+
+**Direct mode:**
+```bash
+/explore authentication patterns
+# Claude: [Immediately explores authentication patterns]
+```
+
+### Example Workflows
+
+**Full GODMODE workflow:**
+```bash
+/explore authentication
+/generate-prd --full "OAuth 2.0 authentication"
+/create-issues docs/prds/2025-12-01-oauth.md --immediate
+/start-issue 123
+# [Implement code]
+/generate-tests
+/security-review
+/run-validation
+/fresh-eyes-review
+/commit-and-pr --base experimental
+```
+
+**Quick Bug Fix:**
+```bash
+/start-issue 456
+# [Fix bug]
+/fresh-eyes-review --lite
+/commit-and-pr --base main
+```
+
+**Just Review Existing Changes:**
+```bash
+# [Already have staged changes]
+/fresh-eyes-review --standard
+/commit-and-pr
+```
+
+**See:** `QUICK_START.md` for full command reference and more example workflows.
 
 ---
 

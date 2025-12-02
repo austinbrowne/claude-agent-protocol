@@ -127,6 +127,119 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 
 ---
 
+## Modular Commands
+
+**13 reusable slash commands** for flexible workflows. Use individually or compose custom workflows.
+
+### Phase 0: Planning (4 commands)
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `/explore` | Codebase exploration | `/explore authentication patterns` |
+| `/generate-prd` | Create PRD | `/generate-prd --full "OAuth support"` |
+| `/create-adr` | Document architecture decision | `/create-adr "Use PostgreSQL"` |
+| `/create-issues` | Generate GitHub issues from PRD | `/create-issues docs/prds/2025-12-01-oauth.md --immediate` |
+
+### Phase 1: Execution (7 commands)
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `/start-issue` | Begin work on issue | `/start-issue 123` |
+| `/generate-tests` | Generate comprehensive tests | `/generate-tests --path src/auth/AuthService.ts` |
+| `/security-review` | Run security checklist | `/security-review` |
+| `/run-validation` | Run tests + coverage + lint + security | `/run-validation` |
+| `/fresh-eyes-review` | Multi-agent unbiased code review | `/fresh-eyes-review --standard` |
+| `/recovery` | Handle failed implementations | `/recovery` |
+| `/commit-and-pr` | Commit and create PR | `/commit-and-pr --base experimental` |
+
+### Phase 2: Finalization (2 commands)
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `/refactor` | Guided refactoring | `/refactor` |
+| `/finalize` | Update docs and final checks | `/finalize --all` |
+
+### Example Workflows with Commands
+
+**Full GODMODE workflow:**
+```bash
+/explore authentication
+/generate-prd --full "OAuth 2.0 authentication"
+# Creates: docs/prds/2025-12-01-oauth-auth.md
+
+/create-issues docs/prds/2025-12-01-oauth-auth.md --immediate
+# Creates issue #123, renames PRD to: docs/prds/123-2025-12-01-oauth-auth.md
+
+/start-issue 123
+# [Implement code]
+/generate-tests
+/security-review
+/run-validation
+/fresh-eyes-review
+/commit-and-pr --base experimental
+/refactor
+/finalize --all
+```
+
+**Quick Bug Fix workflow:**
+```bash
+# Assumes issue #456 already exists (created manually or via /create-issues)
+/start-issue 456
+# [Fix bug]
+/generate-tests --path src/auth/bugfix.ts
+/fresh-eyes-review --lite
+/commit-and-pr --base main
+```
+
+**Just Review Existing Changes workflow:**
+```bash
+# [Already have code changes staged]
+/fresh-eyes-review --standard
+# [Fix issues found]
+/commit-and-pr --base experimental
+```
+
+**Mid-Workflow Entry (Have PRD, Skip Explore):**
+```bash
+# Assumes PRD already exists: docs/prds/2025-11-28-existing-feature.md
+/create-issues docs/prds/2025-11-28-existing-feature.md --immediate
+# Creates issue #789, renames PRD to: docs/prds/789-2025-11-28-existing-feature.md
+
+/start-issue 789
+# [Implement]
+/generate-tests
+/run-validation
+/fresh-eyes-review
+/commit-and-pr
+```
+
+### Command Invocation Patterns
+
+All commands support **hybrid invocation**:
+
+**Interactive mode** (command asks questions):
+```bash
+/explore
+# Claude: What would you like to explore? _____
+```
+
+**Direct mode** (command executes immediately):
+```bash
+/explore authentication patterns
+# Claude: [Immediately explores authentication patterns]
+```
+
+### Command Help
+
+For details on any command:
+```bash
+cat ~/.claude/commands/explore.md
+cat ~/.claude/commands/generate-prd.md
+# etc.
+```
+
+---
+
 ## GitHub Projects Setup
 
 **One-time setup:**
@@ -260,6 +373,7 @@ Single Session:
 | File | Purpose |
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
+| `commands/*.md` | **13 modular slash commands** (explore, generate-prd, create-adr, create-issues, start-issue, generate-tests, security-review, run-validation, fresh-eyes-review, recovery, commit-and-pr, refactor, finalize) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures (rollback, abandon) |

@@ -1,3 +1,7 @@
+---
+description: Commit changes and create pull request
+---
+
 # /commit-and-pr
 
 **Description:** Commit changes and create pull request

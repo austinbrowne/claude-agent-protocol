@@ -1,3 +1,7 @@
+---
+description: Generate GitHub issues from approved PRD
+---
+
 # /create-issues
 
 **Description:** Generate GitHub issues from approved PRD

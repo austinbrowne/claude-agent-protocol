@@ -1,3 +1,7 @@
+---
+description: Document architectural decisions using ADR template
+---
+
 # /create-adr
 
 **Description:** Document architectural decisions using ADR (Architecture Decision Record) template

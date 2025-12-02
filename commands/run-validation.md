@@ -1,3 +1,7 @@
+---
+description: Run all validation checks (tests, coverage, lint, security)
+---
+
 # /run-validation
 
 **Description:** Run all validation checks (tests, coverage, lint, security scan)

@@ -1,3 +1,7 @@
+---
+description: Guided refactoring pass to improve code quality
+---
+
 # /refactor
 
 **Description:** Guided refactoring pass to improve code quality

@@ -1,3 +1,7 @@
+---
+description: Multi-agent unbiased code review (zero context)
+---
+
 # /fresh-eyes-review
 
 **Description:** Multi-agent unbiased code review (zero conversation context)

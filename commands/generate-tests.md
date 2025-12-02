@@ -1,3 +1,7 @@
+---
+description: Generate tests for implemented code
+---
+
 # /generate-tests
 
 **Description:** Generate tests for implemented code

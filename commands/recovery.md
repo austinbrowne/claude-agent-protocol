@@ -1,3 +1,7 @@
+---
+description: Evaluate Continue/Rollback/Abandon for failed implementations
+---
+
 # /recovery
 
 **Description:** Evaluate Continue/Rollback/Abandon decision for failed implementations

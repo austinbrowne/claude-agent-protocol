@@ -1,3 +1,7 @@
+---
+description: Run security checklist review on code changes
+---
+
 # /security-review
 
 **Description:** Run security checklist review on code changes

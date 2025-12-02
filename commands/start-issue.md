@@ -1,3 +1,7 @@
+---
+description: Begin work on a GitHub issue (Entry Point B workflow)
+---
+
 # /start-issue
 
 **Description:** Begin work on a GitHub issue (Entry Point B workflow)

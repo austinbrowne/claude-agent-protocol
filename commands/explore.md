@@ -1,3 +1,7 @@
+---
+description: Codebase exploration and context gathering
+---
+
 # /explore
 
 **Description:** Codebase exploration and context gathering

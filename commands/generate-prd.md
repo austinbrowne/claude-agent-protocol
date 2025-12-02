@@ -1,3 +1,7 @@
+---
+description: Create PRD from exploration or user description
+---
+
 # /generate-prd
 
 **Description:** Create PRD (Product Requirements Document) from exploration or user description

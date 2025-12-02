@@ -1,3 +1,7 @@
+---
+description: Final documentation and validation before merge
+---
+
 # /finalize
 
 **Description:** Final documentation and validation before merge

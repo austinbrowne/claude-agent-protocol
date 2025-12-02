@@ -20,3 +20,12 @@ todos/
 *.key
 *.pem
 credentials.json
+
+# Claude Code local installation files
+node_modules/
+package.json
+package-lock.json
+settings.json
+
+# Auto-generated codebase map
+CODEBASE_MAP.md

@@ -28,6 +28,7 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 | **EDGE CASES MATTER** | AI forgets null, empty, boundaries. ALWAYS check these explicitly. |
 | **SIMPLE > CLEVER** | Prefer clear, maintainable code. Avoid over-engineering. |
 | **FLAG UNCERTAINTY** | If unsure, ask. Don't hallucinate APIs or make assumptions. |
+| **CONTEXT EFFICIENT** | Grep before read. Line ranges over full files. Exploration subagents preserve main context. |
 
 ---
 

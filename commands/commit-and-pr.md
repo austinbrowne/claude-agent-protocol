@@ -207,8 +207,10 @@ git push -u origin issue-123-oauth-provider
 
 ### Step 6: Ask for base branch
 
+**CRITICAL: ALWAYS ask for base branch confirmation, even if a default exists. Do NOT assume `main`.**
+
 **If --base provided:**
-- Use specified base branch
+- Use specified base branch (still confirm with user)
 
 **If no --base (ask user):**
 ```

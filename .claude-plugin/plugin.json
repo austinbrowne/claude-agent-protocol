@@ -1,0 +1,48 @@
+{
+  "name": "ai-coding-agent-protocol",
+  "description": "Comprehensive AI-driven development workflow (GODMODE) with 13 modular slash commands, OWASP security checklists, multi-agent Fresh Eyes review, and structured phases for planning, execution, and finalization.",
+  "version": "3.2.0",
+  "author": {
+    "name": "Austin Browne",
+    "url": "https://github.com/austinbrowne"
+  },
+  "repository": "https://github.com/austinbrowne/claude-agent-protocol",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "ai-coding",
+    "security",
+    "owasp",
+    "code-review",
+    "fresh-eyes",
+    "prd",
+    "godmode",
+    "multi-agent",
+    "testing"
+  ],
+  "commands": [
+    "explore",
+    "generate-prd",
+    "create-adr",
+    "create-issues",
+    "start-issue",
+    "generate-tests",
+    "security-review",
+    "run-validation",
+    "fresh-eyes-review",
+    "recovery",
+    "commit-and-pr",
+    "refactor",
+    "finalize"
+  ],
+  "features": [
+    "13 modular slash commands with hybrid invocation (interactive + direct)",
+    "OWASP Top 10 2025 security checklist",
+    "Multi-agent Fresh Eyes Review (zero-context for unbiased review)",
+    "Failure recovery framework (Continue/Rollback/Abandon)",
+    "GitHub integration (issues, PRs, projects)",
+    "PRD templates (Lite and Full)",
+    "Architecture Decision Record (ADR) templates",
+    "Context-efficient design (behavioral triggers, not documentation bloat)"
+  ]
+}

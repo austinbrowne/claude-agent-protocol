@@ -1,10 +1,33 @@
 # AI Coding Agent Protocol
 
-**Version:** 3.1
-**Last Updated:** November 2025
+**Version:** 3.2
+**Last Updated:** December 2025
 **Status:** Production-ready
 
 Core protocol and templates for AI-assisted software development with Claude Code.
+
+---
+
+## Installation
+
+**Quick install:**
+```bash
+git clone https://github.com/austinbrowne/claude-agent-protocol.git ~/.claude
+```
+
+**Pin to specific version:**
+```bash
+git clone --branch v3.2 https://github.com/austinbrowne/claude-agent-protocol.git ~/.claude
+```
+
+**Update to latest:**
+```bash
+cd ~/.claude && git pull
+```
+
+**Requirements:**
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed
+- GitHub CLI (`gh`) for issue/PR workflows (optional)
 
 ---
 

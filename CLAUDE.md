@@ -136,10 +136,12 @@ Use in responses:
 
 ## Extended Thinking
 
-For complex decisions:
-- "think" - standard reasoning
-- "think hard" - multi-step problems
-- "ultrathink" - critical architecture choices
+Users can request deeper reasoning:
+- "think" - standard reasoning for moderate complexity
+- "think hard" - multi-step problems, security architecture, debugging
+- "ultrathink" - critical architecture decisions, major refactors
+
+Claude should suggest extended thinking for security-sensitive or high-risk changes.
 
 ---
 

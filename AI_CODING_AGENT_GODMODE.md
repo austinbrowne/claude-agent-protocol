@@ -178,10 +178,15 @@ Ready to proceed to Phase 1 implementation?"
 
 ### Step 2: Plan with Extended Thinking
 
-**Use thinking triggers:**
-- `"think"` - Moderate complexity
-- `"think hard"` - Multi-step problems, security architecture
-- `"ultrathink"` - Critical decisions, major refactors
+**Users can request deeper reasoning with these triggers:**
+- `"think"` - Standard reasoning for moderate complexity
+- `"think hard"` - Multi-step problems, security architecture, debugging complex issues
+- `"ultrathink"` - Critical architecture decisions, major refactors, high-risk changes
+
+**When Claude should suggest extended thinking:**
+- Security-sensitive changes → Suggest "think hard"
+- Architecture decisions with multiple valid approaches → Suggest "ultrathink"
+- Debugging that requires tracing through multiple systems → Suggest "think hard"
 
 ### Step 3: Generate PRD
 

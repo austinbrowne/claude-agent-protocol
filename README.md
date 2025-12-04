@@ -299,7 +299,7 @@ Phase 0: Explore & Plan
 2. Generate Full PRD
 3. Save PRD to docs/prds/YYYY-MM-DD-feature-name.md
 4. Human review & approval
-5. Create GitHub issues (/create-issue-from-prd docs/prds/...)
+5. Create GitHub issues (/create-issues docs/prds/...)
    a. Create first issue, note issue number (e.g., #123)
    b. Rename PRD to docs/prds/123-YYYY-MM-DD-feature-name.md
    c. Update issue to reference renamed PRD

@@ -12,7 +12,7 @@
 3. Claude generates PRD
 4. Claude saves PRD to docs/prds/YYYY-MM-DD-feature-name.md
 5. You approve PRD
-6. [OPTIONAL] Create GitHub issues (/create-issue-from-prd)
+6. [OPTIONAL] Create GitHub issues (/create-issues)
    a. Creates first issue #123
    b. Renames PRD: docs/prds/123-YYYY-MM-DD-feature-name.md
    c. Updates issue to reference renamed PRD
@@ -268,7 +268,7 @@ gh project list --owner OWNER
 Session 1 (Planning):
 → Entry Point A (Phase 0)
 → Generate PRD
-→ /create-issue-from-prd
+→ /create-issues
 → Fork B: Create 10 issues in backlog
 → Exit
 
@@ -283,7 +283,7 @@ Session 2-11 (Implementation):
 Single Session:
 → Entry Point A (Phase 0)
 → Generate PRD
-→ /create-issue-from-prd
+→ /create-issues
 → Fork A: Create issues with --assignee @me
 → Work through all issues sequentially
 ```

@@ -1,6 +1,6 @@
 # GitHub Issue Template
 
-This template is used by `/create-issue-from-prd` to generate well-structured issues for AI-assisted development.
+This template is used by `/create-issues` to generate well-structured issues for AI-assisted development.
 
 ---
 

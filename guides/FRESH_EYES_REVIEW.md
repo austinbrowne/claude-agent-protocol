@@ -366,7 +366,7 @@ LOW priority items logged for future consideration.
 - [ ] Fresh Eyes Review completed for this change
 - [ ] All CRITICAL findings addressed
 - [ ] All HIGH findings addressed or documented why skipped
-- [ ] Review findings logged to `~/.claude/review-data/review-findings.jsonl` (if Learning Loop implemented)
+- [ ] Review findings logged (NOT YET IMPLEMENTED - see PRD #6)
 
 **You CANNOT proceed to Step 7 (Commit) without completing this checkpoint.**
 
@@ -489,17 +489,11 @@ Main Agent (Phase 1, Step 6):
 
 ---
 
-## Integration with Learning Loop
+## Integration with Learning Loop (NOT YET IMPLEMENTED)
 
-If PRD #6 (Learning Loop & Metrics) is implemented:
+> **Note:** This feature is planned in PRD #6 but not yet implemented.
 
-**After Fresh Eyes Review completes**, log findings to `~/.claude/review-data/review-findings.jsonl`:
-
-```jsonl
-{"date":"2025-11-30","project":"my-app","issue":"#45","review_tier":"standard","findings":[{"severity":"CRITICAL","type":"hardcoded-secret","file":"config.ts:45","agent":"security"},{"severity":"HIGH","type":"null-check-missing","file":"auth.ts:67","agent":"code-quality"}],"false_positives":[],"time_minutes":12}
-```
-
-This enables continuous protocol improvement from real-world review data.
+When implemented, Fresh Eyes Review will log findings to enable continuous protocol improvement from real-world review data.
 
 ---
 

@@ -75,8 +75,6 @@ Core protocol and templates for AI-assisted software development with Claude Cod
 │   ├── commit-and-pr.md               # Commit and PR creation
 │   ├── refactor.md                    # Guided refactoring
 │   └── finalize.md                    # Final docs and validation
-│
-└── review-data/                        # Fresh Eyes Review data (gitignored)
 ```
 
 ---

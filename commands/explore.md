@@ -59,9 +59,11 @@ User types `/explore [target]` where target is:
   Your choice: _____
   ```
 
-### Step 2: Execute exploration using Task tool with subagent_type=Explore
+### Step 2: Execute exploration using subagent
 
-**CRITICAL:** Use the Task tool with `subagent_type=Explore` for codebase exploration. This is the recommended approach per GODMODE protocol for non-needle queries.
+> **Implementation Note:** Claude uses its internal Task tool to spawn an exploration subagent. Users don't need to do anything - just invoke `/explore` and Claude handles this automatically.
+
+**CRITICAL:** Use a subagent for codebase exploration. This preserves main conversation context while the subagent does heavy file reading.
 
 **Example Task invocation:**
 ```

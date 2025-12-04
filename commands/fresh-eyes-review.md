@@ -104,11 +104,13 @@ Then run: `/fresh-eyes-review`
 
 **Read:** `~/.claude/guides/FRESH_EYES_REVIEW.md`
 
-**Launch review agents using Task tool:**
+**Launch review agents (subagents):**
+
+> **Implementation Note:** Claude uses its internal Task tool to spawn review subagents. Users don't need to do anything - just invoke `/fresh-eyes-review` and Claude handles this automatically.
 
 **Important:**
-- Each agent has ZERO conversation context (fresh eyes)
-- **CRITICAL: Launch ALL specialist agents IN PARALLEL using a single message with multiple Task tool calls**
+- Each agent has ZERO conversation context (fresh eyes - this is intentional for unbiased review)
+- **CRITICAL: Launch ALL specialist agents IN PARALLEL**
 - Only the Supervisor runs AFTER specialists complete (it needs their findings)
 
 **For Lite tier:**

@@ -424,6 +424,6 @@ Use in responses:
 
 ---
 
-**Version:** 3.1
-**Last Updated:** November 2025
+**Version:** 3.2
+**Last Updated:** December 2025
 **Full docs:** See `README.md`

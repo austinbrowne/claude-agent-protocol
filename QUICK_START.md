@@ -131,6 +131,19 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 
 **13 reusable slash commands** for flexible workflows. Use individually or compose custom workflows.
 
+### Token Usage Estimates
+
+| Command | Tokens | Cost Est. | Notes |
+|---------|--------|-----------|-------|
+| `/explore` | 5-15k | $0.05-0.15 | Spawns subagent, preserves main context |
+| `/generate-prd` | 2-5k | $0.02-0.05 | Lite ~2k, Full ~5k |
+| `/create-issues` | 3-8k | $0.03-0.08 | Depends on PRD size |
+| `/fresh-eyes-review` | 5-20k | $0.05-0.30 | Lite ~5k, Standard ~10k, Full ~20k |
+| `/security-review` | 3-5k | $0.03-0.05 | Single checklist pass |
+| Other commands | 1-3k | $0.01-0.03 | Minimal overhead |
+
+*Estimates based on Claude Sonnet pricing. Actual costs vary by codebase size.*
+
 ### Phase 0: Planning (4 commands)
 
 | Command | Description | Example |

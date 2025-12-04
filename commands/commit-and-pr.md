@@ -37,21 +37,28 @@ User types `/commit-and-pr --base experimental` to specify base branch.
 
 ## Execution Steps
 
-### Step 1: Verify prerequisites
+### Step 1: Verify prerequisites (MANDATORY GATE)
+
+**⚠️ CRITICAL: This step is a MANDATORY gate. Do NOT skip even if context was summarized.**
 
 **Check Fresh Eyes Review status:**
 - Look for Fresh Eyes verdict in conversation history
 - Verify: APPROVED or APPROVED_WITH_NOTES
-- If not found or not approved:
+- **If not found or not approved, you MUST run it now:**
   ```
-  ⚠️  Fresh Eyes Review not completed or not approved!
+  🛑 STOP: Fresh Eyes Review Required
 
-  Run Fresh Eyes Review first: `/fresh-eyes-review`
+  Fresh Eyes Review not completed or not approved.
+  This is a MANDATORY checkpoint - not optional.
 
-  Current status: [BLOCK | FIX_BEFORE_COMMIT | Not run]
-
-  Bypass and commit anyway? (yes/no): _____
+  Running Fresh Eyes Review now...
   ```
+
+  **Then automatically run:** `/fresh-eyes-review`
+
+  **Do NOT offer bypass.** The review must complete before proceeding.
+
+  **Only after APPROVED verdict:** Continue to Step 2.
 
 **Check tests passing:**
 - Look for validation status in conversation history

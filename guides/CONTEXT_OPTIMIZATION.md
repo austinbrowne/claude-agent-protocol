@@ -207,8 +207,6 @@ Assistant: "Found 47 users. Top 5 by activity: ..."
 ```
 → 2k tokens
 
-**See:** `/guides/MCP_INTEGRATION.md`
-
 ---
 
 ### 6. Clear Context Between Unrelated Tasks
@@ -489,5 +487,5 @@ Custom errors (see src/utils/errors.ts)
 
 ---
 
-**Last Updated:** November 2025
-**See Also:** `/guides/MCP_INTEGRATION.md`, `AI_CODING_AGENT_GODMODE.md` (Section 11)
+**Last Updated:** December 2025
+**See Also:** `AI_CODING_AGENT_GODMODE.md` (Section 11)

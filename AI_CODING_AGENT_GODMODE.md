@@ -262,7 +262,7 @@ Create ADR if:
 **If using GitHub Projects workflow:**
 
 1. **Generate issues from approved PRD:**
-   - Use: `/create-issue-from-prd docs/prds/2025-11-29-feature-name.md`
+   - Use: `/create-issues docs/prds/2025-11-29-feature-name.md`
    - See: `guides/GITHUB_PROJECT_INTEGRATION.md` for full workflow
 
 2. **Create first issue and rename PRD:**

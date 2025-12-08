@@ -38,6 +38,7 @@ User types `/start-issue 123` where 123 is the issue number.
 ## Arguments
 
 - `[issue_number]` - GitHub issue number to start (e.g., `123`)
+- `--pipeline` - Run full workflow: start → implement → test → validate → fresh-eyes → commit/PR
 
 ---
 
@@ -150,9 +151,48 @@ git push -u origin issue-123-oauth-provider-integration
 gh issue comment 123 --body "🚧 Starting implementation on branch \`issue-123-oauth-provider-integration\`"
 ```
 
-### Step 8: Display issue context to user
+### Step 8: Display issue context and workflow to user
 
-**Present to user:**
+**If --pipeline flag is set:**
+
+Display the full workflow as a todo list that Claude MUST add to its todos immediately:
+
+```
+✅ Issue #123 started with PIPELINE mode!
+
+Title: Phase 1: OAuth provider integration
+
+Acceptance Criteria:
+- [ ] Google OAuth provider configured
+- [ ] GitHub OAuth provider configured
+- [ ] Token exchange implemented
+- [ ] Tests passing with >80% coverage
+
+PRD Reference: docs/prds/123-2025-12-01-oauth-auth.md
+Labels: type: feature, priority: high, security-sensitive
+Branch: issue-123-oauth-provider-integration
+
+⚠️ SECURITY_SENSITIVE: Security review required
+
+📋 PIPELINE WORKFLOW (add ALL to todos now):
+1. [ ] Read PRD: docs/prds/123-2025-12-01-oauth-auth.md ← MANDATORY
+2. [ ] Implement code per acceptance criteria
+3. [ ] Generate tests: /generate-tests
+4. [ ] Run validation: /run-validation
+5. [ ] Fresh eyes review: /fresh-eyes-review ← MANDATORY
+6. [ ] Commit and PR: /commit-and-pr
+
+Starting Step 1: Reading PRD...
+```
+
+**CRITICAL:** When --pipeline is used, Claude MUST:
+1. Immediately add ALL 6 steps to the todo list using TodoWrite
+2. Mark step 1 as in_progress
+3. Automatically proceed through all steps without waiting for user prompts
+4. Only pause for user input on errors or decisions
+
+**If --pipeline flag is NOT set (default):**
+
 ```
 ✅ Issue #123 started!
 
@@ -347,6 +387,31 @@ Next steps:
 2. Generate tests: `/generate-tests`
 ```
 
+**Example 5: Pipeline mode (full automated workflow)**
+```
+User: /start-issue 123 --pipeline
+
+Claude: ✅ Issue #123 started with PIPELINE mode!
+
+Title: Phase 1: OAuth provider integration
+
+📋 PIPELINE WORKFLOW (adding to todos now):
+1. [ ] Read PRD ← MANDATORY
+2. [ ] Implement code
+3. [ ] Generate tests
+4. [ ] Run validation
+5. [ ] Fresh eyes review ← MANDATORY
+6. [ ] Commit and PR
+
+[Claude adds all 6 steps to TodoWrite]
+
+Starting Step 1: Reading PRD...
+
+[Claude automatically proceeds through entire workflow]
+[Only pauses for errors or decisions]
+[Completes with PR creation]
+```
+
 ---
 
 ## Notes
@@ -360,3 +425,4 @@ Next steps:
 - **Entry Point B**: This command implements Entry Point B workflow from QUICK_START.md
 - **Comment on issue**: Adds GitHub comment marking start of implementation
 - **Branch protection**: Working on feature branch, not main
+- **Pipeline mode**: `--pipeline` runs full workflow automatically with mandatory checkpoints

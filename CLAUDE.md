@@ -160,8 +160,10 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - Skip tests for any code change
 - Deploy or merge without explicit human approval
 - Modify dependency lock files without approval
-- Skip `/fresh-eyes-review` before committing significant changes
+- **Skip `/fresh-eyes-review` before committing** - even if context was summarized, run it
 - Ignore edge cases (null, empty, boundaries)
+
+**⚠️ Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When running `/commit-and-pr`, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/fresh-eyes-review` again.
 
 ---
 

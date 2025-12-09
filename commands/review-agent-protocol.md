@@ -2,11 +2,11 @@
 description: Review the AI Coding Agent Protocol and confirm compliance
 ---
 
-Read and internalize the guidelines from `~/.claude/AI_CODING_AGENT_GODMODE.md`.
+Read and internalize the guidelines from `../AI_CODING_AGENT_GODMODE.md`.
 
 Then provide a brief status report:
 
-1. **Current Phase:** What phase of work are we in? (Exploration, Planning, Execution Phase N, Finalization)
+1. **Current Phase:** What phase of work are we in? (Phase 0: Planning, Phase 1: Execution, Phase 2: Finalization)
 
 2. **Protocol Compliance:**
    - Am I exploring before proposing solutions?

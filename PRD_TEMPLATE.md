@@ -20,12 +20,26 @@
 - [ ] Criterion 2
 - [ ] Criterion 3
 
+**Test Strategy:**
+- Unit tests: [What to test]
+- Integration tests: [What to test]
+- (See `~/.claude/templates/TEST_STRATEGY.md` for details)
+
+**Security Review:** [Required? Y/N]
+- If yes, use `~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md`
+
 **Estimated Effort:** [X hours]
 
 **Risks:** [Key risk, if any]
 
 **Status:** READY_FOR_REVIEW
 ```
+
+**See also:**
+- Full PRD Template (below) for complex features
+- `~/.claude/templates/TEST_STRATEGY.md` - Test guidance
+- `~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md` - Security checklist
+- `~/.claude/templates/ADR_TEMPLATE.md` - Architecture decisions
 
 ---
 
@@ -159,11 +173,61 @@
 
 ---
 
+### Test Strategy
+
+**See:** `~/.claude/templates/TEST_STRATEGY.md` for detailed guidance.
+
+| Test Type | What to Test | Coverage Target | Acceptance Criteria |
+|-----------|--------------|-----------------|---------------------|
+| **Unit** | [Functions/classes] | >80% | [Criterion] |
+| **Integration** | [API endpoints] | Critical paths | [Criterion] |
+| **E2E** | [User flows] | Happy path + errors | [Criterion] |
+| **Security** | [Auth, validation] | OWASP Top 10 | [Criterion] |
+| **Performance** | [Endpoints, queries] | P95 < [X]ms | [Criterion] |
+
+---
+
 ## 6. Risks
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
 | [Risk] | High/Med/Low | High/Med/Low | [Strategy] |
+
+---
+
+### Performance Budget
+
+**See:** `~/.claude/templates/PERFORMANCE_BUDGET.md` for detailed guidance.
+
+**Only include if performance-critical. Otherwise, skip this section.**
+
+| Metric | Budget | Measurement | Risk if Exceeded |
+|--------|--------|-------------|------------------|
+| [Metric] | [Target] | [Tool] | `PERFORMANCE_IMPACT` / High / Medium |
+
+**Example:**
+- API response time (P95): <200ms (load testing)
+- Bundle size increase: <50 KB (webpack-bundle-analyzer)
+- Database query time (P95): <50ms (query logs)
+
+---
+
+### Security Review
+
+**See:** `~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md` for detailed checklist.
+
+**Include if this feature involves:**
+- [ ] Authentication or authorization
+- [ ] Handling PII or sensitive data
+- [ ] External API integrations
+- [ ] User input processing
+- [ ] File uploads
+- [ ] Database queries with user input
+
+**If any boxes checked above:**
+- Security review is MANDATORY before deployment
+- Use AI_CODE_SECURITY_REVIEW.md checklist
+- Flag as `SECURITY_SENSITIVE`
 
 ---
 
@@ -180,6 +244,50 @@
 *Out of scope for this version, but worth noting:*
 - [Future idea 1]
 - [Future idea 2]
+
+---
+
+## 9. Architecture Decision Record (ADR)
+
+**See:** `~/.claude/templates/ADR_TEMPLATE.md`
+
+**Create an ADR if this feature involves:**
+- [ ] Major architectural decision (database choice, framework, cloud provider)
+- [ ] Significant tradeoffs between alternatives
+- [ ] Decision that's hard to reverse
+- [ ] Pattern that will be reused across codebase
+
+**If creating ADR:**
+- Document in `docs/adr/NNNN-title.md`
+- Link ADR here: [Link to ADR]
+- Include: Context, Decision, Consequences, Alternatives Considered
+
+---
+
+## 10. Rollback Plan
+
+**See:** `~/.claude/procedures/ROLLBACK.md`
+
+**Rollback strategy if deployment fails:**
+
+**Code rollback:**
+- [ ] `git revert [commit]` (preferred)
+- [ ] Deploy previous tag `v[X.Y.Z]`
+- [ ] Disable feature flag `FEATURE_NAME=false`
+
+**Database rollback (if migrations):**
+- [ ] Migration down script exists: `[migration file]`
+- [ ] Database backup taken before deploy: [backup location]
+- [ ] Rollback command: `[command]`
+
+**Verification after rollback:**
+- [ ] [Verification step 1]
+- [ ] [Verification step 2]
+- [ ] Monitor [key metric] for 30 minutes
+
+**Communication:**
+- Notify: [team channel, stakeholders]
+- Incident lead: [name]
 
 ---
 

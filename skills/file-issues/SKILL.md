@@ -50,7 +50,25 @@ AskUserQuestion:
 - Description (what needs to be built and why)
 - User story (if obvious from context)
 
-### 3. Create GitHub Issue
+### 3. Confirm Before Creating
+
+Present a summary of the extracted title and details, then ask:
+
+```
+AskUserQuestion:
+  question: "Here's what I'll file. Want to add any more details before I create it?"
+  header: "Confirm"
+  options:
+    - label: "Looks good, create it"
+      description: "File the issue as shown"
+    - label: "Add more details"
+      description: "Let me add more context before filing"
+```
+
+**If "Add more details":** Ask the user for additional context. Incorporate it, then present the updated summary and ask again.
+**If "Looks good":** Proceed to Step 4.
+
+### 4. Create GitHub Issue
 
 **For bugs** — load `templates/BUG_ISSUE_TEMPLATE.md` and fill sparsely:
 
@@ -74,7 +92,7 @@ gh issue create \
 
 Fill only: Title, Description. Leave Acceptance Criteria, Technical Requirements, Testing Notes, and all other sections as template defaults.
 
-### 4. Confirm and Loop
+### 5. Confirm and Loop
 
 Print the created issue number and URL.
 
@@ -92,9 +110,9 @@ AskUserQuestion:
 ```
 
 **If filing another:** Return to Step 2 with the selected type (skip Step 1).
-**If done:** Continue to Step 5.
+**If done:** Continue to Step 6.
 
-### 5. Print Summary
+### 6. Print Summary
 
 Display all filed issues:
 

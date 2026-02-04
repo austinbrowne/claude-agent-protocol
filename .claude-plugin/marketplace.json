@@ -1,6 +1,6 @@
 {
   "name": "ai-coding-agent-protocol",
-  "description": "AI Coding Agent Protocol marketplace",
+  "description": "AI Coding Agent Protocol marketplace — orchestrated AI development workflows",
   "owner": {
     "name": "Austin Browne",
     "url": "https://github.com/austinbrowne"
@@ -8,15 +8,23 @@
   "plugins": [
     {
       "name": "ai-coding-agent-protocol",
-      "source": "./",
-      "description": "Comprehensive AI-driven development workflow (GODMODE) with 13 modular slash commands, OWASP security checklists, multi-agent Fresh Eyes review, and structured phases for planning, execution, and finalization.",
-      "version": "3.2.0",
+      "source": {
+        "source": "github",
+        "repo": "austinbrowne/claude-agent-protocol",
+        "ref": "release/v4.1"
+      },
+      "description": "GODMODE v4.1 — 3 orchestrator workflows, 17 slash commands, 6 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
+      "version": "4.1.0",
       "keywords": [
         "workflow",
         "ai-coding",
         "security",
         "code-review",
-        "godmode"
+        "godmode",
+        "orchestrator",
+        "multi-agent",
+        "knowledge-compounding",
+        "adversarial-validation"
       ]
     }
   ]

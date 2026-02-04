@@ -778,8 +778,8 @@ Next: Awaiting approval for Phase [N+1]
 After completing a feature or fixing a tricky bug:
 1. Identify key learnings, gotchas, and insights from the implementation
 2. Check if similar solutions already exist in `docs/solutions/`
-3. Create solution doc with YAML frontmatter: category, tags, problem, solution, gotchas
-4. Save to `docs/solutions/{category}-{description-slug}.md`
+3. Create solution doc with enum-validated YAML frontmatter: module, problem_type, component, symptoms, root_cause, resolution_type, severity, tags
+4. Save to `docs/solutions/{problem_type-directory}/{slug}-{YYYYMMDD}.md`
 
 **Auto-trigger phrases (Claude should suggest `/compound` when these appear):**
 - "the trick was", "the fix was", "root cause was"

@@ -100,8 +100,12 @@ Scan conversation for:
 Extracted learning:
 
 Title: [auto-generated or from --title]
-Problem: [extracted problem description]
-Root cause: [extracted root cause]
+Module: [detected module/area]
+Problem type: [enum value]
+Symptoms:
+- [symptom 1]
+- [symptom 2]
+Root cause: [enum value] — [explanation]
 Solution: [extracted fix]
 Gotchas:
 - [gotcha 1]
@@ -137,19 +141,32 @@ Is this accurate? (yes/edit/start-over): _____
 ls docs/solutions/ 2>/dev/null
 ```
 
-**If directory exists, run multi-pass Grep:**
+**If directory exists, narrow by category first, then run multi-pass Grep:**
 
-1. **Title/summary match:**
-   - Grep for keywords from the extracted title and problem summary
-   - Example: `Grep pattern="refresh.*token|race.*condition" path="docs/solutions/"`
+**Category narrowing:** If `problem_type` is known, search the specific subdirectory:
+- Example: `Grep pattern="race.*condition" path="docs/solutions/security-issues/"`
 
-2. **Category match:**
-   - Grep for the same category
-   - Example: `Grep pattern="category: auth" path="docs/solutions/"`
+**Then run multi-pass Grep across all of `docs/solutions/`:**
 
-3. **Tag overlap:**
-   - Grep for tags that match the new solution's tags
-   - Example: `Grep pattern="tags:.*jwt|tags:.*token" path="docs/solutions/"`
+1. **Tag match:**
+   - Grep for tags from the new solution
+   - Example: `Grep pattern="tags:.*(jwt|token|refresh)" path="docs/solutions/"`
+
+2. **Module match:**
+   - Grep for the same module/area
+   - Example: `Grep pattern="module:.*Authentication" path="docs/solutions/"`
+
+3. **Problem type match:**
+   - Grep for the same problem type enum
+   - Example: `Grep pattern="problem_type: security_issue" path="docs/solutions/"`
+
+4. **Symptom match:**
+   - Grep for keywords from observed symptoms
+   - Example: `Grep pattern="symptoms:.*race condition|symptoms:.*session" path="docs/solutions/"`
+
+5. **Full-text search:**
+   - Grep for domain-specific keywords in body content
+   - Example: `Grep pattern="refresh token|race condition" path="docs/solutions/"`
 
 **If potential duplicates found:**
 - Read the matching file(s)
@@ -161,8 +178,8 @@ ls docs/solutions/ 2>/dev/null
 ```
 Potential duplicate found:
 
-Existing: docs/solutions/auth-jwt-refresh-token-race-condition.md
-Match reason: Same category (auth), overlapping tags (jwt, token, refresh)
+Existing: docs/solutions/security-issues/jwt-refresh-token-race-condition-20260115.md
+Match reason: Same problem_type (security_issue), overlapping tags (jwt, token, refresh)
 
 Options:
 1. Update existing — add new gotchas/details to existing solution
@@ -176,7 +193,7 @@ Your choice: _____
 - Read existing solution file
 - Merge new gotchas, details, and context into existing file
 - Preserve original content, add new findings
-- Update `discovered` date if more recent
+- Update `date` if more recent
 - Save updated file
 
 **If "Create new":**
@@ -187,22 +204,27 @@ Your choice: _____
 ```
 Skipped. Existing solution covers this learning.
 
-File: docs/solutions/auth-jwt-refresh-token-race-condition.md
+File: docs/solutions/security-issues/jwt-refresh-token-race-condition-20260115.md
 ```
 
 ### Step 5: Generate solution document
 
-**Determine metadata:**
+**Determine metadata using enum-validated fields:**
 
-1. **Title:** From user input or auto-generated
-2. **Category:** Auto-detect from context:
-   - auth | api | database | testing | security | performance | error-handling | architecture | devops | refactoring | debugging
-3. **Tags:** Extract 3-5 relevant keywords
-4. **Language:** Detect from code in conversation (or "agnostic")
-5. **Framework:** Detect from imports/patterns (or "agnostic")
-6. **Complexity:** simple | moderate | complex (based on root cause depth)
-7. **Confidence:** high | medium | low (based on how well-understood the fix is)
-8. **Issue reference:** Extract from conversation if working on an issue
+1. **Module:** Project area (e.g., "Authentication", "API", "Database")
+2. **Problem type:** Auto-detect from context — determines subdirectory:
+   - `build_error`, `test_failure`, `runtime_error`, `performance_issue`, `database_issue`, `security_issue`, `ui_bug`, `integration_issue`, `logic_error`, `developer_experience`, `workflow_issue`, `best_practice`, `documentation_gap`
+3. **Component:** Technical component involved:
+   - `model`, `controller`, `view`, `service`, `background_job`, `database`, `frontend`, `realtime`, `api_client`, `auth`, `payments`, `config`, `testing`, `tooling`, `documentation`
+4. **Symptoms:** 1-5 specific observable symptoms (error messages, behaviors)
+5. **Root cause:** Enum value:
+   - `missing_association`, `missing_eager_load`, `missing_index`, `wrong_api`, `scope_error`, `race_condition`, `async_timing`, `memory_issue`, `config_error`, `logic_error`, `test_isolation`, `missing_validation`, `missing_permission`, `type_error`, `encoding_error`, `dependency_issue`
+6. **Resolution type:** `code_fix`, `migration`, `config_change`, `test_fix`, `dependency_update`, `environment_setup`, `workflow_improvement`, `documentation_update`, `tooling_addition`
+7. **Severity:** `critical`, `high`, `medium`, `low`
+8. **Tags:** Extract 3-5 relevant keywords (lowercase, hyphen-separated)
+9. **Language:** Detect from code in conversation (optional)
+10. **Framework:** Detect from imports/patterns (optional)
+11. **Issue reference:** Extract from conversation if working on an issue (optional)
 
 **Load template from:** `templates/SOLUTION_TEMPLATE.md`
 
@@ -210,94 +232,110 @@ File: docs/solutions/auth-jwt-refresh-token-race-condition.md
 
 ```markdown
 ---
-title: "JWT refresh token race condition causes session loss"
-category: auth
+module: "Authentication"
+date: 2026-02-03
+problem_type: security_issue
+component: auth
+symptoms:
+  - "JWT refresh token race condition"
+  - "Sessions lost on concurrent requests"
+root_cause: race_condition
+resolution_type: code_fix
+severity: high
 tags: [jwt, refresh-token, race-condition, concurrency, session]
 language: typescript
 framework: express
-complexity: moderate
-confidence: high
-discovered: 2026-02-03
 issue_ref: "#145"
-problem_summary: "Concurrent refresh token requests invalidate each other"
-solution_summary: "Implement token rotation with grace period"
-status: validated
 related_solutions: []
 ---
 
-# JWT Refresh Token Race Condition Causes Session Loss
+# Troubleshooting: JWT Refresh Token Race Condition Causes Session Loss
 
 ## Problem
+Concurrent refresh token requests invalidate each other, causing users to lose their sessions intermittently.
 
-**What happened:**
-[Filled from extracted problem]
+## Environment
+- Module: Authentication
+- Language/Framework: TypeScript / Express
+- Affected Component: Auth service — token refresh endpoint
+- Date: 2026-02-03
 
-**Context:**
-[Filled from conversation context]
+## Symptoms
+- Sessions lost intermittently on concurrent requests
+- Token refresh endpoint returns 401 when called in parallel
 
-**Root cause:**
-[Filled from extracted root cause]
+## What Didn't Work
 
----
+**Attempted Solution 1:** Simple token refresh without locking
+- **Why it failed:** Concurrent requests each invalidate the previous token
 
 ## Solution
 
-**The fix:**
-[Filled from extracted solution]
+Implement token rotation with grace period — allow the previous token to remain valid for a short window after rotation.
 
-**Key code/config:**
-[Relevant code snippet from conversation]
+**Code changes:**
+```
+# Before (broken):
+[Problematic code]
 
-**Why it works:**
-[Explanation of why the fix addresses root cause]
+# After (fixed):
+[Corrected code]
+```
 
----
+## Why This Works
 
-## Gotchas
-
-- [Extracted gotcha 1]
-- [Extracted gotcha 2]
-
----
+1. Root cause was concurrent refresh requests invalidating each other
+2. Grace period allows in-flight requests to complete with the old token
+3. Token rotation still happens, maintaining security
 
 ## Prevention
 
-**How to avoid this in the future:**
-- [Specific practice or pattern]
+- Always consider concurrency when designing token refresh flows
+- Use a grace period or mutex for stateful token operations
 
-**Related patterns:**
-- [Links to related docs or solutions]
+## Related Issues
 
----
-
-## Applicability
-
-**Use this solution when:**
-- [Condition derived from problem context]
-
-**Do NOT use when:**
-- [Counter-condition]
+- See also: [related-solution.md](../category/related-solution.md)
 ```
 
 ### Step 6: Save solution file
 
-**Create directory if needed:**
+**Create category subdirectory if needed:**
+
+Map `problem_type` to directory:
+
+| problem_type | Directory |
+|---|---|
+| `build_error` | `docs/solutions/build-errors/` |
+| `test_failure` | `docs/solutions/test-failures/` |
+| `runtime_error` | `docs/solutions/runtime-errors/` |
+| `performance_issue` | `docs/solutions/performance-issues/` |
+| `database_issue` | `docs/solutions/database-issues/` |
+| `security_issue` | `docs/solutions/security-issues/` |
+| `ui_bug` | `docs/solutions/ui-bugs/` |
+| `integration_issue` | `docs/solutions/integration-issues/` |
+| `logic_error` | `docs/solutions/logic-errors/` |
+| `developer_experience` | `docs/solutions/developer-experience/` |
+| `workflow_issue` | `docs/solutions/workflow-issues/` |
+| `best_practice` | `docs/solutions/best-practices/` |
+| `documentation_gap` | `docs/solutions/documentation-gaps/` |
+
 ```bash
-mkdir -p docs/solutions
+mkdir -p docs/solutions/{category-directory}
 ```
 
 **Generate filename:**
-- Format: `docs/solutions/{category}-{description-slug}.md`
-- Category: from YAML frontmatter
-- Description slug: kebab-case, 3-6 words from title
-- Example: `docs/solutions/auth-jwt-refresh-token-race-condition.md`
+- Format: `docs/solutions/{category-directory}/{slug}-{YYYYMMDD}.md`
+- Slug: kebab-case, 3-6 words from title
+- Date: today's date in YYYYMMDD format
+- Example: `docs/solutions/security-issues/jwt-refresh-token-race-condition-20260203.md`
 
 **Check filename does not collide:**
 ```bash
-ls docs/solutions/{generated-filename} 2>/dev/null
+ls docs/solutions/{category-directory}/{generated-filename} 2>/dev/null
 ```
 
-If collision: append incrementing number (e.g., `auth-jwt-refresh-token-race-condition-2.md`)
+If collision: append incrementing number (e.g., `jwt-refresh-token-race-condition-20260203-2.md`)
 
 **Save file.**
 
@@ -306,14 +344,15 @@ If collision: append incrementing number (e.g., `auth-jwt-refresh-token-race-con
 ```
 Solution captured!
 
-File: docs/solutions/auth-jwt-refresh-token-race-condition.md
+File: docs/solutions/security-issues/jwt-refresh-token-race-condition-20260203.md
 
 Searchable by:
-- Category: auth
+- Module: Authentication
+- Problem type: security_issue → docs/solutions/security-issues/
+- Component: auth
 - Tags: jwt, refresh-token, race-condition, concurrency, session
-- Keywords: "refresh token", "race condition", "session loss"
-- Language: typescript
-- Framework: express
+- Symptoms: "JWT refresh token race condition", "Sessions lost on concurrent requests"
+- Root cause: race_condition
 
 This solution will be found automatically when:
 - `/brainstorm` explores auth-related features
@@ -329,15 +368,16 @@ Tip: The more solutions you capture, the smarter future planning becomes.
 ## Output
 
 **Solution file created:**
-- Location: `docs/solutions/{category}-{description-slug}.md`
-- YAML frontmatter with all searchable metadata
+- Location: `docs/solutions/{problem_type-directory}/{slug}-{YYYYMMDD}.md`
+- Enum-validated YAML frontmatter with all searchable metadata
 - Full problem/solution/gotchas documentation
 
 **Searchability:**
-- Category-based search
-- Tag-based search
+- Category directory narrowing (by `problem_type`)
+- Module, component, and tag-based Grep
+- Symptom keyword matching
+- Root cause enum filtering
 - Full-text keyword search
-- Language/framework filtering
 
 **Status:** `SOLUTION_CAPTURED`
 
@@ -360,8 +400,12 @@ User: /compound
 Claude: Extracted learning from conversation:
 
 Title: N+1 query in user dashboard caused 30s load time
-Problem: Dashboard page loading 30+ seconds
-Root cause: Each user card triggered individual DB query for avatar
+Module: User Dashboard
+Problem type: performance_issue
+Symptoms:
+- Dashboard page loading 30+ seconds
+- Individual DB query per user card avatar
+Root cause: missing_eager_load — Each user card triggered individual DB query
 Solution: Eager-load avatars with JOIN in initial query
 Gotchas:
 - ORM default is lazy loading — must explicitly specify eager
@@ -369,17 +413,19 @@ Gotchas:
 
 Is this accurate? yes
 
-Checking for duplicates in docs/solutions/...
+Checking for duplicates in docs/solutions/performance-issues/...
 No duplicates found.
 
 Solution captured!
 
-File: docs/solutions/database-n-plus-one-user-dashboard.md
+File: docs/solutions/performance-issues/n-plus-one-user-dashboard-20260203.md
 
 Searchable by:
-- Category: database
+- Module: User Dashboard
+- Problem type: performance_issue → docs/solutions/performance-issues/
+- Component: model
 - Tags: n-plus-one, eager-loading, orm, performance, query
-- Keywords: "N+1", "lazy loading", "JOIN"
+- Root cause: missing_eager_load
 ```
 
 **Example 2: Auto-suggest on trigger phrase**
@@ -398,8 +444,12 @@ User: /compound
 Claude: Extracted learning:
 
 Title: bcrypt.compare() called without await always returns truthy
-Problem: Authentication always succeeds regardless of password
-Root cause: bcrypt.compare() returns a Promise, which is truthy
+Module: Authentication
+Problem type: security_issue
+Symptoms:
+- Authentication always succeeds regardless of password
+- "wrong password" tests never fail
+Root cause: async_timing — bcrypt.compare() returns a Promise, which is truthy
 Solution: Add await before bcrypt.compare() call
 Gotchas:
 - TypeScript does not warn about unhandled Promise in boolean context
@@ -409,7 +459,7 @@ Is this accurate? yes
 
 Solution captured!
 
-File: docs/solutions/auth-bcrypt-compare-missing-await.md
+File: docs/solutions/security-issues/bcrypt-compare-missing-await-20260203.md
 ```
 
 **Example 3: Duplicate detection**
@@ -419,16 +469,20 @@ User: /compound --title "JWT token not invalidated on logout"
 Claude: Extracted learning:
 
 Title: JWT token not invalidated on logout
-Problem: Users remain authenticated after clicking logout
-Root cause: JWTs are stateless — server cannot invalidate them
+Module: Authentication
+Problem type: security_issue
+Symptoms:
+- Users remain authenticated after clicking logout
+- JWT token persists after logout action
+Root cause: logic_error — JWTs are stateless, server cannot invalidate them
 Solution: Implement token denylist with Redis TTL matching token expiry
 
-Checking for duplicates in docs/solutions/...
+Checking for duplicates in docs/solutions/security-issues/...
 
 Potential duplicate found:
 
-Existing: docs/solutions/auth-jwt-session-invalidation.md
-Match reason: Category (auth), tags (jwt, logout, session)
+Existing: docs/solutions/security-issues/jwt-session-invalidation-20260115.md
+Match reason: Same problem_type (security_issue), overlapping tags (jwt, logout, session)
 
 Options:
 1. Update existing — add new gotchas/details
@@ -439,7 +493,7 @@ Your choice: 1
 
 Claude: Updated existing solution with new details.
 
-File: docs/solutions/auth-jwt-session-invalidation.md (updated)
+File: docs/solutions/security-issues/jwt-session-invalidation-20260115.md (updated)
 Added:
 - New gotcha: Redis TTL must match JWT expiry exactly
 - New prevention tip: Consider short-lived tokens + refresh rotation
@@ -453,10 +507,11 @@ Added:
 - **Conversation context is primary source:** Claude extracts the learning from what was just discussed. Manual input is a fallback.
 - **Duplicate detection prevents bloat:** The `docs/solutions/` directory stays clean by merging related learnings into existing files.
 - **YAML frontmatter enables search:** The `learnings-researcher` agent uses these fields for multi-pass Grep. Good metadata means better discoverability.
-- **Category taxonomy is fixed:** Use only the defined categories (auth, api, database, testing, security, performance, error-handling, architecture, devops, refactoring, debugging). This ensures consistent search.
+- **Enum taxonomy is fixed:** Use only the defined `problem_type` values (build_error, test_failure, runtime_error, performance_issue, database_issue, security_issue, ui_bug, integration_issue, logic_error, developer_experience, workflow_issue, best_practice, documentation_gap). This ensures consistent directory structure and search.
+- **All YAML fields use enums:** `component`, `root_cause`, `resolution_type`, and `severity` also have fixed enum values. See `templates/SOLUTION_TEMPLATE.md` for the complete list.
 - **Compound knowledge grows over time:** Each captured solution makes future planning smarter. Commands like `/brainstorm`, `/deepen-plan`, and `/start-issue` automatically search past solutions.
 - **Trigger phrases are suggestions, not requirements:** Claude can also suggest `/compound` based on contextual signals beyond the listed trigger phrases.
-- **Status field:** Use `validated` for well-tested solutions, `draft` for uncertain ones, `deprecated` for outdated learnings.
+- **Compatible with compound-engineering plugin:** The YAML schema and directory structure are compatible with the compound-engineering plugin's `compound-docs` skill. Docs created by either system are searchable by both.
 - **Team knowledge base:** Over time, `docs/solutions/` becomes a project-specific knowledge base that persists across sessions and team members.
 
 ---

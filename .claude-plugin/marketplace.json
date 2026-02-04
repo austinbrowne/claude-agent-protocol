@@ -7,7 +7,7 @@
   },
   "plugins": [
     {
-      "name": "ai-coding-agent-protocol",
+      "name": "godmode",
       "source": {
         "source": "github",
         "repo": "austinbrowne/claude-agent-protocol",

@@ -1,5 +1,5 @@
 {
-  "name": "ai-coding-agent-protocol",
+  "name": "godmode",
   "version": "4.1.0",
   "description": "AI-powered development workflow. 3 orchestrator workflows, 17 slash commands, 6 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
   "author": {

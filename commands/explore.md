@@ -1,4 +1,5 @@
 ---
+name: workflows:explore
 description: "Reconnaissance & ideation — explore the codebase and brainstorm approaches"
 ---
 

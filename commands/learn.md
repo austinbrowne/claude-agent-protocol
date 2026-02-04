@@ -1,4 +1,5 @@
 ---
+name: workflows:learn
 description: "Knowledge capture — save solved problems as searchable, reusable solution docs"
 ---
 

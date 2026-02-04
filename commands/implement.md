@@ -1,4 +1,5 @@
 ---
+name: workflows:implement
 description: "Implementation — start issues, generate tests, run validation, security review, and recovery"
 ---
 

@@ -1,4 +1,5 @@
 ---
+name: workflows:plan
 description: "Planning & requirements — PRD generation, deepening, review, issues, and ADR"
 ---
 

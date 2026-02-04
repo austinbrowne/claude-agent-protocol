@@ -1,4 +1,5 @@
 ---
+name: workflows:ship
 description: "Ship — commit, PR creation, refactoring, and finalization"
 ---
 

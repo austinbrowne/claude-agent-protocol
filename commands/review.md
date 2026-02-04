@@ -1,4 +1,5 @@
 ---
+name: workflows:review
 description: "Code review — fresh eyes multi-agent review and protocol compliance check"
 ---
 

@@ -181,9 +181,9 @@ AskUserQuestion:
 
 ## Skills Referenced
 
-- `skills/knowledge-compounding/SKILL.md` — Capture bug learnings
+- `skills/compound/SKILL.md` — Capture bug learnings
 - `skills/fresh-eyes-review/SKILL.md` — Lite review mode
-- `skills/file-todos/SKILL.md` — Todo tracking
+- `skills/todos/SKILL.md` — Todo tracking
 
 ---
 

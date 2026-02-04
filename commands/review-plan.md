@@ -37,7 +37,7 @@ User types `/review-plan docs/prds/YYYY-MM-DD-feature-name.md` with explicit pat
 
 ## Skills
 
-**Load before execution:** Read and follow `skills/plan-review/SKILL.md` for the 5-agent review process (Architecture, Simplicity, Spec-Flow, Security + Adversarial Validator), parallel-then-sequential execution pattern, verdict consolidation, and revision workflow.
+**Load before execution:** Read and follow `skills/review-plan/SKILL.md` for the 5-agent review process (Architecture, Simplicity, Spec-Flow, Security + Adversarial Validator), parallel-then-sequential execution pattern, verdict consolidation, and revision workflow.
 
 ---
 

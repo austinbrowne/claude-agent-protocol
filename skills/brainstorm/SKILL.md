@@ -1,5 +1,5 @@
 ---
-name: brainstorming
+name: brainstorm
 version: "1.0"
 description: Structured divergent thinking methodology for exploring solution approaches
 referenced_by:

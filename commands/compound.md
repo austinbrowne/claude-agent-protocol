@@ -57,7 +57,7 @@ Capture it as a reusable solution? `/compound`
 
 ## Skills
 
-**Load before execution:** Read and follow `skills/knowledge-compounding/SKILL.md` for auto-trigger phrase detection, solution document schema, deduplication search patterns, and `docs/solutions/` conventions.
+**Load before execution:** Read and follow `skills/compound/SKILL.md` for auto-trigger phrase detection, solution document schema, deduplication search patterns, and `docs/solutions/` conventions.
 
 ---
 

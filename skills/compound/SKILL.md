@@ -1,5 +1,5 @@
 ---
-name: knowledge-compounding
+name: compound
 version: "1.1"
 description: Methodology for capturing solved problems as searchable, reusable solution docs — compatible with compound-engineering plugin
 referenced_by:

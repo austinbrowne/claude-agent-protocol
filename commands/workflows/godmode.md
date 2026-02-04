@@ -61,7 +61,7 @@ AskUserQuestion:
 
 **Step 0.1: Explore**
 - Invoke `/explore` with the feature description
-- Load skill: `skills/brainstorming/SKILL.md` for next step context
+- Load skill: `skills/brainstorm/SKILL.md` for next step context
 - After completion, `/explore` presents `AskUserQuestion` with options including `/brainstorm`
 
 **Step 0.2: Brainstorm (optional)**
@@ -81,7 +81,7 @@ AskUserQuestion:
 
 **Step 0.5: Review Plan**
 - Invoke `/review-plan` with PRD path
-- Load skill: `skills/plan-review/SKILL.md`
+- Load skill: `skills/review-plan/SKILL.md`
 - If REVISION_REQUESTED: guide user through fixes, re-run review
 - If APPROVED: present option to create issues
 
@@ -116,7 +116,7 @@ AskUserQuestion:
 **Step 1.5: Compound (optional)**
 - If user learned something worth capturing
 - Invoke `/compound`
-- Load skill: `skills/knowledge-compounding/SKILL.md`
+- Load skill: `skills/compound/SKILL.md`
 
 **Step 1.6: Commit and PR**
 - Invoke `/commit-and-pr`
@@ -163,12 +163,12 @@ AskUserQuestion:
 
 ## Skills Referenced
 
-- `skills/brainstorming/SKILL.md` — Brainstorming methodology
-- `skills/knowledge-compounding/SKILL.md` — Knowledge capture
+- `skills/brainstorm/SKILL.md` — Brainstorming methodology
+- `skills/compound/SKILL.md` — Knowledge capture
 - `skills/fresh-eyes-review/SKILL.md` — Smart selection review
-- `skills/plan-review/SKILL.md` — Multi-agent plan review
+- `skills/review-plan/SKILL.md` — Multi-agent plan review
 - `skills/security-review/SKILL.md` — OWASP security review
-- `skills/file-todos/SKILL.md` — Todo tracking
+- `skills/todos/SKILL.md` — Todo tracking
 
 ---
 

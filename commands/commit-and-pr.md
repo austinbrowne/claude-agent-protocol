@@ -38,7 +38,7 @@ User types `/commit-and-pr --base experimental` to specify base branch.
 
 ## Skills
 
-**Load before execution:** `skills/file-todos/SKILL.md` — For verifying todo completion status and updating `.todos/` files before commit.
+**Load before execution:** `skills/todos/SKILL.md` — For verifying todo completion status and updating `.todos/` files before commit.
 
 ---
 

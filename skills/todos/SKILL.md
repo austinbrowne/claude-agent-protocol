@@ -1,5 +1,5 @@
 ---
-name: file-todos
+name: todos
 version: "1.0"
 description: File-based todo tracking system using .todos/ directory
 referenced_by:

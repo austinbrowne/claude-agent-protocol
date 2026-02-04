@@ -110,7 +110,7 @@ AskUserQuestion:
 ## Skills Referenced
 
 - `skills/fresh-eyes-review/SKILL.md` — Lite review mode
-- `skills/knowledge-compounding/SKILL.md` — Optional learning capture
+- `skills/compound/SKILL.md` — Optional learning capture
 
 ---
 

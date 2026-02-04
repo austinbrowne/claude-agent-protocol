@@ -1,5 +1,5 @@
 ---
-name: plan-review
+name: review-plan
 version: "1.0"
 description: Multi-agent plan review methodology with adversarial validation
 referenced_by:

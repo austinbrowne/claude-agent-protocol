@@ -45,12 +45,12 @@ cd ~/.claude && git pull
 - **`/quickfix`** - Minimal fix flow: fix → lite review → ship
 
 ### Skills (6)
-- **Brainstorming** (`skills/brainstorming/`) - Structured divergent thinking methodology
-- **Knowledge Compounding** (`skills/knowledge-compounding/`) - Capture and reuse solved problems
+- **Brainstorming** (`skills/brainstorm/`) - Structured divergent thinking methodology
+- **Knowledge Compounding** (`skills/compound/`) - Capture and reuse solved problems
 - **Fresh Eyes Review** (`skills/fresh-eyes-review/`) - 13-agent smart selection system with trigger patterns
-- **File Todos** (`skills/file-todos/`) - File-based todo tracking conventions
+- **File Todos** (`skills/todos/`) - File-based todo tracking conventions
 - **Security Review** (`skills/security-review/`) - OWASP security review methodology
-- **Plan Review** (`skills/plan-review/`) - Multi-agent plan review with adversarial validation
+- **Plan Review** (`skills/review-plan/`) - Multi-agent plan review with adversarial validation
 
 ### Checklists
 - **AI_CODE_SECURITY_REVIEW.md** - OWASP Top 10 2025 security checklist (45% of AI code has vulnerabilities!)

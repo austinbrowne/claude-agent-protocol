@@ -39,7 +39,7 @@ User types `/brainstorm [topic]` where topic is a natural-language description o
 
 ## Skills
 
-**Load before execution:** Read and follow `skills/brainstorming/SKILL.md` for structured divergent thinking methodology, comparison matrix format, and brainstorm document schema.
+**Load before execution:** Read and follow `skills/brainstorm/SKILL.md` for structured divergent thinking methodology, comparison matrix format, and brainstorm document schema.
 
 ---
 

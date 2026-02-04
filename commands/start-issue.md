@@ -45,8 +45,8 @@ User types `/start-issue 123` where 123 is the issue number.
 ## Skills
 
 **Load before execution:**
-- `skills/knowledge-compounding/SKILL.md` — For searching `docs/solutions/` to surface relevant past learnings
-- `skills/file-todos/SKILL.md` — For creating living plans in `.todos/` and tracking implementation progress
+- `skills/compound/SKILL.md` — For searching `docs/solutions/` to surface relevant past learnings
+- `skills/todos/SKILL.md` — For creating living plans in `.todos/` and tracking implementation progress
 
 ---
 

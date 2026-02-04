@@ -1,10 +1,10 @@
 ---
-description: Codebase exploration and context gathering
+description: Multi-agent codebase exploration and context gathering
 ---
 
 # /explore
 
-**Description:** Codebase exploration and context gathering
+**Description:** Multi-agent codebase exploration and context gathering
 
 **When to use:**
 - Starting new feature and need to understand existing architecture
@@ -48,7 +48,7 @@ User types `/explore [target]` where target is:
 **If interactive mode (no arguments):**
 - Ask user:
   ```
-  🔍 Codebase Exploration
+  Codebase Exploration
 
   What would you like to explore?
   1. Feature area (e.g., "authentication")
@@ -59,77 +59,110 @@ User types `/explore [target]` where target is:
   Your choice: _____
   ```
 
-### Step 2: Execute exploration using subagent
+### Step 1.5: Launch 4 Research Agents in Parallel
 
-> **Implementation Note:** Claude uses its internal Task tool to spawn an exploration subagent. Users don't need to do anything - just invoke `/explore` and Claude handles this automatically.
+**CRITICAL:** Launch all applicable research agents simultaneously via Task tool in a single message.
 
-**CRITICAL:** Use a subagent for codebase exploration. This preserves main conversation context while the subagent does heavy file reading.
+**Smart research decision (for agents 3 & 4):**
+- High-risk topics (security, payments, external APIs) → always research
+- Strong local context (good patterns, CLAUDE.md has guidance) → skip external
+- Uncertainty or unfamiliar territory → research
 
-**Example Task invocation:**
+| # | Agent | Condition | Task Tool Config |
+|---|-------|-----------|-----------------|
+| 1 | **Codebase Research Agent** | Always runs | `subagent_type: "Explore"`, reads `agents/research/codebase-researcher.md` for process |
+| 2 | **Learnings Research Agent** | Always runs (if `docs/solutions/` has files) | `subagent_type: "general-purpose"`, searches `docs/solutions/` per `agents/research/learnings-researcher.md` |
+| 3 | **Best Practices Research Agent** | Conditional: unfamiliar technology, external APIs, or user explicitly asks | `subagent_type: "general-purpose"`, web search per `agents/research/best-practices-researcher.md` |
+| 4 | **Framework Docs Research Agent** | Conditional: known framework detected in package.json/Gemfile/requirements.txt/go.mod/Cargo.toml | `subagent_type: "general-purpose"`, queries Context7 MCP per `agents/research/framework-docs-researcher.md` |
+
+**Codebase Research Agent prompt:**
 ```
-Task tool with:
-- subagent_type: "Explore"
-- description: "Explore [target] in codebase"
-- prompt: "Explore the [target] in this codebase. Identify:
-  1. Key files and their purposes
-  2. Architecture patterns used
-  3. Important functions/classes
-  4. Dependencies and relationships
-  5. Potential areas of concern
+Explore the [target] in this codebase. Identify:
+1. Key files and their purposes
+2. Architecture patterns used
+3. Important functions/classes
+4. Dependencies and relationships
+5. Potential areas of concern
 
-  Provide a structured summary suitable for planning new work."
+Provide a structured summary suitable for planning new work.
 ```
 
-**Thoroughness level:**
+**Learnings Research Agent prompt:**
+```
+Search docs/solutions/ for past solutions relevant to [target].
+Use multi-pass Grep strategy: tags → category → keywords → full-text.
+Return relevant findings with applicability assessment.
+```
+
+**Thoroughness level for Codebase Research Agent:**
 - Simple queries (single file/class): "quick"
 - Feature areas: "medium"
 - Full codebase: "very thorough"
 
-### Step 3: Generate exploration summary
+### Step 2: Generate consolidated exploration summary
 
-From the Explore agent output, create structured summary containing:
+From all agent outputs, create structured summary containing:
 
-1. **Architecture Overview**
+1. **Architecture Overview** (from Codebase Research Agent)
    - Key design patterns identified
    - Component relationships
    - Data flow
 
-2. **Key Files** (Top 5-10 most relevant)
+2. **Key Files** (from Codebase Research Agent, Top 5-10 most relevant)
    - File path
    - Purpose
    - Important functions/classes
 
-3. **Patterns Found**
+3. **Patterns Found** (from Codebase Research Agent)
    - Coding conventions
    - Error handling approach
    - Testing patterns
    - Security patterns
 
-4. **Dependencies**
+4. **Past Solutions Found** (from Learnings Research Agent) — NEW
+   - Relevant solutions from `docs/solutions/`
+   - Applicable gotchas and recommendations
+   - *(If no solutions directory or no matches: "No past solutions found for this area")*
+
+5. **Best Practices** (from Best Practices Research Agent, if triggered) — NEW
+   - Current industry recommendations
+   - Common mistakes to avoid
+   - Source references
+
+6. **Framework Documentation** (from Framework Docs Research Agent, if triggered) — NEW
+   - Framework-specific conventions
+   - Version-specific notes
+   - Relevant API documentation
+
+7. **Dependencies**
    - Internal dependencies
    - External libraries used
    - Coupling points
 
-5. **Areas of Concern** (if any)
+8. **Areas of Concern** (if any)
    - Technical debt
    - Security vulnerabilities
    - Performance bottlenecks
    - Missing tests
 
-### Step 4: Optionally create/update codebase map
+### Step 3: Optionally create/update codebase map
 
 If exploration is "full" codebase overview:
 - Create or update `.claude/CODEBASE_MAP.md`
 - Store high-level architecture for future reference
 - Include directory structure and component purposes
 
-### Step 5: Report findings and suggest next step
+### Step 4: Report findings and suggest next step
 
 Output the structured summary and suggest:
 ```
-✅ Exploration complete!
+Exploration complete!
+
+Research agents used: Codebase + Learnings [+ Best Practices] [+ Framework Docs]
+Past solutions found: N relevant learnings
 
 Next steps:
+- Brainstorm approaches: `/brainstorm`
 - Generate PRD: `/generate-prd`
 - Explore another area: `/explore [different-target]`
 - Create ADR for architecture decision: `/create-adr`
@@ -143,6 +176,9 @@ Next steps:
 - Architecture overview
 - Key files (top 5-10 with purposes)
 - Patterns identified
+- Past solutions found (from `docs/solutions/`)
+- Best practices (if researched)
+- Framework documentation (if researched)
 - Dependencies
 - Areas of concern (if any)
 
@@ -154,6 +190,7 @@ Next steps:
 - `LOW_CONFIDENCE` - Complex/undocumented codebase, needs deeper investigation
 
 **Suggested next step:**
+- "Ready to brainstorm approaches? Run `/brainstorm`"
 - "Ready to generate PRD? Run `/generate-prd`"
 - Or: "Need deeper investigation? Run `/explore [specific-area]`"
 
@@ -161,8 +198,12 @@ Next steps:
 
 ## References
 
-- See: `~/.claude/AI_CODING_AGENT_GODMODE.md` Phase 0 Step 1 for exploration best practices
-- See: `~/.claude/guides/CONTEXT_OPTIMIZATION.md` for token-efficient exploration techniques
+- See: `agents/research/codebase-researcher.md` for codebase exploration process
+- See: `agents/research/learnings-researcher.md` for past solutions search
+- See: `agents/research/best-practices-researcher.md` for web research
+- See: `agents/research/framework-docs-researcher.md` for framework docs
+- See: `AI_CODING_AGENT_GODMODE.md` Phase 0 Step 1 for exploration best practices
+- See: `guides/CONTEXT_OPTIMIZATION.md` for token-efficient exploration techniques
 
 ---
 
@@ -172,12 +213,12 @@ Next steps:
 ```
 User: /explore
 
-Claude: 🔍 Codebase Exploration
+Claude: Codebase Exploration
 
 What would you like to explore?
-1. Feature area (e.g., "authentication")
-2. Specific path (e.g., "src/auth/")
-3. Pattern/concept (e.g., "error handling")
+1. Feature area
+2. Specific path
+3. Pattern/concept
 4. Full codebase overview
 
 Your choice: 1
@@ -186,9 +227,13 @@ Claude: What feature area? _____
 
 User: authentication
 
-Claude: [Launches Explore agent, generates summary]
+Claude: [Launches 4 research agents in parallel]
+  - Codebase Research Agent: exploring authentication patterns
+  - Learnings Research Agent: searching docs/solutions/ for auth learnings
+  - Framework Docs Research Agent: querying Next.js auth docs (detected in package.json)
+  - Best Practices Research Agent: skipped (strong local patterns exist)
 
-✅ Exploration complete!
+Exploration complete!
 
 Architecture Overview:
 - JWT-based authentication with refresh tokens
@@ -200,16 +245,17 @@ Key Files:
 2. src/middleware/auth.ts - Route protection
 3. src/models/User.ts - User model with password hashing
 
-Patterns Found:
-- bcrypt for password hashing
-- JWT tokens with 15min expiry
-- Refresh tokens stored in httpOnly cookies
+Past Solutions Found:
+- auth-jwt-refresh-token-race-condition.md
+  Gotcha: Concurrent refresh requests can invalidate tokens
+  Recommendation: Implement token rotation with grace period
 
-Dependencies:
-- jsonwebtoken (^9.0.0)
-- bcrypt (^5.1.0)
+Framework Documentation:
+- NextAuth.js v5: Use server-side session validation
+- Middleware: Edge Runtime compatible auth checks only
 
 Next steps:
+- Brainstorm approaches: `/brainstorm`
 - Generate PRD: `/generate-prd`
 ```
 
@@ -217,13 +263,13 @@ Next steps:
 ```
 User: /explore authentication patterns
 
-Claude: [Immediately launches Explore agent for "authentication patterns"]
+Claude: [Immediately launches research agents for "authentication patterns"]
 
-✅ Exploration complete!
-
+Exploration complete!
 [Same structured output as above]
 
 Next steps:
+- Brainstorm approaches: `/brainstorm`
 - Generate PRD: `/generate-prd`
 ```
 
@@ -231,21 +277,23 @@ Next steps:
 ```
 User: /explore full
 
-Claude: [Launches very thorough exploration]
+Claude: [Launches very thorough exploration with all 4 agents]
 
-✅ Exploration complete!
+Exploration complete!
 
 Architecture Overview:
 - Monorepo structure (apps/, packages/, libs/)
 - Next.js frontend + Express backend
 - PostgreSQL database with Prisma ORM
-- Microservices architecture with API gateway
 
-[Full directory structure and component purposes]
+Past Solutions Found: 3 relevant learnings
+Best Practices: Current React Server Components patterns researched
+Framework Documentation: Next.js 14 app router conventions loaded
 
 Created: .claude/CODEBASE_MAP.md
 
 Next steps:
+- Brainstorm approaches: `/brainstorm`
 - Generate PRD: `/generate-prd`
 ```
 
@@ -253,7 +301,10 @@ Next steps:
 
 ## Notes
 
-- **Token optimization**: Use Explore agent with appropriate thoroughness level to avoid excessive token usage
-- **Incremental exploration**: For large codebases, explore incrementally (feature by feature) rather than all at once
+- **Multi-agent exploration**: Up to 4 research agents run in parallel for comprehensive context
+- **Token optimization**: Use appropriate thoroughness level to avoid excessive token usage
+- **Incremental exploration**: For large codebases, explore incrementally (feature by feature)
 - **Codebase map**: Store findings in `.claude/CODEBASE_MAP.md` for future sessions
+- **Learnings integration**: Past solutions surface relevant gotchas before you encounter them again
+- **Conditional research**: Best Practices and Framework Docs agents only trigger when valuable
 - **No prerequisites**: This is an entry point command - can be run anytime

@@ -1,5 +1,5 @@
 ---
-description: Commit changes and create pull request
+description: Commit changes and create pull request with finding verification gate
 ---
 
 # /commit-and-pr
@@ -13,6 +13,7 @@ description: Commit changes and create pull request
 
 **Prerequisites:**
 - Fresh Eyes Review APPROVED
+- All CRITICAL and HIGH findings resolved (file-based todos and/or GitHub issues)
 - Tests passing (`/run-validation` PASS)
 - Changes staged (`git add` completed)
 
@@ -39,14 +40,14 @@ User types `/commit-and-pr --base experimental` to specify base branch.
 
 ### Step 1: Verify prerequisites (MANDATORY GATE)
 
-**⚠️ CRITICAL: This step is a MANDATORY gate. Do NOT skip even if context was summarized.**
+**CRITICAL: This step is a MANDATORY gate. Do NOT skip even if context was summarized.**
 
-**Check Fresh Eyes Review status:**
+**Check 1: Fresh Eyes Review status**
 - Look for Fresh Eyes verdict in conversation history
 - Verify: APPROVED or APPROVED_WITH_NOTES
 - **If not found or not approved, you MUST run it now:**
   ```
-  🛑 STOP: Fresh Eyes Review Required
+  STOP: Fresh Eyes Review Required
 
   Fresh Eyes Review not completed or not approved.
   This is a MANDATORY checkpoint - not optional.
@@ -58,28 +59,60 @@ User types `/commit-and-pr --base experimental` to specify base branch.
 
   **Do NOT offer bypass.** The review must complete before proceeding.
 
-  **Only after APPROVED verdict:** Continue to Step 2.
+  **Only after APPROVED verdict:** Continue to next check.
 
-**Check tests passing:**
+**Check 2: Verify all CRITICAL and HIGH findings resolved**
+
+**File-based mode (check `.todos/`):**
+```
+Glob: .todos/*-pending-critical-*.md
+Glob: .todos/*-pending-high-*.md
+If any found → BLOCK commit
+```
+
+**GitHub mode (check issues):**
+```bash
+gh issue list --label "review-finding" --label "priority:p1" --state open
+gh issue list --label "review-finding" --label "priority:p2" --state open
+If any found → BLOCK commit
+```
+
+**Both mode:** Check both sources.
+
+**If unresolved findings found:**
+```
+BLOCK: Unresolved review findings
+
+CRITICAL findings still pending:
+  - .todos/123-pending-critical-sql-injection-users-endpoint.md
+
+HIGH findings still pending:
+  - .todos/123-pending-high-missing-null-check-auth-service.md
+
+Resolve these findings before committing.
+Re-run: `/fresh-eyes-review` after fixes.
+```
+
+**Check 3: Tests passing**
 - Look for validation status in conversation history
 - Verify: VALIDATION_PASSED
 - If not found:
   ```
-  ⚠️  Validation not completed!
+  Validation not completed!
 
   Run validation first: `/run-validation`
 
   Bypass and commit anyway? (yes/no): _____
   ```
 
-**Check staged changes:**
+**Check 4: Staged changes**
 ```bash
 git diff --staged --name-only
 ```
 
 **If no staged changes:**
 ```
-⚠️  No staged changes found!
+No staged changes found!
 
 Stage your changes:
   git add .
@@ -331,7 +364,8 @@ Next steps:
 1. Review PR on GitHub: https://github.com/org/repo/pull/150
 2. Wait for approval (or self-merge if authorized)
 3. After merge, issue #123 will auto-close
-4. Pick next issue: `gh issue list`
+4. Capture learnings: `/compound` (if you solved something tricky)
+5. Pick next issue: `gh issue list`
    Or start next issue: `/start-issue [number]`
 ```
 

@@ -1,10 +1,10 @@
 ---
-description: Multi-agent unbiased code review (zero context)
+description: Multi-agent unbiased code review with smart agent selection (zero context)
 ---
 
 # /fresh-eyes-review
 
-**Description:** Multi-agent unbiased code review (zero conversation context)
+**Description:** Multi-agent unbiased code review with smart agent selection (zero conversation context)
 
 **When to use:**
 - After validation passes (`/run-validation` complete)
@@ -21,18 +21,19 @@ description: Multi-agent unbiased code review (zero context)
 ## Invocation
 
 **Interactive mode:**
-User types `/fresh-eyes-review` with no arguments. Claude auto-selects review tier based on LOC.
+User types `/fresh-eyes-review` with no arguments. Claude auto-selects agents based on diff analysis.
 
 **Direct mode:**
-User types `/fresh-eyes-review --lite`, `--standard`, or `--full` to specify tier.
+User types `/fresh-eyes-review --lite` for minimal review, or `/fresh-eyes-review --track=files` to specify tracking mode.
 
 ---
 
 ## Arguments
 
-- `--lite` - Lite review (Security + Supervisor only) for <100 LOC
-- `--standard` - Standard review (Security + Code Quality + Supervisor) for 100-500 LOC
-- `--full` - Full review (Security + Code Quality + Performance + Supervisor) for >500 LOC
+- `--lite` - Lite review (Security + Edge Case + Supervisor only) for quick reviews
+- `--track=files` - Track findings as file-based todos in `.todos/`
+- `--track=github` - Track findings as GitHub issues
+- `--track=both` - Track findings in both systems
 
 ---
 
@@ -47,197 +48,153 @@ git diff --staged > /tmp/review-diff.txt
 
 **If no staged changes:**
 ```
-⚠️  No staged changes found!
+No staged changes found!
 
 Stage your changes first:
   git add <files>
 
-Or stage all changes:
-  git add .
-
 Then run: `/fresh-eyes-review`
 ```
 
-### Step 2: Count lines of code changed
+### Step 2: Analyze diff for smart agent selection
 
-**Parse diff file:**
-- Count added lines (+)
-- Count removed lines (-)
+**Count lines of code changed:**
+- Count added lines (+) and removed lines (-)
 - Total LOC changed = |added| + |removed|
 
-**Example:**
-- +150 lines added
-- -50 lines removed
-- Total: 200 LOC changed
-
-### Step 3: Auto-select review tier (or use specified tier)
-
-**Tier selection criteria:**
-
-| LOC Changed | Recommended Tier | Agents |
-|-------------|------------------|--------|
-| <100 | Lite | Security + Supervisor |
-| 100-500 | Standard | Security + Code Quality + Supervisor |
-| >500 | Full | Security + Code Quality + Performance + Supervisor |
-
-**If direct mode (--tier specified):**
-- Use specified tier
-
-**If interactive mode (no tier specified):**
-- Auto-select based on LOC
-- Confirm with user:
-  ```
-  👀 Fresh Eyes Code Review
-
-  Changes: 234 lines
-  Recommended: Standard Review (Security + Code Quality + Supervisor)
-
-  Review tiers:
-  1. Lite (<100 LOC): Security + Supervisor
-  2. Standard (100-500 LOC): Security + Code Quality + Supervisor
-  3. Full (>500 LOC): Security + Code Quality + Performance + Supervisor
-
-  Use recommended tier [2]? (1/2/3): _____
-  ```
-
-### Step 4: Execute Fresh Eyes Review workflow
-
-**Read:** `~/.claude/guides/FRESH_EYES_REVIEW.md`
-
-**Launch review agents (subagents):**
-
-> **Implementation Note:** Claude uses its internal Task tool to spawn review subagents. Users don't need to do anything - just invoke `/fresh-eyes-review` and Claude handles this automatically.
-
-**Important:**
-- Each agent has ZERO conversation context (fresh eyes - this is intentional for unbiased review)
-- **CRITICAL: Launch ALL specialist agents IN PARALLEL**
-- Only the Supervisor runs AFTER specialists complete (it needs their findings)
-
-**For Lite tier:**
-1. **PARALLEL:** Launch Security Agent
-   - Reviews /tmp/review-diff.txt
-   - Applies security checklist
-   - Returns security findings
-2. **AFTER Security completes:** Launch Supervisor Agent
-   - Reviews /tmp/review-diff.txt + Security findings
-   - Consolidates final verdict
-
-**For Standard tier:**
-1. **PARALLEL (single message, multiple Task calls):**
-   - Security Agent - security checklist review
-   - Code Quality Agent - naming, structure, complexity, edge cases
-2. **AFTER both complete:** Launch Supervisor Agent
-   - Reviews diff + both agent findings
-   - Consolidates final verdict
-
-**For Full tier:**
-1. **PARALLEL (single message, multiple Task calls):**
-   - Security Agent - security checklist review
-   - Code Quality Agent - naming, structure, complexity, edge cases
-   - Performance Agent - N+1 queries, inefficient algorithms, memory leaks
-2. **AFTER all three complete:** Launch Supervisor Agent
-   - Reviews diff + all agent findings
-   - Consolidates final verdict
-
-**Parallel agent launch pattern (MUST use single message):**
-```
-In ONE response, call Task tool THREE times:
-
-Task 1:
-- subagent_type: "general-purpose"
-- description: "Fresh Eyes Security Review"
-- prompt: "You are a security specialist..."
-
-Task 2:
-- subagent_type: "general-purpose"
-- description: "Fresh Eyes Code Quality Review"
-- prompt: "You are a code quality specialist..."
-
-Task 3:
-- subagent_type: "general-purpose"
-- description: "Fresh Eyes Performance Review"
-- prompt: "You are a performance specialist..."
-
-All three run simultaneously. Wait for all to complete before launching Supervisor.
+**Get changed file list:**
+```bash
+git diff --staged --name-only > /tmp/review-files.txt
 ```
 
-**Individual agent prompts:**
+**Run trigger detection against diff content and file paths:**
 
-**Security Agent:**
+| # | Agent | Trigger Patterns (Grep diff content + file paths) |
+|---|-------|----------------------------------------------------|
+| 5 | Performance | `SELECT\|INSERT\|UPDATE\|DELETE\|\.find\|\.where\|\.query\|ORM\|model\|prisma\|sequelize\|knex\|typeorm`, nested `for\|while\|\.map.*\.map\|\.forEach.*\.forEach`, LOC > 200, file paths matching `model\|service\|api\|repository` |
+| 6 | API Contract | `router\.\|app\.\(get\|post\|put\|delete\|patch\)\|@Controller\|@Route\|@Get\|@Post\|endpoint\|handler`, file paths matching `route\|controller\|handler\|endpoint\|api`, `openapi\|swagger\|schema\.json\|\.graphql` |
+| 7 | Concurrency | `async\|await\|Promise\|Thread\|Lock\|Mutex\|goroutine\|channel\|atomic\|volatile\|Semaphore\|\.lock\(\)\|synchronized\|actor\|spawn` |
+| 8 | Error Handling | `fetch\(\|axios\.\|http\.\|request\(\|\.get\(\|\.post\(\|fs\.\|readFile\|writeFile\|open\(`, `try\|catch\|except\|rescue\|recover`, LOC > 300 |
+| 9 | Data Validation | `req\.body\|req\.params\|req\.query\|request\.form\|request\.data\|params\[\|FormData\|multipart\|upload\|parse\|decode\|JSON\.parse\|parseInt\|parseFloat` |
+| 10 | Dependency | Modified `package\.json\|Cargo\.toml\|go\.mod\|go\.sum\|requirements\.txt\|Gemfile\|pom\.xml\|build\.gradle\|pyproject\.toml`, >3 new import/require statements |
+| 11 | Testing Adequacy | File paths matching `test\|spec\|__tests__`, OR >50 LOC non-test code with NO test file changes |
+| 12 | Config & Secrets | `env\|secret\|key\|token\|password\|credential\|api_key\|API_KEY\|\.env\|config\.\|settings\.\|\.config\.\|\.yaml\|\.yml\|\.toml` (in non-test files) |
+| 13 | Documentation | Exported/public API changes (`export\|public\|module\.exports\|__all__`), magic numbers (bare numeric literals >1), LOC > 300, file paths matching `README\|docs\|\.md` |
+
+**Smart selection algorithm:**
+1. Grep `/tmp/review-diff.txt` for each conditional agent's trigger patterns
+2. Grep `/tmp/review-files.txt` for file path triggers
+3. Build agent roster: **Core agents always run** (Security, Code Quality, Edge Case) + triggered conditional agents
+4. Present selection to user with reasoning:
+
 ```
-You are a security specialist with zero context about this project.
+Fresh Eyes Review — Agent Selection
 
-Review the code changes in /tmp/review-diff.txt for security issues.
+LOC changed: 234 lines (156 added, 78 removed)
+Files changed: 5
 
-Apply the security checklist from ~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md.
+Core agents (always run):
+  - Security Reviewer
+  - Code Quality Reviewer
+  - Edge Case Reviewer
+
+Conditional agents triggered:
+  - Performance Reviewer (triggered: ORM patterns detected in diff)
+  - Testing Adequacy Reviewer (triggered: 180 LOC implementation, no test files changed)
+  - API Contract Reviewer (triggered: route definitions in src/api/users.ts)
+
+Total agents: 6 specialists + Supervisor + Adversarial Validator = 8
+
+Proceed with this selection? (yes / customize): ___
+```
+
+### Step 3: Launch specialist review agents IN PARALLEL
+
+**CRITICAL:** All specialist agents launch in a SINGLE message with multiple Task tool calls.
+
+Each agent receives:
+- Zero conversation context (fresh eyes — intentional for unbiased review)
+- `/tmp/review-diff.txt` (the code diff)
+- Its agent definition from `agents/review/{agent-name}.md`
+- Relevant checklist files (security agent gets `checklists/AI_CODE_SECURITY_REVIEW.md`, etc.)
+
+**Agent prompt template:**
+```
+You are a [specialist type] with zero context about this project.
+
+Read your review process from [agent definition file path].
+Review the code changes in /tmp/review-diff.txt.
+
+[Agent-specific checklist reference if applicable]
 
 Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
+
+Output format:
+[AGENT NAME] REVIEW FINDINGS:
+
+CRITICAL:
+- [Finding with file:line reference and specific fix]
+
+HIGH:
+- [Finding with file:line reference and specific fix]
+
+MEDIUM:
+- [Finding with file:line reference]
+
+LOW:
+- [Finding with file:line reference]
+
+PASSED:
+- [List of checks that passed]
+
+Total issues: N
+Recommendation: BLOCK | FIX_BEFORE_COMMIT | APPROVED
 ```
 
-**Code Quality Agent:**
-```
-You are a code quality specialist with zero context about this project.
+**Agent definitions referenced:**
+- `agents/review/security-reviewer.md`
+- `agents/review/code-quality-reviewer.md`
+- `agents/review/edge-case-reviewer.md`
+- `agents/review/performance-reviewer.md` (if triggered)
+- `agents/review/api-contract-reviewer.md` (if triggered)
+- `agents/review/concurrency-reviewer.md` (if triggered)
+- `agents/review/error-handling-reviewer.md` (if triggered)
+- `agents/review/data-validation-reviewer.md` (if triggered)
+- `agents/review/dependency-reviewer.md` (if triggered)
+- `agents/review/testing-adequacy-reviewer.md` (if triggered)
+- `agents/review/config-secrets-reviewer.md` (if triggered)
+- `agents/review/documentation-reviewer.md` (if triggered)
 
-Review the code changes in /tmp/review-diff.txt for code quality issues.
+### Step 4: Launch Supervisor AFTER all specialists complete
 
-Check: naming conventions, code structure, cyclomatic complexity, edge case handling, error handling.
+**Read:** `agents/review/supervisor.md`
 
-Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-```
+**Supervisor receives:**
+- All specialist findings
+- Original diff file: `/tmp/review-diff.txt`
 
-**Performance Agent:**
-```
-You are a performance specialist with zero context about this project.
+**Supervisor tasks:**
+1. Validate each finding against the code diff
+2. Remove false positives
+3. Consolidate duplicate findings
+4. Prioritize by severity AND impact
+5. Create todo specifications for CRITICAL and HIGH findings
 
-Review the code changes in /tmp/review-diff.txt for performance issues.
+### Step 5: Launch Adversarial Validator AFTER Supervisor
 
-Check: N+1 queries, inefficient algorithms, memory leaks, unnecessary allocations, missing pagination.
+**Read:** `agents/review/adversarial-validator.md`
 
-Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-```
+**Adversarial Validator receives:**
+- Original diff file: `/tmp/review-diff.txt`
+- Supervisor's consolidated report
 
-### Step 5: Consolidate findings from all agents
-
-**Supervisor agent output format:**
-```
-=== FRESH EYES REVIEW VERDICT ===
-
-Tier: Standard
-Agents: Security, Code Quality, Supervisor
-LOC Changed: 234 lines
-
-=== CRITICAL ISSUES (BLOCK) ===
-❌ [Security] SQL Injection in src/api/users.ts:45
-   Finding: Raw SQL with user input
-   Fix: Use parameterized queries
-
-=== HIGH PRIORITY ISSUES (FIX BEFORE COMMIT) ===
-⚠️  [Code Quality] Missing null check in src/auth/AuthService.ts:67
-   Finding: user.email accessed without null check
-   Fix: Add if (!user) guard clause
-
-=== MEDIUM PRIORITY ISSUES (ADDRESS SOON) ===
-⚠️  [Code Quality] Complex function in src/utils/validate.ts:23
-   Finding: Cyclomatic complexity = 12 (target: <8)
-   Fix: Extract helper functions
-
-=== LOW PRIORITY / SUGGESTIONS ===
-ℹ️  [Code Quality] Consider extracting magic number in src/config.ts:15
-   Finding: Hardcoded 86400 (seconds in day)
-   Suggestion: const SECONDS_PER_DAY = 86400
-
-=== VERDICT ===
-Status: FIX_BEFORE_COMMIT
-
-Reason: 1 CRITICAL issue must be fixed before committing.
-
-Action required:
-1. Fix SQL injection in src/api/users.ts:45
-2. Fix missing null check in src/auth/AuthService.ts:67
-3. Re-run review after fixes
-
-Confidence: HIGH_CONFIDENCE
-```
+**Adversarial Validator tasks:**
+1. Inventory every claim in the implementation (implied by diff): "handles edge cases", "validates input", "error handling present"
+2. Demand evidence for each claim — look for actual code, not just assertions
+3. Challenge review findings — are any false positives? Is anything missed?
+4. Probe AI blind spots systematically
+5. Classify claims as: **VERIFIED** | **UNVERIFIED** | **DISPROVED** | **INCOMPLETE**
+6. DISPROVED claims escalate to BLOCK verdict
 
 ### Step 6: Determine verdict
 
@@ -245,25 +202,97 @@ Confidence: HIGH_CONFIDENCE
 
 | Verdict | Meaning | Action |
 |---------|---------|--------|
-| **BLOCK** | Critical issues found, do NOT commit | Fix immediately, re-run review |
-| **FIX_BEFORE_COMMIT** | High priority issues, fix before commit | Fix issues, re-run review |
-| **APPROVED** | No blocking issues, safe to commit | Proceed to commit |
-| **APPROVED_WITH_NOTES** | Minor issues noted, can commit | Proceed, address notes later |
+| **BLOCK** | 1+ CRITICAL issues or DISPROVED claims | Fix immediately, re-run review |
+| **FIX_BEFORE_COMMIT** | 1+ HIGH issues | Fix issues, re-run review |
+| **APPROVED_WITH_NOTES** | MEDIUM/LOW only | Proceed, address notes later |
+| **APPROVED** | No issues | Proceed to commit |
 
-**Severity thresholds:**
-- 1+ CRITICAL → BLOCK
-- 1+ HIGH → FIX_BEFORE_COMMIT
-- MEDIUM/LOW only → APPROVED_WITH_NOTES
-- No issues → APPROVED
+### Step 7: Create findings tracking
 
-### Step 7: Report findings and suggest next steps
+**Ask user for tracking preference (if not specified via --track flag):**
+
+```
+Review findings ready. Track them as:
+1. File-based todos (.todos/ directory) (Recommended for solo work)
+2. GitHub issues (project board) (Recommended for teams)
+3. Both (file-based + GitHub issues)
+4. None (just show findings, don't track)
+
+Choice: ___
+```
+
+**If a project's CLAUDE.md specifies a default tracking mode, use that without asking.**
+
+**File-based todos (.todos/):**
+For each CRITICAL and HIGH finding, create a todo file:
+- Filename: `.todos/{issue_id}-pending-{priority}-{description-slug}.md`
+- Use template from `templates/TODO_TEMPLATE.md`
+- Fill in: issue_id, priority, title, source (fresh-eyes-review), agent, file, line, finding, action
+
+For MEDIUM findings: ask user "Track MEDIUM findings as todos? (yes/no)"
+
+**GitHub issues:**
+For each CRITICAL and HIGH finding:
+```bash
+gh issue create \
+  --title "[{agent}] {finding title}" \
+  --label "priority:{p1|p2|p3},review-finding,agent:{agent-name}" \
+  --body "{finding details, file/line, suggested fix, acceptance criteria}" \
+  --assignee @me
+```
+
+### Step 8: Report findings and suggest next steps
+
+**Output format:**
+
+```
+=== FRESH EYES REVIEW VERDICT ===
+
+Agents: Security, Code Quality, Edge Case, Performance, Testing Adequacy + Supervisor + Adversarial Validator
+LOC Changed: 234 lines
+
+=== CRITICAL ISSUES (BLOCK) ===
+[Security] SQL Injection in src/api/users.ts:45
+  Finding: Raw SQL with user input concatenation
+  Fix: Use parameterized queries
+  Claim status: VERIFIED (adversarial validator confirmed)
+
+=== HIGH PRIORITY ISSUES (FIX BEFORE COMMIT) ===
+[Edge Case] Missing null check in src/auth/AuthService.ts:67
+  Finding: user.email accessed without null guard
+  Fix: Add if (!user?.email) guard clause
+
+=== MEDIUM PRIORITY ISSUES (ADDRESS SOON) ===
+[Code Quality] Complex function in src/utils/validate.ts:23
+  Finding: Cyclomatic complexity = 12 (target: <8)
+  Fix: Extract helper functions
+
+=== LOW PRIORITY / SUGGESTIONS ===
+[Documentation] Magic number in src/config.ts:15
+  Finding: Hardcoded 86400 (seconds in day)
+  Suggestion: const SECONDS_PER_DAY = 86400
+
+=== ADVERSARIAL VALIDATION ===
+Claims checked: 8
+VERIFIED: 5 | UNVERIFIED: 2 | DISPROVED: 0 | INCOMPLETE: 1
+
+Unverified claims:
+- "Handles concurrent requests" — no concurrency tests found
+- Incomplete: "Input validation" — validates email format but not length
+
+=== VERDICT ===
+Status: FIX_BEFORE_COMMIT
+
+Findings tracked: 3 todos created in .todos/
+
+Action required:
+1. Fix SQL injection in src/api/users.ts:45
+2. Fix missing null check in src/auth/AuthService.ts:67
+3. Re-run review after fixes
+```
 
 **If BLOCK or FIX_BEFORE_COMMIT:**
 ```
-❌ Fresh Eyes Review: FIX_BEFORE_COMMIT
-
-1 CRITICAL, 1 HIGH, 1 MEDIUM, 1 LOW issue found.
-
 Fix CRITICAL/HIGH issues before committing.
 
 Next steps:
@@ -274,14 +303,11 @@ Next steps:
 
 **If APPROVED:**
 ```
-✅ Fresh Eyes Review: APPROVED
-
 No blocking issues found.
-0 CRITICAL, 0 HIGH, 1 MEDIUM, 2 LOW issues noted.
 
 Next steps:
 - Commit and create PR: `/commit-and-pr`
-- Or address MEDIUM/LOW issues first (optional)
+- Capture learnings: `/compound` (if you learned something worth documenting)
 ```
 
 ---
@@ -293,14 +319,18 @@ Next steps:
 - HIGH priority issues (if any)
 - MEDIUM priority issues (if any)
 - LOW priority / suggestions (if any)
+- Adversarial validation results
 
 **Verdict:** BLOCK | FIX_BEFORE_COMMIT | APPROVED | APPROVED_WITH_NOTES
 
 **Metadata:**
-- Tier used (Lite, Standard, Full)
-- Agents involved
+- Agents involved (core + triggered)
 - LOC changed
+- Trigger reasoning
+- Claim verification summary
 - Confidence level
+
+**Tracking:** Todos created in `.todos/` and/or GitHub issues (per user choice)
 
 **Suggested next steps:**
 - If BLOCK/FIX: "Fix issues and re-run `/fresh-eyes-review`"
@@ -310,67 +340,74 @@ Next steps:
 
 ## References
 
-- See: `~/.claude/guides/FRESH_EYES_REVIEW.md` for full review workflow
-- See: `~/.claude/AI_CODING_AGENT_GODMODE.md` Phase 1 Step 6 for review guidance
-- See: `~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md` for security checklist
-- See: `~/.claude/checklists/AI_CODE_REVIEW.md` for code quality checklist
+- See: `agents/review/*.md` for individual agent definitions
+- See: `guides/FRESH_EYES_REVIEW.md` for full review workflow and trigger table
+- See: `checklists/AI_CODE_SECURITY_REVIEW.md` for security checklist
+- See: `checklists/AI_CODE_REVIEW.md` for code quality checklist
+- See: `templates/TODO_TEMPLATE.md` for todo file format
+- See: `AI_CODING_AGENT_GODMODE.md` Phase 1 Step 6 for review guidance
 
 ---
 
 ## Example Usage
 
-**Example 1: Auto-select tier (Standard)**
+**Example 1: Smart selection (auto)**
 ```
 User: /fresh-eyes-review
 
-Claude: 👀 Fresh Eyes Code Review
+Claude: Fresh Eyes Review — Agent Selection
 
-Changes: 234 lines
-Recommended: Standard Review
+LOC changed: 234 lines
+Files changed: 5
 
-Use recommended tier? yes
+Core agents (always run):
+  - Security Reviewer
+  - Code Quality Reviewer
+  - Edge Case Reviewer
 
-[Launching agents...]
+Conditional agents triggered:
+  - Performance Reviewer (ORM patterns)
+  - Testing Adequacy (180 LOC, no test changes)
 
-✅ Fresh Eyes Review: APPROVED
+Proceed? yes
 
-0 CRITICAL, 0 HIGH, 1 MEDIUM, 2 LOW
+[Launches 5 specialists in parallel]
+[Launches Supervisor after specialists]
+[Launches Adversarial Validator after Supervisor]
 
-Next steps:
-- Commit: `/commit-and-pr`
-```
+Fresh Eyes Review: FIX_BEFORE_COMMIT
+1 HIGH issue: Missing null check
 
-**Example 2: Direct mode with tier**
-```
-User: /fresh-eyes-review --full
-
-Claude: [Immediately launches Full review]
-
-❌ Fresh Eyes Review: BLOCK
-
-1 CRITICAL issue found.
-
-Issue:
-❌ [Security] SQL Injection in src/api/users.ts:45
+Tracked: 1 todo created in .todos/
 
 Fix and re-run: `/fresh-eyes-review`
 ```
 
-**Example 3: Interactive tier selection**
+**Example 2: Lite review**
 ```
-User: /fresh-eyes-review
+User: /fresh-eyes-review --lite
 
-Claude: Changes: 520 lines
-Recommended: Full Review
+Claude: Lite Review — 3 agents only (Security + Edge Case + Supervisor)
 
-Review tiers:
-1. Lite
-2. Standard
-3. Full
+[Launches review]
 
-Use recommended tier [3]? 2
+Fresh Eyes Review: APPROVED
 
-[Launches Standard review instead of Full]
+Next: `/commit-and-pr`
+```
+
+**Example 3: With GitHub issue tracking**
+```
+User: /fresh-eyes-review --track=github
+
+Claude: [Runs full smart selection review]
+
+Fresh Eyes Review: FIX_BEFORE_COMMIT
+2 findings tracked as GitHub issues:
+  - Issue #201: [Security] SQL injection risk
+  - Issue #202: [Edge Case] Missing null check
+
+Fix and re-run.
 ```
 
 ---
@@ -378,10 +415,11 @@ Use recommended tier [3]? 2
 ## Notes
 
 - **Zero context:** Agents have NO conversation history (true fresh eyes)
-- **Tier auto-selection:** Based on LOC changed, can override
-- **Token optimization:** Use appropriate tier to manage token usage
+- **Smart selection:** Agents triggered by diff content, not just LOC
+- **Parallel execution:** All specialist agents run simultaneously for speed
+- **Adversarial validation:** Final gate that challenges claims and findings
+- **Dual tracking:** File-based todos OR GitHub issues (user chooses)
 - **Re-runnable:** Re-run after fixing issues until APPROVED
-- **Supervisor consolidates:** Final verdict from Supervisor agent
-- **Confidence levels:** Agents report confidence (HIGH/MEDIUM/LOW)
-- **Not a replacement for human review:** This is AI review, human review still valuable
+- **Supervisor consolidates:** Deduplicates, removes false positives, prioritizes
+- **Not a replacement for human review:** AI review supplements, doesn't replace
 - **Diff-based:** Reviews only changed code, not entire codebase

@@ -21,7 +21,7 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 
 | Rule | What It Means |
 |------|---------------|
-| **EXPLORE FIRST** | NEVER guess. Use Grep to find patterns. Read relevant files BEFORE proposing solutions. |
+| **EXPLORE FIRST** | NEVER guess. Use Grep to find patterns. Read relevant files BEFORE proposing solutions. Search `docs/solutions/` for past learnings. |
 | **HUMAN IN LOOP** | NEVER merge, deploy, or finalize without explicit human approval. ALWAYS pause for feedback. |
 | **SECURITY FIRST** | 45% of AI code has vulnerabilities. ALWAYS run security checklist for auth/data/APIs. |
 | **TEST EVERYTHING** | Every function MUST have tests. ALWAYS test: happy path + null + boundaries + errors. |
@@ -29,6 +29,7 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 | **SIMPLE > CLEVER** | Prefer clear, maintainable code. Avoid over-engineering. |
 | **FLAG UNCERTAINTY** | If unsure, ask. Don't hallucinate APIs or make assumptions. |
 | **CONTEXT EFFICIENT** | Grep before read. Line ranges over full files. Exploration subagents preserve main context. |
+| **COMPOUND LEARNINGS** | When you solve something tricky, capture it in `docs/solutions/` via `/compound`. |
 
 ---
 
@@ -75,21 +76,25 @@ Use individual commands as needed. All commands support hybrid invocation (inter
 **Phase 0: Planning**
 | Command | Purpose |
 |---------|---------|
-| `/explore` | Codebase exploration |
-| `/generate-prd` | Create PRD (Lite or Full) |
+| `/explore` | Multi-agent codebase exploration |
+| `/brainstorm` | Structured divergent thinking before planning |
+| `/generate-prd` | Create PRD with research and spec-flow analysis |
+| `/deepen-plan` | Enrich PRD with parallel research and review agents |
+| `/review-plan` | Multi-agent plan review before implementation |
 | `/create-adr` | Document architecture decisions |
 | `/create-issues` | Generate GitHub issues from PRD |
 
 **Phase 1: Execution**
 | Command | Purpose |
 |---------|---------|
-| `/start-issue` | Begin work on GitHub issue |
+| `/start-issue` | Begin work with living plan and past learnings |
 | `/generate-tests` | Generate comprehensive tests |
 | `/security-review` | Run OWASP security checklist |
 | `/run-validation` | Tests + coverage + lint + security |
-| `/fresh-eyes-review` | Multi-agent unbiased review |
+| `/fresh-eyes-review` | 13-agent smart selection review |
 | `/recovery` | Handle failed implementations |
-| `/commit-and-pr` | Commit and create PR |
+| `/commit-and-pr` | Commit and create PR with finding verification |
+| `/compound` | Capture solved problems as reusable solutions |
 
 **Phase 2: Finalization**
 | Command | Purpose |
@@ -100,13 +105,26 @@ Use individual commands as needed. All commands support hybrid invocation (inter
 ### Quick Workflows
 
 **Full feature:**
-`/explore` → `/generate-prd` → `/create-issues` → `/start-issue` → [implement] → `/generate-tests` → `/fresh-eyes-review` → `/commit-and-pr`
+`/explore` → `/brainstorm` → `/generate-prd` → `/deepen-plan` → `/review-plan` → `/create-issues` → `/start-issue` → [implement] → `/generate-tests` → `/fresh-eyes-review` → `/compound` → `/commit-and-pr`
 
 **Quick bug fix:**
-`/start-issue` → [fix] → `/fresh-eyes-review --lite` → `/commit-and-pr`
+`/start-issue` → [fix] → `/fresh-eyes-review --lite` → `/compound` → `/commit-and-pr`
 
 **Just review:**
 [staged changes] → `/fresh-eyes-review` → `/commit-and-pr`
+
+---
+
+## Project Conventions
+
+| Directory | Purpose |
+|-----------|---------|
+| `agents/review/` | 17 review agent definitions |
+| `agents/research/` | 4 research agent definitions |
+| `docs/solutions/` | Knowledge compounding — captured solved problems |
+| `docs/brainstorms/` | Brainstorm session records |
+| `.todos/` | File-based todo tracking (committed to git) |
+| `docs/prds/` | Product Requirements Documents |
 
 ---
 
@@ -163,7 +181,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - **Skip `/fresh-eyes-review` before committing** - even if context was summarized, run it
 - Ignore edge cases (null, empty, boundaries)
 
-**⚠️ Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When running `/commit-and-pr`, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/fresh-eyes-review` again.
+**Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When running `/commit-and-pr`, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/fresh-eyes-review` again.
 
 ---
 
@@ -173,7 +191,10 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Full protocol documentation |
 | `QUICK_START.md` | Entry points and command reference |
-| `commands/*.md` | 13 modular slash commands |
+| `commands/*.md` | 17 modular slash commands |
+| `agents/review/*.md` | 17 review agent definitions |
+| `agents/research/*.md` | 4 research agent definitions |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
-| `guides/FRESH_EYES_REVIEW.md` | Multi-agent review process |
+| `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
+| `templates/*.md` | 8 reusable templates |

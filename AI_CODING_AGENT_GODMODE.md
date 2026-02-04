@@ -1,10 +1,10 @@
 # AI Coding Agent Standard Operating Protocol (SOP)
 
-**Version:** 3.2
-**Last Updated:** December 2025
+**Version:** 4.0
+**Last Updated:** February 2026
 **Purpose:** Safe, effective AI-assisted software development
 
-**NEW:** 13 modular slash commands available for flexible workflows - see `~/.claude/commands/*.md` and `QUICK_START.md`
+**NEW in v4.0:** 17 modular slash commands, 21 specialized agents (17 review + 4 research), knowledge compounding, brainstorming, plan deepening, adversarial validation, and smart agent selection - see `~/.claude/commands/*.md` and `QUICK_START.md`
 
 ---
 
@@ -14,7 +14,8 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 
 **For quick access:**
 - Critical safety rules → `~/.claude/CLAUDE.md` (auto-loaded with highest priority)
-- Modular commands → `~/.claude/commands/*.md` (13 commands)
+- Modular commands → `~/.claude/commands/*.md` (17 commands)
+- Agent definitions → `~/.claude/agents/review/*.md` (17 review agents) + `~/.claude/agents/research/*.md` (4 research agents)
 - Quick reference → `~/.claude/QUICK_START.md`
 
 **Use this document when:**
@@ -176,6 +177,18 @@ Ready to proceed to Phase 1 implementation?"
 - Create `.claude/CODEBASE_MAP.md` for reusable architecture context
 - For files >500 lines, request summary FIRST
 
+### Step 1.5: Brainstorm (Optional but Recommended for Complex Features)
+
+**Use:** `/brainstorm` command
+
+When multiple valid approaches exist, brainstorm before committing to a solution:
+1. Search `docs/solutions/` for relevant past learnings
+2. Generate 2-3 approaches with pros/cons/complexity/risk
+3. Present comparison matrix, get user decision
+4. Save to `docs/brainstorms/YYYY-MM-DD-{slug}-brainstorm.md`
+
+**Skip for:** Clear bug fixes, small tasks, when approach is obvious.
+
 ### Step 2: Plan with Extended Thinking
 
 **Users can request deeper reasoning with these triggers:**
@@ -236,6 +249,26 @@ mkdir -p docs/prds
 - Historical record of decisions
 - Context for future developers
 - Issue number creates direct link between PRD and implementation
+
+### Step 3b: Deepen Plan (Optional)
+
+**Use:** `/deepen-plan` command
+
+Enrich the PRD with massive parallel research:
+1. Parse PRD into sections
+2. Launch research subagents per section (parallel)
+3. Launch 6 review agents against full plan (parallel)
+4. Search `docs/solutions/` for applicable learnings
+5. Update PRD in-place with `[DEEPENED]` annotations
+
+### Step 3c: Review Plan (Optional)
+
+**Use:** `/review-plan` command
+
+Multi-agent plan review before implementation:
+1. Launch 4 reviewers in parallel: Architecture, Simplicity, Spec-Flow, Security
+2. Launch Adversarial Validator after reviewers (challenges plan AND findings)
+3. Consolidate report with verdict: APPROVED / REVISION_REQUESTED / APPROVED_WITH_NOTES
 
 ### Step 4: Check for Architectural Decision
 
@@ -341,6 +374,8 @@ Create ADR if:
 
 - Restate phase goals (from PRD or from issue context)
 - Ensure git checkpoint exists (can rollback if needed)
+- **Search `docs/solutions/` for relevant past learnings** (use `/start-issue` which does this automatically)
+- Create living plan in `.todos/{issue_id}-plan.md` for progress tracking
 
 **If working from GitHub issue:**
 
@@ -725,6 +760,30 @@ Next: Awaiting approval for Phase [N+1]
 
 ---
 
+## Phase 3: Compound (After Merge)
+
+### Step 1: Capture Learnings
+
+**Use:** `/compound` command
+
+After completing a feature or fixing a tricky bug:
+1. Identify key learnings, gotchas, and insights from the implementation
+2. Check if similar solutions already exist in `docs/solutions/`
+3. Create solution doc with YAML frontmatter: category, tags, problem, solution, gotchas
+4. Save to `docs/solutions/{category}-{description-slug}.md`
+
+**Auto-trigger phrases (Claude should suggest `/compound` when these appear):**
+- "the trick was", "the fix was", "root cause was"
+- "I learned that", "next time we should"
+- "key insight", "important gotcha"
+
+**Why compound:**
+- Future `/explore` and `/start-issue` runs search `docs/solutions/`
+- Prevents repeating the same mistakes
+- Builds institutional knowledge that survives across sessions
+
+---
+
 # Communication Protocol
 
 ## Status Indicators
@@ -857,11 +916,14 @@ Next: Awaiting approval for Phase [N+1]
 - `checklists/AI_CODE_REVIEW.md` - Code quality review
 - `templates/TEST_STRATEGY.md` - Comprehensive testing guide
 - `templates/ADR_TEMPLATE.md` - Architecture decisions
+- `agents/review/*.md` - 17 review agent definitions
+- `agents/research/*.md` - 4 research agent definitions
 - `guides/CONTEXT_OPTIMIZATION.md` - Advanced context techniques
 - `guides/MULTI_AGENT_PATTERNS.md` - Complex coordination
+- `guides/FRESH_EYES_REVIEW.md` - Smart selection review process
 
 **Reference these at the marked checkpoints. They are MANDATORY, not optional.**
 
 ---
 
-*Last Updated: November 2025 | Version: 3.1 | Next Review: Quarterly*
+*Last Updated: February 2026 | Version: 4.0 | Next Review: Quarterly*

@@ -129,41 +129,49 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 
 ## Modular Commands
 
-**13 reusable slash commands** for flexible workflows. Use individually or compose custom workflows.
+**17 reusable slash commands** for flexible workflows. Use individually or compose custom workflows.
 
 ### Token Usage Estimates
 
 | Command | Tokens | Cost Est. | Notes |
 |---------|--------|-----------|-------|
-| `/explore` | 5-15k | $0.05-0.15 | Spawns subagent, preserves main context |
-| `/generate-prd` | 2-5k | $0.02-0.05 | Lite ~2k, Full ~5k |
+| `/explore` | 10-25k | $0.10-0.25 | Up to 4 parallel research agents |
+| `/brainstorm` | 3-8k | $0.03-0.08 | Includes learnings search |
+| `/generate-prd` | 5-10k | $0.05-0.10 | Includes research + spec-flow analysis |
+| `/deepen-plan` | 20-50k | $0.20-0.50 | 10-20+ parallel agents |
+| `/review-plan` | 10-20k | $0.10-0.20 | 5 agents (4 parallel + adversarial) |
 | `/create-issues` | 3-8k | $0.03-0.08 | Depends on PRD size |
-| `/fresh-eyes-review` | 5-20k | $0.05-0.30 | Lite ~5k, Standard ~10k, Full ~20k |
+| `/fresh-eyes-review` | 10-40k | $0.10-0.50 | Lite ~10k, Smart selection ~20-40k |
+| `/compound` | 2-5k | $0.02-0.05 | Solution capture |
 | `/security-review` | 3-5k | $0.03-0.05 | Single checklist pass |
 | Other commands | 1-3k | $0.01-0.03 | Minimal overhead |
 
 *Estimates based on Claude Sonnet pricing. Actual costs vary by codebase size.*
 
-### Phase 0: Planning (4 commands)
+### Phase 0: Planning (7 commands)
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `/explore` | Codebase exploration | `/explore authentication patterns` |
-| `/generate-prd` | Create PRD | `/generate-prd --full "OAuth support"` |
+| `/explore` | Multi-agent codebase exploration | `/explore authentication patterns` |
+| `/brainstorm` | Structured divergent thinking | `/brainstorm "auth approach"` |
+| `/generate-prd` | Create PRD with research + spec-flow | `/generate-prd --full "OAuth support"` |
+| `/deepen-plan` | Enrich PRD with parallel research | `/deepen-plan docs/prds/2025-12-01-oauth.md` |
+| `/review-plan` | Multi-agent plan review | `/review-plan docs/prds/2025-12-01-oauth.md` |
 | `/create-adr` | Document architecture decision | `/create-adr "Use PostgreSQL"` |
 | `/create-issues` | Generate GitHub issues from PRD | `/create-issues docs/prds/2025-12-01-oauth.md --immediate` |
 
-### Phase 1: Execution (7 commands)
+### Phase 1: Execution (8 commands)
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `/start-issue` | Begin work on issue | `/start-issue 123` |
+| `/start-issue` | Begin work with living plan | `/start-issue 123` |
 | `/generate-tests` | Generate comprehensive tests | `/generate-tests --path src/auth/AuthService.ts` |
 | `/security-review` | Run security checklist | `/security-review` |
 | `/run-validation` | Run tests + coverage + lint + security | `/run-validation` |
-| `/fresh-eyes-review` | Multi-agent unbiased code review | `/fresh-eyes-review --standard` |
+| `/fresh-eyes-review` | 13-agent smart selection review | `/fresh-eyes-review` |
 | `/recovery` | Handle failed implementations | `/recovery` |
 | `/commit-and-pr` | Commit and create PR | `/commit-and-pr --base experimental` |
+| `/compound` | Capture solved problems | `/compound` |
 
 ### Phase 2: Finalization (2 commands)
 
@@ -174,21 +182,26 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 
 ### Example Workflows with Commands
 
-**Full GODMODE workflow:**
+**Full GODMODE workflow (v4.0):**
 ```bash
 /explore authentication
+/brainstorm "auth approach"
 /generate-prd --full "OAuth 2.0 authentication"
+/deepen-plan docs/prds/2025-12-01-oauth-auth.md
+/review-plan docs/prds/2025-12-01-oauth-auth.md
 # Creates: docs/prds/2025-12-01-oauth-auth.md
 
 /create-issues docs/prds/2025-12-01-oauth-auth.md --immediate
 # Creates issue #123, renames PRD to: docs/prds/123-2025-12-01-oauth-auth.md
 
 /start-issue 123
-# [Implement code]
+# [Implement code — past learnings surfaced, living plan created]
 /generate-tests
 /security-review
 /run-validation
 /fresh-eyes-review
+# [Fix any findings]
+/compound
 /commit-and-pr --base experimental
 /refactor
 /finalize --all
@@ -198,16 +211,17 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 ```bash
 # Assumes issue #456 already exists (created manually or via /create-issues)
 /start-issue 456
-# [Fix bug]
+# [Fix bug — past solutions searched automatically]
 /generate-tests --path src/auth/bugfix.ts
 /fresh-eyes-review --lite
+/compound
 /commit-and-pr --base main
 ```
 
 **Just Review Existing Changes workflow:**
 ```bash
 # [Already have code changes staged]
-/fresh-eyes-review --standard
+/fresh-eyes-review
 # [Fix issues found]
 /commit-and-pr --base experimental
 ```
@@ -215,6 +229,9 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 **Mid-Workflow Entry (Have PRD, Skip Explore):**
 ```bash
 # Assumes PRD already exists: docs/prds/2025-11-28-existing-feature.md
+/deepen-plan docs/prds/2025-11-28-existing-feature.md
+/review-plan docs/prds/2025-11-28-existing-feature.md
+
 /create-issues docs/prds/2025-11-28-existing-feature.md --immediate
 # Creates issue #789, renames PRD to: docs/prds/789-2025-11-28-existing-feature.md
 
@@ -223,6 +240,7 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 /generate-tests
 /run-validation
 /fresh-eyes-review
+/compound
 /commit-and-pr
 ```
 
@@ -386,11 +404,13 @@ Single Session:
 | File | Purpose |
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
-| `commands/*.md` | **13 modular slash commands** (explore, generate-prd, create-adr, create-issues, start-issue, generate-tests, security-review, run-validation, fresh-eyes-review, recovery, commit-and-pr, refactor, finalize) |
+| `commands/*.md` | **17 modular slash commands** (explore, brainstorm, generate-prd, deepen-plan, review-plan, create-adr, create-issues, start-issue, generate-tests, security-review, run-validation, fresh-eyes-review, recovery, commit-and-pr, compound, refactor, finalize) |
+| `agents/review/*.md` | **17 review agents** (security, code-quality, edge-case, supervisor, adversarial-validator, performance, api-contract, concurrency, error-handling, data-validation, dependency, testing-adequacy, config-secrets, documentation, architecture, simplicity, spec-flow) |
+| `agents/research/*.md` | **4 research agents** (codebase, learnings, best-practices, framework-docs) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures (rollback, abandon) |
-| `guides/FRESH_EYES_REVIEW.md` | Mandatory code review process |
+| `guides/FRESH_EYES_REVIEW.md` | Smart selection review process (13 agents) |
 | `guides/GITHUB_PROJECT_INTEGRATION.md` | Full gh CLI guide |
 | `guides/CONTEXT_OPTIMIZATION.md` | Token reduction |
 | `guides/MULTI_AGENT_PATTERNS.md` | Multi-agent workflows |
@@ -398,6 +418,13 @@ Single Session:
 | `templates/ADR_TEMPLATE.md` | Architecture decisions |
 | `templates/GITHUB_ISSUE_TEMPLATE.md` | Issue structure |
 | `templates/RECOVERY_REPORT.md` | Document implementation failures |
+| `templates/BRAINSTORM_TEMPLATE.md` | Brainstorm session output |
+| `templates/SOLUTION_TEMPLATE.md` | Knowledge compound docs |
+| `templates/TODO_TEMPLATE.md` | File-based todo tracking |
+| `templates/LIVING_PLAN_TEMPLATE.md` | Implementation tracking |
+| `docs/solutions/` | Knowledge compounding storage |
+| `docs/brainstorms/` | Brainstorm session records |
+| `.todos/` | File-based todo tracking |
 
 ---
 
@@ -424,6 +451,6 @@ Use in responses:
 
 ---
 
-**Version:** 3.2
-**Last Updated:** December 2025
+**Version:** 4.0
+**Last Updated:** February 2026
 **Full docs:** See `README.md`

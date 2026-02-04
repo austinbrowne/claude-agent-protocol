@@ -1,7 +1,7 @@
 {
   "name": "ai-coding-agent-protocol",
-  "description": "Comprehensive AI-driven development workflow (GODMODE) with 13 modular slash commands, OWASP security checklists, multi-agent Fresh Eyes review, and structured phases for planning, execution, and finalization.",
-  "version": "3.2.0",
+  "description": "Comprehensive AI-driven development workflow (GODMODE v4.0) with 17 modular slash commands, 21 specialized agents (17 review + 4 research), knowledge compounding, OWASP security checklists, 13-agent smart selection Fresh Eyes review, brainstorm and plan deepening, and structured phases for planning, execution, and finalization.",
+  "version": "4.0.0",
   "author": {
     "name": "Austin Browne",
     "url": "https://github.com/austinbrowne"
@@ -18,11 +18,17 @@
     "prd",
     "godmode",
     "multi-agent",
-    "testing"
+    "testing",
+    "knowledge-compounding",
+    "brainstorm",
+    "adversarial-validation"
   ],
   "commands": [
     "explore",
+    "brainstorm",
     "generate-prd",
+    "deepen-plan",
+    "review-plan",
     "create-adr",
     "create-issues",
     "start-issue",
@@ -32,16 +38,25 @@
     "fresh-eyes-review",
     "recovery",
     "commit-and-pr",
+    "compound",
     "refactor",
     "finalize"
   ],
   "features": [
-    "13 modular slash commands with hybrid invocation (interactive + direct)",
+    "17 modular slash commands with hybrid invocation (interactive + direct)",
+    "21 specialized agents (17 review + 4 research) with smart selection",
+    "Knowledge compounding — capture and reuse solved problems (docs/solutions/)",
+    "Structured brainstorming with comparison matrices",
+    "Plan deepening with massive parallel research (10-20+ agents)",
+    "Multi-agent plan review with adversarial validation",
+    "13-agent smart selection Fresh Eyes Review (zero-context for unbiased review)",
+    "Adversarial validator — falsification over confirmation",
+    "Dual tracking: file-based .todos/ AND GitHub issues",
+    "Living implementation plans with progress tracking",
     "OWASP Top 10 2025 security checklist",
-    "Multi-agent Fresh Eyes Review (zero-context for unbiased review)",
     "Failure recovery framework (Continue/Rollback/Abandon)",
     "GitHub integration (issues, PRs, projects)",
-    "PRD templates (Lite and Full)",
+    "PRD templates (Lite and Full) with spec-flow analysis",
     "Architecture Decision Record (ADR) templates",
     "Context-efficient design (behavioral triggers, not documentation bloat)"
   ]

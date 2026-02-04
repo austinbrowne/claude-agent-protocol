@@ -1,5 +1,5 @@
 ---
-description: Begin work on a GitHub issue (Entry Point B workflow)
+description: Begin work on a GitHub issue with living plan and past learnings (Entry Point B workflow)
 ---
 
 # /start-issue
@@ -57,11 +57,11 @@ User types `/start-issue 123` where 123 is the issue number.
   ```
 - Display to user:
   ```
-  🚀 Start Issue
+  Start Issue
 
   Available issues:
-    #123 - Phase 1: OAuth provider integration (Ready, 8 hours)
-    #124 - Phase 2: Token management (Ready, 4 hours)
+    #123 - Phase 1: OAuth provider integration (Ready)
+    #124 - Phase 2: Token management (Ready)
     #125 - Phase 3: Frontend OAuth flow (Blocked by #123)
 
   Select issue number: _____
@@ -82,6 +82,28 @@ gh issue view 123 --json title,body,labels,assignees,state
 - PRD reference (from issue body)
 - Dependencies (Blocked by, Depends on)
 
+### Step 2.5: Search Past Solutions
+
+**Before implementation, search `docs/solutions/` for relevant learnings:**
+
+Launch Learnings Research Agent (reference: `agents/research/learnings-researcher.md`):
+- Search by issue tags/labels
+- Search by keywords from issue title and description
+- Search by category matching issue type
+
+**Display relevant past solutions alongside issue context:**
+```
+Past solutions found:
+
+1. auth-jwt-refresh-token-race-condition.md (HIGH relevance)
+   Gotcha: Concurrent refresh requests can invalidate tokens
+   Recommendation: Implement token rotation with grace period
+
+2. testing-mock-external-api-timeout.md (MEDIUM relevance)
+   Gotcha: Mock timeout behavior, not just success/failure
+   Recommendation: Test with delayed responses, not just instant mocks
+```
+
 ### Step 3: Verify issue is ready
 
 **Check for blockers:**
@@ -91,7 +113,7 @@ gh issue view 123 --json title,body,labels,assignees,state
 
 **If blocked:**
 ```
-⚠️ Issue #123 is blocked!
+Issue #123 is blocked!
 
 Blocked by: #120 (still open)
 
@@ -105,7 +127,7 @@ Your choice: _____
 
 **If not ready (missing acceptance criteria or description):**
 ```
-⚠️ Issue #123 is missing critical information!
+Issue #123 is missing critical information!
 
 Missing:
 - Acceptance criteria
@@ -140,25 +162,72 @@ git checkout -b issue-123-oauth-provider-integration
 git push -u origin issue-123-oauth-provider-integration
 ```
 
-**Why -u flag:**
-- Sets upstream tracking
-- Future `git push` and `git pull` work without specifying remote
-- Required for PR creation later
+### Step 7: Create Living Plan
 
-### Step 7: Update issue with start comment
+**Create implementation tracking file:** `.todos/{issue_id}-plan.md`
 
-```bash
-gh issue comment 123 --body "🚧 Starting implementation on branch \`issue-123-oauth-provider-integration\`"
+**Use template from:** `templates/LIVING_PLAN_TEMPLATE.md`
+
+**Populate with:**
+- Issue ID and title from Step 2
+- Branch name from Step 5
+- Acceptance criteria from issue body
+- Past learnings from Step 2.5
+- Implementation steps (derived from acceptance criteria)
+- Progress log with start timestamp
+
+**Example:**
+```markdown
+---
+issue_id: "123"
+title: "Phase 1: OAuth provider integration"
+branch: "issue-123-oauth-provider-integration"
+started: 2025-12-15
+last_updated: 2025-12-15
+status: in_progress
+---
+
+# Living Plan: Issue #123 — Phase 1: OAuth provider integration
+
+## Acceptance Criteria
+- [ ] Google OAuth provider configured
+- [ ] GitHub OAuth provider configured
+- [ ] Token exchange implemented
+- [ ] Tests passing with >80% coverage
+
+## Implementation Steps
+- [ ] Step 1: Set up OAuth configuration
+- [ ] Step 2: Implement Google provider
+- [ ] Step 3: Implement GitHub provider
+- [ ] Step 4: Implement token exchange
+- [ ] Step 5: Generate tests
+- [ ] Step 6: Run validation
+- [ ] Step 7: Fresh Eyes Review
+- [ ] Step 8: Commit and PR
+
+## Past Learnings Applied
+- auth-jwt-refresh-token-race-condition.md: Implement token rotation with grace period
+
+## Progress Log
+### 2025-12-15 — Started
+- Branch created: issue-123-oauth-provider-integration
+- Issue assigned to @me
 ```
 
-### Step 8: Display issue context and workflow to user
+### Step 8: Update issue with start comment
+
+```bash
+gh issue comment 123 --body "Starting implementation on branch \`issue-123-oauth-provider-integration\`"
+```
+
+### Step 9: Display issue context and workflow to user
 
 **If --pipeline flag is set:**
 
 Display the full workflow as a todo list that Claude MUST add to its todos immediately:
 
 ```
-✅ Issue #123 started with PIPELINE mode!
+Issue #123 started with PIPELINE mode!
 
 Title: Phase 1: OAuth provider integration
 
@@ -168,25 +237,24 @@ Acceptance Criteria:
 - [ ] Token exchange implemented
 - [ ] Tests passing with >80% coverage
 
-PRD Reference: docs/prds/123-2025-12-01-oauth-auth.md
-Labels: type: feature, priority: high, security-sensitive
-Branch: issue-123-oauth-provider-integration
+Past Learnings Applied:
+- Token rotation with grace period (from past solution)
 
-⚠️ SECURITY_SENSITIVE: Security review required
+Living Plan: .todos/123-plan.md
 
-📋 PIPELINE WORKFLOW (add ALL to todos now):
-1. [ ] Read PRD: docs/prds/123-2025-12-01-oauth-auth.md ← MANDATORY
+PIPELINE WORKFLOW (add ALL to todos now):
+1. [ ] Read PRD (if referenced) — MANDATORY
 2. [ ] Implement code per acceptance criteria
 3. [ ] Generate tests: /generate-tests
 4. [ ] Run validation: /run-validation
-5. [ ] Fresh eyes review: /fresh-eyes-review ← MANDATORY
+5. [ ] Fresh eyes review: /fresh-eyes-review — MANDATORY
 6. [ ] Commit and PR: /commit-and-pr
 
-Starting Step 1: Reading PRD...
+Starting Step 1...
 ```
 
 **CRITICAL:** When --pipeline is used, Claude MUST:
-1. Immediately add ALL 6 steps to the todo list using TodoWrite
+1. Immediately add ALL steps to the todo list
 2. Mark step 1 as in_progress
 3. Automatically proceed through all steps without waiting for user prompts
 4. Only pause for user input on errors or decisions
@@ -194,7 +262,7 @@ Starting Step 1: Reading PRD...
 **If --pipeline flag is NOT set (default):**
 
 ```
-✅ Issue #123 started!
+Issue #123 started!
 
 Title: Phase 1: OAuth provider integration
 
@@ -207,13 +275,15 @@ Acceptance Criteria:
 - [ ] Token exchange implemented
 - [ ] Tests passing with >80% coverage
 
+Past Learnings Applied:
+- auth-jwt-refresh-token-race-condition.md: Implement token rotation with grace period
+
 PRD Reference: docs/prds/123-2025-12-01-oauth-auth.md
 Labels: type: feature, priority: high, security-sensitive
-
 Branch: issue-123-oauth-provider-integration
-Assigned to: @me
+Living Plan: .todos/123-plan.md
 
-⚠️ SECURITY_SENSITIVE: Review ~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md before implementation
+SECURITY_SENSITIVE: Review checklists/AI_CODE_SECURITY_REVIEW.md before implementation
 
 Next steps:
 1. Review PRD if needed: cat docs/prds/123-2025-12-01-oauth-auth.md
@@ -221,22 +291,30 @@ Next steps:
 3. Generate tests: `/generate-tests`
 ```
 
-### Step 9: If PRD reference exists, optionally load PRD summary
+### Step 10: Incremental Commit Guidance
 
-**If issue contains PRD reference:**
-- Parse PRD path from issue body
-- Offer to show PRD summary
+**During implementation, after each logical unit of work:**
+- Suggest commit with `Part of #NNN` (not `Closes`)
+- Only final commit uses `Closes #NNN`
+- Each intermediate commit should be independently buildable
+- Update living plan progress log after each commit
 
+**Example intermediate commit:**
+```bash
+git commit -m "$(cat <<'EOF'
+feat: add Google OAuth provider configuration
+
+Part of #123
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
 ```
-PRD available: docs/prds/123-2025-12-01-oauth-auth.md
 
-Show PRD summary? (yes/no) _____
-```
-
-**If yes:**
-- Read PRD file
-- Display: Problem, Goals, Solution overview, Key technical approach
-- Don't display full PRD (too long), just summary
+**Update living plan:**
+- Check off completed implementation steps
+- Add progress log entry with commit hash
+- Update `last_updated` date in frontmatter
 
 ---
 
@@ -247,14 +325,15 @@ Show PRD summary? (yes/no) _____
 - Branch created and checked out: `issue-NNN-brief-description`
 - Branch pushed to remote with upstream tracking
 - Issue updated with start comment
+- Living plan created: `.todos/{issue_id}-plan.md`
+- Past solutions surfaced
 
 **Context displayed:**
-- Issue title
-- Issue description
+- Issue title and description
 - Acceptance criteria
+- Past learnings (from `docs/solutions/`)
 - PRD reference (if exists)
 - Labels (especially security-sensitive, performance-critical)
-- Estimated effort
 
 **Status:** `ISSUE_STARTED`
 
@@ -266,9 +345,11 @@ Show PRD summary? (yes/no) _____
 
 ## References
 
-- See: `~/.claude/QUICK_START.md` Entry Point B for issue-first workflow
-- See: `~/.claude/AI_CODING_AGENT_GODMODE.md` Phase 1 Step 1 for starting issues
-- See: `~/.claude/guides/GITHUB_PROJECT_INTEGRATION.md` for GitHub workflow
+- See: `QUICK_START.md` Entry Point B for issue-first workflow
+- See: `AI_CODING_AGENT_GODMODE.md` Phase 1 Step 1 for starting issues
+- See: `guides/GITHUB_PROJECT_INTEGRATION.md` for GitHub workflow
+- See: `agents/research/learnings-researcher.md` for past solutions search
+- See: `templates/LIVING_PLAN_TEMPLATE.md` for living plan format
 
 ---
 
@@ -278,151 +359,71 @@ Show PRD summary? (yes/no) _____
 ```
 User: /start-issue
 
-Claude: 🚀 Start Issue
+Claude: Start Issue
 
 Available issues:
-  #123 - Phase 1: OAuth provider integration (Ready, 8 hours)
-  #124 - Phase 2: Token management (Ready, 4 hours)
+  #123 - Phase 1: OAuth provider integration (Ready)
+  #124 - Phase 2: Token management (Ready)
   #125 - Phase 3: Frontend OAuth flow (Blocked by #123)
 
-Select issue number: _____
+Select issue number: 123
 
-User: 123
+Claude: [Loads issue, searches past solutions, creates living plan]
 
-Claude: [Loads issue #123]
+Issue #123 started!
 
-✅ Issue #123 started!
+Past Learnings Applied:
+- Token rotation with grace period
 
-Title: Phase 1: OAuth provider integration
-
-Acceptance Criteria:
-- [ ] Google OAuth provider configured
-- [ ] GitHub OAuth provider configured
-- [ ] Token exchange implemented
-- [ ] Tests passing with >80% coverage
-
-PRD Reference: docs/prds/123-2025-12-01-oauth-auth.md
-Labels: type: feature, priority: high, security-sensitive
-
+Living Plan: .todos/123-plan.md
 Branch: issue-123-oauth-provider-integration
-Assigned to: @me
-
-⚠️ SECURITY_SENSITIVE: Review ~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md
 
 Next steps:
 1. Implement code
 2. Generate tests: `/generate-tests`
 ```
 
-**Example 2: Direct mode**
-```
-User: /start-issue 123
-
-Claude: [Immediately loads issue #123 and creates branch]
-
-✅ Issue #123 started!
-
-[Same output as above]
-```
-
-**Example 3: Blocked issue**
-```
-User: /start-issue 125
-
-Claude: ⚠️ Issue #125 is blocked!
-
-Blocked by: #123 (still open)
-
-Options:
-1. Wait for #123 to be completed
-2. Select different issue: /start-issue [number]
-3. Override and start anyway (risky)
-
-Your choice: _____
-
-User: 2
-
-Claude: Available issues:
-  #123 - Phase 1: OAuth provider integration (Ready, 8 hours)
-  #124 - Phase 2: Token management (Ready, 4 hours)
-
-Select issue number: _____
-
-User: 123
-
-Claude: [Starts #123 instead]
-```
-
-**Example 4: With PRD context**
-```
-User: /start-issue 123
-
-Claude: ✅ Issue #123 started!
-
-[Issue context displayed]
-
-PRD available: docs/prds/123-2025-12-01-oauth-auth.md
-
-Show PRD summary? (yes/no) _____
-
-User: yes
-
-Claude: **PRD Summary:**
-
-Problem:
-Users want to sign in with OAuth providers (Google, GitHub) instead of creating passwords.
-
-Solution:
-Implement OAuth 2.0 authentication flow supporting multiple providers.
-
-Technical Approach:
-- Use Passport.js for OAuth strategy
-- Store tokens encrypted in database
-- Implement token refresh logic
-
-[Summary displayed, not full PRD]
-
-Next steps:
-1. Implement OAuth strategies
-2. Generate tests: `/generate-tests`
-```
-
-**Example 5: Pipeline mode (full automated workflow)**
+**Example 2: Pipeline mode**
 ```
 User: /start-issue 123 --pipeline
 
-Claude: ✅ Issue #123 started with PIPELINE mode!
+Claude: Issue #123 started with PIPELINE mode!
 
-Title: Phase 1: OAuth provider integration
-
-📋 PIPELINE WORKFLOW (adding to todos now):
-1. [ ] Read PRD ← MANDATORY
-2. [ ] Implement code
-3. [ ] Generate tests
-4. [ ] Run validation
-5. [ ] Fresh eyes review ← MANDATORY
-6. [ ] Commit and PR
-
-[Claude adds all 6 steps to TodoWrite]
-
-Starting Step 1: Reading PRD...
-
-[Claude automatically proceeds through entire workflow]
-[Only pauses for errors or decisions]
+[Creates living plan, adds all steps to todos]
+[Automatically proceeds through entire workflow]
+[Pauses only for errors or decisions]
 [Completes with PR creation]
+```
+
+**Example 3: With past solutions**
+```
+User: /start-issue 123
+
+Claude: Issue #123 started!
+
+Past solutions found:
+1. auth-jwt-refresh-token-race-condition.md (HIGH)
+   Gotcha: Concurrent refresh requests invalidate tokens
+   Applied: Implementing token rotation with grace period
+
+Living Plan: .todos/123-plan.md
+
+Next steps:
+1. Implement code (applying past learnings)
+2. Generate tests: `/generate-tests`
 ```
 
 ---
 
 ## Notes
 
+- **Living plan**: Implementation tracking file created automatically in `.todos/`
+- **Past solutions**: Relevant learnings surfaced before implementation begins
+- **Incremental commits**: Use `Part of #NNN` for intermediate, `Closes #NNN` for final
 - **Branch naming**: `issue-NNN-brief-description` (consistent convention)
 - **Upstream tracking**: `-u` flag on first push enables easy future pushes
 - **Issue assignment**: Auto-assigns to @me if not already assigned
 - **Blocker detection**: Warns if issue is blocked by other issues
 - **PRD context**: Optionally loads PRD summary if referenced in issue
 - **Security flags**: Highlights security-sensitive issues with warning
-- **Entry Point B**: This command implements Entry Point B workflow from QUICK_START.md
-- **Comment on issue**: Adds GitHub comment marking start of implementation
-- **Branch protection**: Working on feature branch, not main
 - **Pipeline mode**: `--pipeline` runs full workflow automatically with mandatory checkpoints

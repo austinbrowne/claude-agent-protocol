@@ -125,6 +125,40 @@
 
 ---
 
+## 3a. Spec-Flow Analysis
+
+*Systematic analysis of user flows for completeness.*
+
+**User Flows Identified:**
+
+| Flow | Type | Status |
+|------|------|--------|
+| [Primary flow] | Happy path | Complete / Gaps found |
+| [Alternative flow] | Alternative | Complete / Gaps found |
+| [Error flow] | Error | Complete / Gaps found |
+
+**Flow Map:**
+```
+Flow 1: [Primary user flow]
+Step 1: User does X → Success: Y | Error: Z | Empty: W
+Step 2: System responds → Success: Y | Timeout: Z | Invalid: W
+...
+```
+
+**States Checked Per Flow:**
+- [ ] Happy path: fully specified
+- [ ] Error states: failure handling at each step
+- [ ] Empty states: no-data experience
+- [ ] Edge states: unusual but valid inputs
+- [ ] Permission states: unauthorized access handling
+- [ ] Loading/transition states: async operation UX
+
+**Gaps Found:**
+- [Gap 1]: [No handling for X at Step Y]
+- [Gap 2]: [Missing error state for Z]
+
+---
+
 ## 4. Technical Approach
 
 **Architecture:**

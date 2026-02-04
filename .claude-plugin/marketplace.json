@@ -14,7 +14,7 @@
         "ref": "release/v4.1"
       },
       "description": "GODMODE v4.1 — 3 orchestrator workflows, 17 slash commands, 6 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
-      "version": "4.1.0",
+      "version": "4.1.1",
       "keywords": [
         "workflow",
         "ai-coding",

@@ -1,7 +1,7 @@
 {
   "name": "godmode",
-  "version": "4.1.1",
-  "description": "AI-powered development workflow. 6 workflow commands, 19 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
+  "version": "4.1.2",
+  "description": "AI-powered development workflow. 6 workflow commands, 21 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
   "author": {
     "name": "Austin Browne",
     "url": "https://github.com/austinbrowne"

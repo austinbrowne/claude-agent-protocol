@@ -348,3 +348,24 @@ Next steps:
 - **Code smells:** Focuses on common code smells (duplication, magic numbers, complexity)
 - **Not always applicable:** Some refactorings may require architectural changes
 - **Optional step:** Refactoring is optional in GODMODE workflow (Phase 2)
+
+---
+
+## Post-Completion Flow
+
+After completing refactoring, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Refactoring complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /run-validation"
+      description: "Verify all tests still pass after refactoring"
+    - label: "Run /finalize"
+      description: "Update docs and run final checks"
+    - label: "Done"
+      description: "End workflow — commit refactoring changes manually"
+```
+
+Based on user's selection, invoke the chosen command.

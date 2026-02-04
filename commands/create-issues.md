@@ -360,3 +360,22 @@ Next steps:
   - `--backlog`: No assignee (park for later)
 - **Project association**: Issues can be associated with GitHub Project if configured
 - **Related issues**: If phases have dependencies, issues linked with "Depends on" / "Blocks"
+
+---
+
+## Post-Completion Flow
+
+After creating issues, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Issues created. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /start-issue"
+      description: "Begin work on the first issue immediately"
+    - label: "Done"
+      description: "End workflow — issues are in the backlog"
+```
+
+Based on user's selection, invoke `/start-issue` with the first issue number if selected.

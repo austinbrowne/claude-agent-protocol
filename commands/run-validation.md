@@ -446,3 +446,24 @@ Next steps:
 - **Warnings vs errors:** Low severity issues are warnings, don't block progress
 - **Re-runnable:** Can re-run after fixing issues
 - **Exit codes:** Returns non-zero exit code if validation fails (for CI/CD)
+
+---
+
+## Post-Completion Flow
+
+After validation completes, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Validation complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /fresh-eyes-review"
+      description: "Run multi-agent code review (recommended before commit)"
+    - label: "Fix failures"
+      description: "Fix failing tests or lint errors, then re-run validation"
+    - label: "Done"
+      description: "End workflow — proceed manually"
+```
+
+Based on user's selection, invoke the chosen command. If "Fix failures", help fix the issues then re-run `/run-validation`.

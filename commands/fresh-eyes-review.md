@@ -37,6 +37,14 @@ User types `/fresh-eyes-review --lite` for minimal review, or `/fresh-eyes-revie
 
 ---
 
+## Skills
+
+**Load before execution:** Read and follow `skills/fresh-eyes-review/SKILL.md` for the 13-agent smart selection system, core vs conditional agent roster, trigger pattern detection, verdict classification, and lite review mode.
+
+**Reference:** `skills/fresh-eyes-review/references/trigger-patterns.md` for detailed Grep patterns per conditional agent.
+
+---
+
 ## Execution Steps
 
 ### Step 1: Create diff file from staged changes
@@ -423,3 +431,26 @@ Fix and re-run.
 - **Supervisor consolidates:** Deduplicates, removes false positives, prioritizes
 - **Not a replacement for human review:** AI review supplements, doesn't replace
 - **Diff-based:** Reviews only changed code, not entire codebase
+
+---
+
+## Post-Completion Flow
+
+After completing the review, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Fresh Eyes Review complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Fix findings"
+      description: "Address CRITICAL/HIGH findings, then re-run review"
+    - label: "Run /compound"
+      description: "Capture any learnings discovered during review"
+    - label: "Run /commit-and-pr"
+      description: "Commit changes and create pull request (if APPROVED)"
+    - label: "Done"
+      description: "End workflow — address findings manually"
+```
+
+Based on user's selection, invoke the chosen command. If "Fix findings", help fix issues then re-run `/fresh-eyes-review`.

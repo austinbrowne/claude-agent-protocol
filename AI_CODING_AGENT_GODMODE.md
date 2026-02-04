@@ -6,15 +6,24 @@
 
 **NEW in v4.0:** 17 modular slash commands, 21 specialized agents (17 review + 4 research), knowledge compounding, brainstorming, plan deepening, adversarial validation, and smart agent selection - see `~/.claude/commands/*.md` and `QUICK_START.md`
 
+**NEW in v4.1:** Orchestrator workflows (`/godmode`, `/bugfix`, `/quickfix`), 6 reusable skill packages, and programmatic flow chaining via `AskUserQuestion` — every command offers next-step options after completion.
+
 ---
 
 ## Document Role
 
 This is the **comprehensive reference document** for the GODMODE protocol.
 
+**For guided workflows, use orchestrator commands instead:**
+- `/godmode` — Full feature: planning → execution → finalization (reads this doc's phases automatically)
+- `/bugfix` — Bug fix with investigation: explore → fix → validate → ship
+- `/quickfix` — Minimal fix: fix → lite review → ship
+
 **For quick access:**
 - Critical safety rules → `~/.claude/CLAUDE.md` (auto-loaded with highest priority)
+- Orchestrator workflows → `~/.claude/commands/workflows/*.md` (3 orchestrators)
 - Modular commands → `~/.claude/commands/*.md` (17 commands)
+- Reusable skills → `~/.claude/skills/*/SKILL.md` (6 skill packages)
 - Agent definitions → `~/.claude/agents/review/*.md` (17 review agents) + `~/.claude/agents/research/*.md` (4 research agents)
 - Quick reference → `~/.claude/QUICK_START.md`
 
@@ -918,6 +927,8 @@ After completing a feature or fixing a tricky bug:
 - `templates/ADR_TEMPLATE.md` - Architecture decisions
 - `agents/review/*.md` - 17 review agent definitions
 - `agents/research/*.md` - 4 research agent definitions
+- `skills/*/SKILL.md` - 6 reusable skill packages
+- `commands/workflows/*.md` - 3 orchestrator workflows
 - `guides/CONTEXT_OPTIMIZATION.md` - Advanced context techniques
 - `guides/MULTI_AGENT_PATTERNS.md` - Complex coordination
 - `guides/FRESH_EYES_REVIEW.md` - Smart selection review process
@@ -926,4 +937,4 @@ After completing a feature or fixing a tricky bug:
 
 ---
 
-*Last Updated: February 2026 | Version: 4.0 | Next Review: Quarterly*
+*Last Updated: February 2026 | Version: 4.1 | Next Review: Quarterly*

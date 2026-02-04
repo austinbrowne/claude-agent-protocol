@@ -345,3 +345,22 @@ For major decisions, consider using the full template.
   - ❌ Easily reversible implementation details
 - **Alternatives section is critical**: Always document "Why not X?" to prevent future debates
 - **Review dates**: Set review dates (3-12 months) to re-evaluate decision
+
+---
+
+## Post-Completion Flow
+
+After creating the ADR, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "ADR created. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /generate-prd"
+      description: "Generate a PRD that references this architectural decision"
+    - label: "Done"
+      description: "End workflow — ADR saved for team review"
+```
+
+Based on user's selection, invoke the chosen command.

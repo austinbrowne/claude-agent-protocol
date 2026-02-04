@@ -448,3 +448,20 @@ Merge PR when ready!
 - **Commit docs separately:** Documentation updates in separate commit
 - **Optional step:** Finalization is optional but recommended
 - **Ready to merge:** After finalization, code is ready for production
+
+---
+
+## Post-Completion Flow
+
+After finalization, present completion status:
+
+```
+AskUserQuestion:
+  question: "Finalization complete. The PR is ready to merge."
+  header: "Next step"
+  options:
+    - label: "Done"
+      description: "Merge PR on GitHub when ready"
+```
+
+This is the terminal command in the workflow. After finalization, the next action is merging the PR on GitHub.

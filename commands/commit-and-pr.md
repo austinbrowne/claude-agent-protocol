@@ -36,6 +36,12 @@ User types `/commit-and-pr --base experimental` to specify base branch.
 
 ---
 
+## Skills
+
+**Load before execution:** `skills/file-todos/SKILL.md` — For verifying todo completion status and updating `.todos/` files before commit.
+
+---
+
 ## Execution Steps
 
 ### Step 1: Verify prerequisites (MANDATORY GATE)
@@ -478,3 +484,26 @@ PR: #150
 - **Prerequisites checked:** Verifies Fresh Eyes APPROVED and tests passing
 - **HEREDOC for messages:** Ensures proper formatting of multi-line messages
 - **Issue auto-link:** PR automatically linked to issue via "Closes #123"
+
+---
+
+## Post-Completion Flow
+
+After creating the PR, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "PR created. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /compound"
+      description: "Capture any learnings from this implementation"
+    - label: "Run /refactor"
+      description: "Run a guided refactoring pass"
+    - label: "Run /finalize"
+      description: "Update docs and run final checks"
+    - label: "Done"
+      description: "End workflow — review PR on GitHub"
+```
+
+Based on user's selection, invoke the chosen command.

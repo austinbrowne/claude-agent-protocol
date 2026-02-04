@@ -308,3 +308,24 @@ Next steps:
 - **Learnings integration**: Past solutions surface relevant gotchas before you encounter them again
 - **Conditional research**: Best Practices and Framework Docs agents only trigger when valuable
 - **No prerequisites**: This is an entry point command - can be run anytime
+
+---
+
+## Post-Completion Flow
+
+After completing exploration, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Exploration complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /brainstorm"
+      description: "Brainstorm approaches based on exploration findings"
+    - label: "Run /generate-prd"
+      description: "Generate a PRD from exploration context"
+    - label: "Done"
+      description: "End workflow — exploration results are available in conversation"
+```
+
+Based on user's selection, invoke the chosen command with relevant context from the exploration.

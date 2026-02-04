@@ -36,6 +36,12 @@ None - command auto-detects security-sensitive code from git diff.
 
 ---
 
+## Skills
+
+**Load before execution:** Read and follow `skills/security-review/SKILL.md` for the OWASP Top 10 checklist, AI-specific security blind spots, trigger detection patterns, and severity classification.
+
+---
+
 ## Execution Steps
 
 ### Step 1: Analyze git diff for security triggers
@@ -335,3 +341,24 @@ Next steps:
 - **Re-run after fixes:** Run `/security-review` again after fixing issues
 - **Not a replacement for pentest:** This is code review, not penetration testing
 - **False positives possible:** Review warnings carefully, may not all be real issues
+
+---
+
+## Post-Completion Flow
+
+After completing the security review, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Security review complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /run-validation"
+      description: "Run tests + coverage + lint + security scan"
+    - label: "Run /fresh-eyes-review"
+      description: "Run multi-agent code review"
+    - label: "Done"
+      description: "End workflow — address findings manually"
+```
+
+Based on user's selection, invoke the chosen command.

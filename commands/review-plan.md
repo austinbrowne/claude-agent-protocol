@@ -35,6 +35,12 @@ User types `/review-plan docs/prds/YYYY-MM-DD-feature-name.md` with explicit pat
 
 ---
 
+## Skills
+
+**Load before execution:** Read and follow `skills/plan-review/SKILL.md` for the 5-agent review process (Architecture, Simplicity, Spec-Flow, Security + Adversarial Validator), parallel-then-sequential execution pattern, verdict consolidation, and revision workflow.
+
+---
+
 ## Execution Steps
 
 ### Step 1: Load PRD/plan
@@ -472,3 +478,24 @@ Next steps:
 - **Not a replacement for human review:** This is AI review. Humans should still review the plan, especially for business logic and product decisions.
 - **Token cost:** 5 subagents each processing the full PRD. Cost scales with PRD size. Lite PRDs are cheaper to review than Full PRDs.
 - **Verdict escalation:** A single CRITICAL finding from any source (reviewer or adversarial) results in REVISION_REQUESTED. This is intentionally conservative.
+
+---
+
+## Post-Completion Flow
+
+After completing the plan review, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Plan review complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /create-issues"
+      description: "Generate GitHub issues from the approved plan"
+    - label: "Revise and re-review"
+      description: "Fix priority findings in PRD, then re-run /review-plan"
+    - label: "Done"
+      description: "End workflow — review report available in conversation"
+```
+
+Based on user's selection, invoke the chosen command. If "Revise and re-review", guide user through fixing priority issues then re-run `/review-plan`.

@@ -37,6 +37,12 @@ User types `/brainstorm [topic]` where topic is a natural-language description o
 
 ---
 
+## Skills
+
+**Load before execution:** Read and follow `skills/brainstorming/SKILL.md` for structured divergent thinking methodology, comparison matrix format, and brainstorm document schema.
+
+---
+
 ## Execution Steps
 
 ### Step 1: Assess whether brainstorming adds value
@@ -351,3 +357,24 @@ Next steps:
 - **Pairs with /create-adr:** For major architectural decisions, create an ADR after brainstorming
 - **Token efficiency:** Learnings research uses a subagent to avoid polluting main conversation context
 - **2-3 approaches is the sweet spot:** More than 3 causes analysis paralysis; fewer than 2 is not really brainstorming
+
+---
+
+## Post-Completion Flow
+
+After capturing the brainstorm, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Brainstorm captured. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /generate-prd"
+      description: "Generate a PRD from the chosen approach"
+    - label: "Run /explore"
+      description: "Explore codebase further before planning"
+    - label: "Done"
+      description: "End workflow — brainstorm doc saved for later use"
+```
+
+Based on user's selection, invoke the chosen command. Pass the brainstorm document path as context.

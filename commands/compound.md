@@ -55,6 +55,12 @@ Capture it as a reusable solution? `/compound`
 
 ---
 
+## Skills
+
+**Load before execution:** Read and follow `skills/knowledge-compounding/SKILL.md` for auto-trigger phrase detection, solution document schema, deduplication search patterns, and `docs/solutions/` conventions.
+
+---
+
 ## Execution Steps
 
 ### Step 1: Detect or invoke
@@ -452,3 +458,22 @@ Added:
 - **Trigger phrases are suggestions, not requirements:** Claude can also suggest `/compound` based on contextual signals beyond the listed trigger phrases.
 - **Status field:** Use `validated` for well-tested solutions, `draft` for uncertain ones, `deprecated` for outdated learnings.
 - **Team knowledge base:** Over time, `docs/solutions/` becomes a project-specific knowledge base that persists across sessions and team members.
+
+---
+
+## Post-Completion Flow
+
+After capturing the solution, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Solution captured. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /commit-and-pr"
+      description: "Commit changes and create pull request"
+    - label: "Done"
+      description: "End workflow — solution saved to docs/solutions/"
+```
+
+Based on user's selection, invoke the chosen command.

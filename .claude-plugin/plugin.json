@@ -1,7 +1,7 @@
 {
   "name": "ai-coding-agent-protocol",
-  "description": "Comprehensive AI-driven development workflow (GODMODE v4.0) with 17 modular slash commands, 21 specialized agents (17 review + 4 research), knowledge compounding, OWASP security checklists, 13-agent smart selection Fresh Eyes review, brainstorm and plan deepening, and structured phases for planning, execution, and finalization.",
-  "version": "4.0.0",
+  "description": "Comprehensive AI-driven development workflow (GODMODE v4.1) with 3 orchestrator workflows, 17 modular slash commands, 6 reusable skill packages, 21 specialized agents (17 review + 4 research), knowledge compounding, OWASP security checklists, 13-agent smart selection Fresh Eyes review, brainstorm and plan deepening, and structured phases for planning, execution, and finalization.",
+  "version": "4.1.0",
   "author": {
     "name": "Austin Browne",
     "url": "https://github.com/austinbrowne"
@@ -24,6 +24,9 @@
     "adversarial-validation"
   ],
   "commands": [
+    "workflows/godmode",
+    "workflows/bugfix",
+    "workflows/quickfix",
     "explore",
     "brainstorm",
     "generate-prd",
@@ -43,6 +46,8 @@
     "finalize"
   ],
   "features": [
+    "3 orchestrator workflows (godmode, bugfix, quickfix) with AskUserQuestion flow chaining",
+    "6 reusable skill packages (brainstorming, knowledge-compounding, fresh-eyes-review, file-todos, security-review, plan-review)",
     "17 modular slash commands with hybrid invocation (interactive + direct)",
     "21 specialized agents (17 review + 4 research) with smart selection",
     "Knowledge compounding — capture and reuse solved problems (docs/solutions/)",

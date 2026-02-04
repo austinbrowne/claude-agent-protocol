@@ -127,9 +127,30 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 
 ---
 
+## Orchestrator Workflows
+
+**3 orchestrator commands** for guided, step-by-step workflows. Each orchestrator drives the complete flow with `AskUserQuestion` chaining — you can skip, reorder, or exit at any point.
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `/godmode [description]` | Full feature development | New features, complex tasks requiring planning → execution → finalization |
+| `/bugfix [issue-or-description]` | Bug fix with investigation | Bug needs investigation before fixing, root cause unclear |
+| `/quickfix [issue-or-description]` | Minimal fix flow | Typo fixes, config changes, obvious one-liners where root cause is known |
+
+**Examples:**
+```bash
+/godmode "OAuth 2.0 authentication"     # Full feature workflow
+/bugfix 456                              # Bug fix with investigation
+/bugfix "login fails with special chars" # Bug fix from description
+/quickfix 789                            # Quick fix for known issue
+/quickfix "fix typo in error message"    # Quick fix from description
+```
+
+---
+
 ## Modular Commands
 
-**17 reusable slash commands** for flexible workflows. Use individually or compose custom workflows.
+**17 reusable slash commands** for flexible workflows. Use individually or compose custom workflows. Each command offers next-step options after completion.
 
 ### Token Usage Estimates
 
@@ -182,7 +203,22 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 
 ### Example Workflows with Commands
 
-**Full GODMODE workflow (v4.0):**
+**Orchestrated workflow (recommended):**
+```bash
+# Full feature — orchestrator drives the entire flow
+/godmode "OAuth 2.0 authentication"
+# Claude guides you through: explore → brainstorm → PRD → review → implement → ship
+
+# Bug fix — investigation before fixing
+/bugfix 456
+# Claude: investigates → surfaces past solutions → fixes → validates → ships
+
+# Quick fix — fastest path
+/quickfix "fix typo in error message"
+# Claude: fixes → lite review → ships
+```
+
+**Manual full workflow (v4.0):**
 ```bash
 /explore authentication
 /brainstorm "auth approach"
@@ -404,7 +440,9 @@ Single Session:
 | File | Purpose |
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
+| `commands/workflows/*.md` | **3 orchestrator commands** (godmode, bugfix, quickfix) |
 | `commands/*.md` | **17 modular slash commands** (explore, brainstorm, generate-prd, deepen-plan, review-plan, create-adr, create-issues, start-issue, generate-tests, security-review, run-validation, fresh-eyes-review, recovery, commit-and-pr, compound, refactor, finalize) |
+| `skills/*/SKILL.md` | **6 reusable skill packages** (brainstorming, knowledge-compounding, fresh-eyes-review, file-todos, security-review, plan-review) |
 | `agents/review/*.md` | **17 review agents** (security, code-quality, edge-case, supervisor, adversarial-validator, performance, api-contract, concurrency, error-handling, data-validation, dependency, testing-adequacy, config-secrets, documentation, architecture, simplicity, spec-flow) |
 | `agents/research/*.md` | **4 research agents** (codebase, learnings, best-practices, framework-docs) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
@@ -451,6 +489,6 @@ Use in responses:
 
 ---
 
-**Version:** 4.0
+**Version:** 4.1
 **Last Updated:** February 2026
 **Full docs:** See `README.md`

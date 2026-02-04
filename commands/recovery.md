@@ -441,3 +441,24 @@ Return to Phase 0.
 - **Lessons learned:** Feed back into process improvement
 - **Not failure:** Recovery is learning, improves future implementations
 - **Re-enter workflow:** After rollback/abandon, return to appropriate phase
+
+---
+
+## Post-Completion Flow
+
+After completing recovery action, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Recovery action complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /start-issue"
+      description: "Retry implementation with a new approach"
+    - label: "Run /generate-prd"
+      description: "Return to planning phase and revise the plan"
+    - label: "Done"
+      description: "End workflow — take time to regroup"
+```
+
+Based on user's selection, invoke the chosen command with context from the recovery report.

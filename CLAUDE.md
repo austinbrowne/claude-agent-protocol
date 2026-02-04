@@ -67,11 +67,20 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 
 ## Two Modes Available
 
-### Mode 1: Full Protocol (Complex Tasks)
+### Mode 1: Orchestrator Workflows (Guided)
+Use orchestrator commands for guided, step-by-step workflows with automatic flow chaining.
+
+| Command | Purpose |
+|---------|---------|
+| `/godmode` | Full feature development — planning → execution → finalization |
+| `/bugfix` | Bug fix with investigation — explore → fix → validate → ship |
+| `/quickfix` | Minimal fix flow — fix → lite review → ship |
+
+### Mode 2: Full Protocol (Complex Tasks)
 For comprehensive guidance, see `~/.claude/AI_CODING_AGENT_GODMODE.md`
 
-### Mode 2: Modular Commands (Flexible Workflows)
-Use individual commands as needed. All commands support hybrid invocation (interactive or direct).
+### Mode 3: Modular Commands (Flexible Workflows)
+Use individual commands as needed. All commands support hybrid invocation (interactive or direct). Each command offers next-step options after completion via `AskUserQuestion`.
 
 **Phase 0: Planning**
 | Command | Purpose |
@@ -104,11 +113,17 @@ Use individual commands as needed. All commands support hybrid invocation (inter
 
 ### Quick Workflows
 
-**Full feature:**
+**Full feature (orchestrated):**
+`/godmode "OAuth 2.0 authentication"` — drives entire flow automatically
+
+**Full feature (manual):**
 `/explore` → `/brainstorm` → `/generate-prd` → `/deepen-plan` → `/review-plan` → `/create-issues` → `/start-issue` → [implement] → `/generate-tests` → `/fresh-eyes-review` → `/compound` → `/commit-and-pr`
 
-**Quick bug fix:**
-`/start-issue` → [fix] → `/fresh-eyes-review --lite` → `/compound` → `/commit-and-pr`
+**Bug fix (with investigation):**
+`/bugfix 456` — investigates before fixing, suggests regression test + compound
+
+**Quick fix (no investigation):**
+`/quickfix "fix typo in error message"` — fastest path from fix to shipped
 
 **Just review:**
 [staged changes] → `/fresh-eyes-review` → `/commit-and-pr`
@@ -119,6 +134,9 @@ Use individual commands as needed. All commands support hybrid invocation (inter
 
 | Directory | Purpose |
 |-----------|---------|
+| `skills/` | Reusable knowledge packages (loaded by commands) |
+| `commands/workflows/` | Orchestrator commands (godmode, bugfix, quickfix) |
+| `commands/` | 17 modular slash commands |
 | `agents/review/` | 17 review agent definitions |
 | `agents/research/` | 4 research agent definitions |
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
@@ -191,7 +209,9 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Full protocol documentation |
 | `QUICK_START.md` | Entry points and command reference |
+| `commands/workflows/*.md` | 3 orchestrator commands (godmode, bugfix, quickfix) |
 | `commands/*.md` | 17 modular slash commands |
+| `skills/*/SKILL.md` | 6 reusable skill packages |
 | `agents/review/*.md` | 17 review agent definitions |
 | `agents/research/*.md` | 4 research agent definitions |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |

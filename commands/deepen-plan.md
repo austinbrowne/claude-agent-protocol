@@ -519,3 +519,24 @@ Claude: [Same flow as Example 1]
 - **Phase 2 and Phase 3 run in parallel:** Research and review agents launch at the same time for maximum throughput. Phase 4 (learnings deep-dive) depends on Phase 2 learnings results.
 - **Framework detection:** If the PRD mentions a specific framework (Express, Next.js, Django, etc.), the framework docs researcher activates automatically.
 - **Pairs with /review-plan:** After deepening, run `/review-plan` for a formal approval gate before creating issues.
+
+---
+
+## Post-Completion Flow
+
+After deepening the plan, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Plan deepened. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /review-plan"
+      description: "Run multi-agent plan review for formal approval"
+    - label: "Run /create-issues"
+      description: "Generate GitHub issues from the deepened plan"
+    - label: "Done"
+      description: "End workflow — review the [DEEPENED] annotations manually"
+```
+
+Based on user's selection, invoke the chosen command with the PRD file path.

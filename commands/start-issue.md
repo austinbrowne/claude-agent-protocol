@@ -42,6 +42,14 @@ User types `/start-issue 123` where 123 is the issue number.
 
 ---
 
+## Skills
+
+**Load before execution:**
+- `skills/knowledge-compounding/SKILL.md` — For searching `docs/solutions/` to surface relevant past learnings
+- `skills/file-todos/SKILL.md` — For creating living plans in `.todos/` and tracking implementation progress
+
+---
+
 ## Execution Steps
 
 ### Step 1: Get issue number
@@ -427,3 +435,26 @@ Next steps:
 - **PRD context**: Optionally loads PRD summary if referenced in issue
 - **Security flags**: Highlights security-sensitive issues with warning
 - **Pipeline mode**: `--pipeline` runs full workflow automatically with mandatory checkpoints
+
+---
+
+## Post-Completion Flow
+
+After starting the issue (non-pipeline mode), present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Issue started. After implementing, what would you like to do?"
+  header: "Next step"
+  options:
+    - label: "Run /generate-tests"
+      description: "Generate tests for the implemented code"
+    - label: "Run /security-review"
+      description: "Run security checklist on the changes"
+    - label: "Run /fresh-eyes-review"
+      description: "Jump straight to multi-agent code review"
+    - label: "Done"
+      description: "Continue implementing — run commands manually later"
+```
+
+Based on user's selection, invoke the chosen command. Note: This flow triggers after implementation is complete, not immediately after `/start-issue`.

@@ -374,3 +374,26 @@ Next steps:
 - **Exploration integration**: Uses `/explore` output if available in conversation
 - **Filename convention**: Date prefix allows chronological sorting
 - **Status starts as READY_FOR_REVIEW**: Human approval required before implementation
+
+---
+
+## Post-Completion Flow
+
+After generating the PRD, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "PRD generated. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /deepen-plan"
+      description: "Enrich the PRD with parallel research agents (10-20+)"
+    - label: "Run /review-plan"
+      description: "Run multi-agent plan review with adversarial validation"
+    - label: "Run /create-issues"
+      description: "Generate GitHub issues directly from this PRD"
+    - label: "Done"
+      description: "End workflow — PRD saved for later use"
+```
+
+Based on user's selection, invoke the chosen command with the PRD file path.

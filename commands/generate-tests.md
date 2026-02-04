@@ -301,3 +301,24 @@ Next steps:
 - **Edge cases critical:** Null, empty, boundaries, type errors
 - **Error handling:** Test all error paths and exception handling
 - **Test file location:** Follow project convention (same directory or parallel tests/ directory)
+
+---
+
+## Post-Completion Flow
+
+After generating tests, present next options using `AskUserQuestion`:
+
+```
+AskUserQuestion:
+  question: "Tests generated. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Run /run-validation"
+      description: "Run tests + coverage + lint + security scan"
+    - label: "Run /security-review"
+      description: "Run OWASP security checklist on the code"
+    - label: "Done"
+      description: "End workflow — run tests manually"
+```
+
+Based on user's selection, invoke the chosen command.

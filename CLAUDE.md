@@ -29,7 +29,7 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 | **SIMPLE > CLEVER** | Prefer clear, maintainable code. Avoid over-engineering. |
 | **FLAG UNCERTAINTY** | If unsure, ask. Don't hallucinate APIs or make assumptions. |
 | **CONTEXT EFFICIENT** | Grep before read. Line ranges over full files. Exploration subagents preserve main context. |
-| **COMPOUND LEARNINGS** | When you solve something tricky, capture it in `docs/solutions/` via `/compound`. |
+| **COMPOUND LEARNINGS** | When you solve something tricky, capture it in `docs/solutions/` via `/learn`. |
 
 ---
 
@@ -65,68 +65,51 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 
 # Workflow
 
-## Two Modes Available
+## 6 Workflow Commands
 
-### Mode 1: Orchestrator Workflows (Guided)
-Use orchestrator commands for guided, step-by-step workflows with automatic flow chaining.
+Use workflow commands as entry points. Each workflow offers sub-step selection via `AskUserQuestion` and chains to the next workflow after completion.
 
 | Command | Purpose |
 |---------|---------|
-| `/godmode` | Full feature development — planning → execution → finalization |
-| `/bugfix` | Bug fix with investigation — explore → fix → validate → ship |
-| `/quickfix` | Minimal fix flow — fix → lite review → ship |
-
-### Mode 2: Full Protocol (Complex Tasks)
-For comprehensive guidance, see `~/.claude/AI_CODING_AGENT_GODMODE.md`
-
-### Mode 3: Modular Commands (Flexible Workflows)
-Use individual commands as needed. All commands support hybrid invocation (interactive or direct). Each command offers next-step options after completion via `AskUserQuestion`.
-
-**Phase 0: Planning**
-| Command | Purpose |
-|---------|---------|
-| `/explore` | Multi-agent codebase exploration |
-| `/brainstorm` | Structured divergent thinking before planning |
-| `/generate-prd` | Create PRD with research and spec-flow analysis |
-| `/deepen-plan` | Enrich PRD with parallel research and review agents |
-| `/review-plan` | Multi-agent plan review before implementation |
-| `/create-adr` | Document architecture decisions |
-| `/create-issues` | Generate GitHub issues from PRD |
-
-**Phase 1: Execution**
-| Command | Purpose |
-|---------|---------|
-| `/start-issue` | Begin work with living plan and past learnings |
-| `/generate-tests` | Generate comprehensive tests |
-| `/security-review` | Run OWASP security checklist |
-| `/run-validation` | Tests + coverage + lint + security |
-| `/fresh-eyes-review` | 13-agent smart selection review |
-| `/recovery` | Handle failed implementations |
-| `/commit-and-pr` | Commit and create PR with finding verification |
-| `/compound` | Capture solved problems as reusable solutions |
-
-**Phase 2: Finalization**
-| Command | Purpose |
-|---------|---------|
-| `/refactor` | Guided refactoring |
-| `/finalize` | Final docs and validation |
+| `/explore` | Reconnaissance & ideation — codebase exploration + brainstorming |
+| `/plan` | Planning & requirements — PRD, deepen, review, issues, ADR |
+| `/implement` | Implementation — start issue, tests, validation, security, recovery |
+| `/review` | Code review — fresh eyes review (full/lite), protocol compliance |
+| `/learn` | Knowledge capture — save solved problems as reusable solution docs |
+| `/ship` | Ship — commit/PR, finalize, refactor |
 
 ### Quick Workflows
 
-**Full feature (orchestrated):**
-`/godmode "OAuth 2.0 authentication"` — drives entire flow automatically
+**Full feature:**
+`/explore` → `/plan` → `/implement` → `/review` → `/learn` → `/ship`
 
-**Full feature (manual):**
-`/explore` → `/brainstorm` → `/generate-prd` → `/deepen-plan` → `/review-plan` → `/create-issues` → `/start-issue` → [implement] → `/generate-tests` → `/fresh-eyes-review` → `/compound` → `/commit-and-pr`
+**Bug fix:**
+`/explore` → `/implement` → `/review` → `/learn` → `/ship`
 
-**Bug fix (with investigation):**
-`/bugfix 456` — investigates before fixing, suggests regression test + compound
-
-**Quick fix (no investigation):**
-`/quickfix "fix typo in error message"` — fastest path from fix to shipped
+**Quick fix:**
+`/implement` → `/review` → `/ship`
 
 **Just review:**
-[staged changes] → `/fresh-eyes-review` → `/commit-and-pr`
+`/review` → `/ship`
+
+### Individual Skills (Also User-Invocable)
+
+Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly invocable as slash commands:
+
+**Planning skills:** `explore`, `brainstorm`, `generate-prd`, `deepen-plan`, `review-plan`, `create-adr`, `create-issues`
+
+**Execution skills:** `start-issue`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor`
+
+**Review skills:** `fresh-eyes-review`, `review-protocol`
+
+**Shipping skills:** `commit-and-pr`, `finalize`
+
+**Knowledge skills:** `learn`
+
+---
+
+## Full Protocol (Complex Tasks)
+For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
 
 ---
 
@@ -134,9 +117,8 @@ Use individual commands as needed. All commands support hybrid invocation (inter
 
 | Directory | Purpose |
 |-----------|---------|
-| `skills/` | Reusable knowledge packages (loaded by commands) |
-| `commands/workflows/` | Orchestrator commands (godmode, bugfix, quickfix) |
-| `commands/` | 17 modular slash commands |
+| `commands/` | 6 workflow entry points |
+| `skills/` | 19 reusable skill packages (also user-invocable) |
 | `agents/review/` | 17 review agent definitions |
 | `agents/research/` | 4 research agent definitions |
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
@@ -196,10 +178,10 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - Skip tests for any code change
 - Deploy or merge without explicit human approval
 - Modify dependency lock files without approval
-- **Skip `/fresh-eyes-review` before committing** - even if context was summarized, run it
+- **Skip fresh-eyes review before committing** - even if context was summarized, run it
 - Ignore edge cases (null, empty, boundaries)
 
-**Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When running `/commit-and-pr`, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/fresh-eyes-review` again.
+**Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When shipping, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/review` again.
 
 ---
 
@@ -209,9 +191,8 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Full protocol documentation |
 | `QUICK_START.md` | Entry points and command reference |
-| `commands/workflows/*.md` | 3 orchestrator commands (godmode, bugfix, quickfix) |
-| `commands/*.md` | 17 modular slash commands |
-| `skills/*/SKILL.md` | 6 reusable skill packages |
+| `commands/*.md` | 6 workflow commands |
+| `skills/*/SKILL.md` | 19 reusable skill packages |
 | `agents/review/*.md` | 17 review agent definitions |
 | `agents/research/*.md` | 4 research agent definitions |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |

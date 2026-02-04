@@ -1,11 +1,9 @@
 ---
-name: compound
+name: learn
 version: "1.1"
 description: Methodology for capturing solved problems as searchable, reusable solution docs — compatible with compound-engineering plugin
 referenced_by:
-  - commands/compound.md
-  - commands/workflows/godmode.md
-  - commands/start-issue.md
+  - commands/learn.md
 ---
 
 # Knowledge Compounding Skill
@@ -14,9 +12,19 @@ Methodology for capturing solved problems and making them discoverable for futur
 
 ---
 
+## When to Apply
+
+- After solving a tricky bug or unexpected behavior
+- When discovering a gotcha that others will hit
+- When a debugging session reveals a non-obvious root cause
+- When you learn something important about a library, framework, or pattern
+- Anytime knowledge would be lost if not written down
+
+---
+
 ## Auto-Trigger Detection
 
-Claude should proactively suggest `/compound` when detecting these phrases in conversation:
+Claude should proactively suggest capturing a learning when detecting these phrases in conversation:
 
 - "the trick was"
 - "the fix was"
@@ -38,7 +46,7 @@ It sounds like you found an important insight:
 "[relevant quote from user]"
 
 Want to capture this as a reusable solution doc?
-Run `/compound` to capture, or ignore to skip.
+Run `/learn` to capture, or ignore to skip.
 ```
 
 ---
@@ -156,6 +164,87 @@ related_solutions: []
 
 ---
 
+## Execution Steps
+
+### Step 1: Detect or invoke
+
+**If auto-suggest (trigger phrase detected):**
+- Claude detects a trigger phrase in the user's message
+- Suggest capturing the learning (see suggestion format above)
+- Wait for user to invoke or decline
+
+**If manual invoke:**
+- Proceed directly to Step 2
+
+**If direct mode (with explicit title):**
+- Use provided title, proceed to Step 2
+
+### Step 2: Extract the learning from context
+
+**If conversation contains a recently solved problem:**
+
+Scan conversation for:
+1. **Problem:** What went wrong? (error messages, unexpected behavior, symptoms)
+2. **Root cause:** What was actually wrong? (the underlying issue)
+3. **Solution:** What fixed it? (code changes, config changes, approach)
+4. **Gotchas:** What was tricky or non-obvious? (things easy to get wrong)
+
+**Present extracted learning for confirmation:**
+```
+Extracted learning:
+
+Title: [auto-generated or from explicit title]
+Module: [detected module/area]
+Problem type: [enum value]
+Symptoms:
+- [symptom 1]
+- [symptom 2]
+Root cause: [enum value] — [explanation]
+Solution: [extracted fix]
+Gotchas:
+- [gotcha 1]
+- [gotcha 2]
+
+Is this accurate? (yes/edit/start-over): _____
+```
+
+**If no conversation context available (standalone invoke):**
+- Prompt for manual input: problem, root cause, fix, gotchas
+
+### Step 3: Check for existing duplicates
+
+Search `docs/solutions/` using multi-pass Grep:
+
+1. **Category narrowing:** If `problem_type` is known, search specific subdirectory first
+2. **Tag match:** `Grep pattern="tags:.*(keyword1|keyword2)" path="docs/solutions/"`
+3. **Module match:** `Grep pattern="module:.*ModuleName" path="docs/solutions/"`
+4. **Problem type match:** `Grep pattern="problem_type: enum_value" path="docs/solutions/"`
+5. **Symptom match:** Keywords from observed symptoms
+6. **Full-text search:** Domain-specific keywords in body content
+
+**If duplicate detected:** Offer update existing / create new / skip
+
+### Step 4: Generate solution document
+
+**Determine metadata using enum-validated fields** (module, problem_type, component, symptoms, root_cause, resolution_type, severity, tags, language, framework, issue_ref).
+
+**Load template from:** `templates/SOLUTION_TEMPLATE.md`
+
+**Generate solution with full YAML frontmatter and structured content** (Problem, Environment, Symptoms, What Didn't Work, Solution, Why This Works, Prevention, Related Issues).
+
+### Step 5: Save solution file
+
+1. Create category subdirectory if needed: `mkdir -p docs/solutions/{category-directory}`
+2. Generate filename: `{slug}-{YYYYMMDD}.md`
+3. Check for collisions (append number if needed)
+4. Save file
+
+### Step 6: Confirm with searchability note
+
+Report: file location, searchable fields (module, problem_type, component, tags, symptoms, root_cause), and which commands will auto-discover this solution.
+
+---
+
 ## Searchability
 
 Solutions are discovered by the `learnings-researcher` agent using multi-pass Grep:
@@ -171,10 +260,10 @@ Solutions are discovered by the `learnings-researcher` agent using multi-pass Gr
 Category-based narrowing: search `docs/solutions/security-issues/` directly when problem type is clear.
 
 Commands that auto-search past solutions:
-- `/brainstorm` — explores relevant approaches
-- `/deepen-plan` — enriches plan with past learnings
-- `/start-issue` — surfaces relevant gotchas before implementation
 - `/explore` — finds past solutions for the explored area
+- `/plan` (brainstorm) — explores relevant approaches
+- `/plan` (deepen) — enriches plan with past learnings
+- `/implement` (start-issue) — surfaces relevant gotchas before implementation
 
 ---
 
@@ -194,5 +283,5 @@ Docs created by either system are searchable by both.
 
 - **Input from conversation**: Trigger detection and context extraction
 - **Output to `docs/solutions/{category}/`**: Persisted solution document
-- **Consumed by**: learnings-researcher agent, `/brainstorm`, `/deepen-plan`, `/start-issue`, `/explore`
+- **Consumed by**: learnings-researcher agent, `/explore`, `/plan`, `/implement`
 - **Template**: `templates/SOLUTION_TEMPLATE.md`

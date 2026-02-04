@@ -1,6 +1,6 @@
 # Solution Template
 
-Use this template when running `/compound` to capture solved problems as searchable, reusable solution docs.
+Use this template when running `/learn` to capture solved problems as searchable, reusable solution docs.
 
 **Compatible with:** compound-engineering plugin `compound-docs` skill (shared `docs/solutions/` directory and YAML frontmatter schema).
 

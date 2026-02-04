@@ -1,15 +1,29 @@
 ---
 name: review-plan
-version: "1.0"
+version: "1.1"
 description: Multi-agent plan review methodology with adversarial validation
 referenced_by:
-  - commands/review-plan.md
-  - commands/workflows/godmode.md
+  - commands/plan.md
 ---
 
 # Plan Review Skill
 
 5-agent review process for validating plans before implementation.
+
+---
+
+## When to Apply
+
+- After generating a PRD (via generate-prd skill) and optionally deepening it
+- Before creating issues and starting implementation
+- As a formal approval gate between planning and execution
+
+---
+
+## Prerequisites
+
+- PRD/plan file exists
+- Plan should be in `READY_FOR_REVIEW` or `DEEPENED_READY_FOR_REVIEW` status
 
 ---
 
@@ -36,9 +50,23 @@ Receives the plan AND all 4 reviewer outputs.
 
 ---
 
-## Execution Pattern
+## Execution Steps
 
-### Phase 1: Parallel Review
+### Step 1: Load PRD/plan
+
+**If path provided:**
+- Read specified PRD file
+
+**If no path:**
+- Check conversation for most recent PRD reference
+- If not found, list available PRDs: `ls docs/prds/*.md`
+- Ask user to select
+
+**Read the full PRD content** for use in all reviewer prompts.
+
+### Step 2: Launch 4 review agents IN PARALLEL
+
+**CRITICAL: Launch ALL 4 agents in a SINGLE message with multiple Task calls.**
 
 Each reviewer receives ONLY the PRD content (zero conversation context).
 
@@ -58,26 +86,23 @@ FINDINGS:
 SUMMARY: [1-2 sentence assessment]
 ```
 
-### Phase 2: Adversarial Validation
+**Agent-specific evaluation criteria:**
 
-After all 4 reviewers complete:
+- **Architecture:** Component decomposition, data flow, dependency management, scalability, consistency, separation of concerns
+- **Simplicity:** Over-engineering, YAGNI, abstraction level, phase simplification, technology choices, cognitive load
+- **Spec-Flow:** Acceptance criteria testability, phase ordering, dependencies, success metrics, completeness, edge cases, user flow
+- **Security:** Authentication/authorization design, data protection, input validation, injection prevention, secrets management, transport security, error handling, logging
 
-```
-You are an Adversarial Validator. Reference agents/review/adversarial-validator.md.
+### Step 3: Launch Adversarial Validator AFTER all 4 complete
 
-Challenge both the plan AND the reviewers:
+**Adversarial Validator receives:**
+- Full PRD content
+- All 4 reviewer outputs
 
-1. Plan claims — assumptions validated? Estimates realistic? Hidden dependencies?
-2. Reviewer findings — false positives? False negatives? Contradictions?
-3. Systemic blind spots — what is nobody thinking about?
-
-Return:
-CHALLENGES TO PLAN: [...]
-CHALLENGES TO REVIEWERS: [...]
-FALSE POSITIVES: [findings that should be dismissed]
-MISSED ISSUES: [things nobody caught]
-SYSTEMIC RISKS: [category-level concerns]
-```
+**Tasks:**
+1. Challenge plan claims — assumptions validated? Estimates realistic? Hidden dependencies?
+2. Challenge reviewer findings — false positives? False negatives? Contradictions?
+3. Identify systemic blind spots — what is nobody thinking about?
 
 ---
 
@@ -99,7 +124,7 @@ SYSTEMIC RISKS: [category-level concerns]
 
 If REVISION_REQUESTED:
 1. User updates PRD with priority fixes
-2. Re-run `/review-plan` (all 5 agents run fresh)
+2. Re-run plan review (all 5 agents run fresh)
 3. Each run is independent — no memory of previous reviews
 
 ---
@@ -137,9 +162,21 @@ Confidence: [HIGH | MEDIUM | LOW]
 
 ---
 
+## Notes
+
+- **5 total agents:** 4 specialist reviewers run in parallel, then 1 adversarial validator runs sequentially after all 4 complete
+- **Adversarial validator is key:** Catches cases where all 4 reviewers agree on something wrong or miss the same blind spot
+- **Zero conversation context:** Each reviewer sees only the PRD content, not conversation history
+- **Re-runnable:** If REVISION_REQUESTED, fix the plan and re-run. Each run is independent
+- **Pairs with deepen-plan:** Run deepen first for research enrichment, then review for formal approval
+- **Not a replacement for human review:** AI review supplements, doesn't replace
+- **Verdict escalation:** A single CRITICAL finding from any source results in REVISION_REQUESTED
+
+---
+
 ## Integration Points
 
-- **Input**: PRD file from `/generate-prd` or `/deepen-plan`
+- **Input**: PRD file from generate-prd or deepen-plan skills
 - **Output**: Review verdict + findings
 - **Agent definitions**: `agents/review/*.md`
-- **Consumed by**: `/review-plan` command, `/godmode` workflow
+- **Consumed by**: `/plan` workflow command

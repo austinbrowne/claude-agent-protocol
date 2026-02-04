@@ -1,15 +1,26 @@
 ---
 name: security-review
-version: "1.0"
+version: "1.1"
 description: OWASP-based security review methodology for AI code review
 referenced_by:
-  - commands/security-review.md
-  - commands/fresh-eyes-review.md
+  - commands/implement.md
+  - skills/fresh-eyes-review/SKILL.md
 ---
 
 # Security Review Skill
 
 OWASP Top 10 adapted for AI code review with common AI blind spot detection.
+
+---
+
+## When to Apply
+
+- Code involves authentication, authorization, or user input
+- Handling sensitive data (PII, passwords, tokens, API keys)
+- Database queries with user input
+- External API calls
+- File uploads
+- Issue or PRD flagged as `SECURITY_SENSITIVE`
 
 ---
 
@@ -68,6 +79,48 @@ If NO triggers found: "No security-sensitive code detected. Security review not 
 
 ---
 
+## Execution Steps
+
+### Step 1: Analyze git diff for security triggers
+
+```bash
+git diff HEAD
+git diff --staged
+```
+
+Scan for trigger patterns listed above. If no triggers found, report no security-sensitive code detected.
+
+### Step 2: Load security checklist
+
+Read `checklists/AI_CODE_SECURITY_REVIEW.md` for the full OWASP checklist.
+
+### Step 3: Run applicable checklist items
+
+For each triggered category, run the relevant checklist items against the code:
+
+- **Auth code triggers:** A01 (Access Control) + A07 (Auth Failures)
+- **Database queries trigger:** A03 (Injection)
+- **User input triggers:** A03 (Injection/XSS) + A04 (Insecure Design)
+- **External APIs trigger:** A10 (SSRF) + A08 (Data Integrity)
+
+### Step 4: Check each item against code
+
+For each checklist item:
+- Grep code for relevant patterns
+- Mark each item: PASS / FAIL / WARNING / N/A
+
+### Step 5: Generate security findings report
+
+Report format with CRITICAL / HIGH / MEDIUM / LOW severity sections, plus passed checks.
+
+### Step 6: Set security status flag
+
+- `SECURITY_SENSITIVE` — Has unfixed CRITICAL/HIGH issues
+- `SECURITY_REVIEWED` — Issues noted, can proceed with caution
+- `SECURITY_APPROVED` — All checks passed
+
+---
+
 ## Severity Classification
 
 | Severity | Description | Action |
@@ -79,17 +132,9 @@ If NO triggers found: "No security-sensitive code detected. Security review not 
 
 ---
 
-## Security Status Flags
-
-- `SECURITY_SENSITIVE` — Has unfixed CRITICAL/HIGH issues
-- `SECURITY_REVIEWED` — Issues noted, can proceed with caution
-- `SECURITY_APPROVED` — All checks passed
-
----
-
 ## Integration Points
 
 - **Checklist reference**: `checklists/AI_CODE_SECURITY_REVIEW.md`
 - **Agent reference**: `agents/review/security-reviewer.md`
-- **Consumed by**: `/security-review` command, Fresh Eyes Review security agent
+- **Consumed by**: `/implement` workflow command, Fresh Eyes Review security agent
 - **Triggers**: Git diff content analysis

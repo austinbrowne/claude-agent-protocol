@@ -154,13 +154,13 @@ Search passes: 7 passes, 0 matches
 
 NO RELEVANT SOLUTIONS FOUND.
 This appears to be a new domain for this project.
-Consider running `/compound` after implementation to capture learnings.
+Consider running `/learn` after implementation to capture learnings.
 ```
 
 ## Compatibility
 
 This agent's search strategy is compatible with solution docs created by:
-- The `/compound` command (this project)
+- The `/learn` command (this project)
 - The compound-engineering plugin's `compound-docs` skill
 
 Both produce docs in `docs/solutions/{category}/` with the same YAML frontmatter fields.

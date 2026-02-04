@@ -1,10 +1,9 @@
 ---
 name: brainstorm
-version: "1.0"
+version: "1.1"
 description: Structured divergent thinking methodology for exploring solution approaches
 referenced_by:
-  - commands/brainstorm.md
-  - commands/workflows/godmode.md
+  - commands/plan.md
 ---
 
 # Brainstorming Skill
@@ -30,7 +29,17 @@ Reusable methodology for structured divergent thinking before committing to a so
 
 ## Process
 
-### 1. Search Past Learnings
+### 1. Assess Whether Brainstorming Adds Value
+
+**Auto-skip criteria:**
+- Clear bug fixes with a single obvious solution
+- Tasks where the approach is dictated by existing patterns
+- Direct instructions from user that leave no ambiguity
+
+**If unclear whether brainstorming is worthwhile:**
+- Ask the user whether to brainstorm or skip directly to PRD generation
+
+### 2. Search Past Learnings
 
 Before brainstorming, search `docs/solutions/` for relevant past decisions:
 
@@ -46,13 +55,13 @@ prompt: "Follow agents/research/learnings-researcher.md.
 
 If no results: note "No past learnings found" and continue.
 
-### 2. Define Problem Space
+### 3. Define Problem Space
 
 Gather context from:
 - `/explore` output (if available in conversation)
 - User's topic description
 - Codebase patterns (quick Grep for relevant keywords)
-- Past learnings from step 1
+- Past learnings from step 2
 
 Define:
 1. **Core problem** — what are we trying to solve?
@@ -63,7 +72,7 @@ Define:
 
 Present to user for validation before proceeding.
 
-### 3. Generate 2-3 Approaches
+### 4. Generate 2-3 Approaches
 
 For each approach, provide:
 
@@ -85,7 +94,7 @@ For each approach, provide:
 - Approaches should be genuinely different, not minor variations
 - Be honest about tradeoffs — do not present a clear winner as if it were a tough choice
 
-### 4. Comparison Matrix
+### 5. Comparison Matrix
 
 ```
 | Criteria        | Approach 1 | Approach 2 | Approach 3 |
@@ -103,7 +112,7 @@ Recommendation: [Approach N] — [1-sentence rationale]
 
 Present matrix and ask user for decision.
 
-### 5. Capture to Document
+### 6. Capture to Document
 
 After user decides:
 
@@ -131,9 +140,22 @@ feeds_into: "docs/prds/YYYY-MM-DD-feature-name.md"
 
 ---
 
+## Notes
+
+- **Not always needed:** Skip for clear bug fixes, small tasks, or when the approach is obvious
+- **Past learnings integration:** Searches `docs/solutions/` to avoid repeating past mistakes
+- **Human decides:** Claude recommends but the human always makes the final call
+- **Captured for posterity:** Brainstorm doc records rejected alternatives and rationale
+- **Pairs with ADR creation:** For major architectural decisions, create an ADR after brainstorming
+- **Token efficiency:** Learnings research uses a subagent to avoid polluting main conversation context
+- **2-3 approaches is the sweet spot:** More than 3 causes analysis paralysis; fewer than 2 is not really brainstorming
+
+---
+
 ## Integration Points
 
 - **Input from `/explore`**: Exploration findings inform the problem space
 - **Input from `docs/solutions/`**: Past learnings prevent repeating mistakes
-- **Output to `/generate-prd`**: Chosen approach becomes the technical direction
-- **Output to `/create-adr`**: Major decisions may warrant an ADR
+- **Output to PRD generation**: Chosen approach becomes the technical direction
+- **Output to ADR creation**: Major decisions may warrant an ADR
+- **Template**: `templates/BRAINSTORM_TEMPLATE.md`

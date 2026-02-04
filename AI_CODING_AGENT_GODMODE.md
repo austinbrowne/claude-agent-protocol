@@ -1,12 +1,10 @@
 # AI Coding Agent Standard Operating Protocol (SOP)
 
-**Version:** 4.0
+**Version:** 4.2
 **Last Updated:** February 2026
 **Purpose:** Safe, effective AI-assisted software development
 
-**NEW in v4.0:** 17 modular slash commands, 21 specialized agents (17 review + 4 research), knowledge compounding, brainstorming, plan deepening, adversarial validation, and smart agent selection - see `~/.claude/commands/*.md` and `QUICK_START.md`
-
-**NEW in v4.1:** Orchestrator workflows (`/godmode`, `/bugfix`, `/quickfix`), 6 reusable skill packages, and programmatic flow chaining via `AskUserQuestion` — every command offers next-step options after completion.
+**NEW in v4.2:** 6 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`), 19 reusable skill packages, flat `godmode:` namespace, and natural workflow chaining via `AskUserQuestion`.
 
 ---
 
@@ -14,16 +12,18 @@
 
 This is the **comprehensive reference document** for the GODMODE protocol.
 
-**For guided workflows, use orchestrator commands instead:**
-- `/godmode` — Full feature: planning → execution → finalization (reads this doc's phases automatically)
-- `/bugfix` — Bug fix with investigation: explore → fix → validate → ship
-- `/quickfix` — Minimal fix: fix → lite review → ship
+**For guided workflows, use the 6 workflow commands:**
+- `/explore` — Reconnaissance & ideation: codebase exploration + brainstorming
+- `/plan` — Planning & requirements: PRD, deepen, review, issues, ADR
+- `/implement` — Implementation: start issue, tests, validation, security, recovery
+- `/review` — Code review: fresh eyes (full/lite), protocol compliance
+- `/learn` — Knowledge capture: save solved problems as reusable docs
+- `/ship` — Ship: commit/PR, finalize, refactor
 
 **For quick access:**
 - Critical safety rules → `~/.claude/CLAUDE.md` (auto-loaded with highest priority)
-- Orchestrator workflows → `~/.claude/commands/workflows/*.md` (3 orchestrators)
-- Modular commands → `~/.claude/commands/*.md` (17 commands)
-- Reusable skills → `~/.claude/skills/*/SKILL.md` (6 skill packages)
+- Workflow commands → `~/.claude/commands/*.md` (6 workflows)
+- Reusable skills → `~/.claude/skills/*/SKILL.md` (19 skill packages)
 - Agent definitions → `~/.claude/agents/review/*.md` (17 review agents) + `~/.claude/agents/research/*.md` (4 research agents)
 - Quick reference → `~/.claude/QUICK_START.md`
 
@@ -773,7 +773,7 @@ Next: Awaiting approval for Phase [N+1]
 
 ### Step 1: Capture Learnings
 
-**Use:** `/compound` command
+**Use:** `/learn` command
 
 After completing a feature or fixing a tricky bug:
 1. Identify key learnings, gotchas, and insights from the implementation
@@ -781,7 +781,7 @@ After completing a feature or fixing a tricky bug:
 3. Create solution doc with enum-validated YAML frontmatter: module, problem_type, component, symptoms, root_cause, resolution_type, severity, tags
 4. Save to `docs/solutions/{problem_type-directory}/{slug}-{YYYYMMDD}.md`
 
-**Auto-trigger phrases (Claude should suggest `/compound` when these appear):**
+**Auto-trigger phrases (Claude should suggest `/learn` when these appear):**
 - "the trick was", "the fix was", "root cause was"
 - "I learned that", "next time we should"
 - "key insight", "important gotcha"
@@ -927,8 +927,8 @@ After completing a feature or fixing a tricky bug:
 - `templates/ADR_TEMPLATE.md` - Architecture decisions
 - `agents/review/*.md` - 17 review agent definitions
 - `agents/research/*.md` - 4 research agent definitions
-- `skills/*/SKILL.md` - 6 reusable skill packages
-- `commands/workflows/*.md` - 3 orchestrator workflows
+- `skills/*/SKILL.md` - 19 reusable skill packages
+- `commands/*.md` - 6 workflow commands
 - `guides/CONTEXT_OPTIMIZATION.md` - Advanced context techniques
 - `guides/MULTI_AGENT_PATTERNS.md` - Complex coordination
 - `guides/FRESH_EYES_REVIEW.md` - Smart selection review process

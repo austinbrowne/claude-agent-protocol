@@ -1,10 +1,10 @@
 # AI Coding Agent Protocol
 
-**Version:** 4.1
+**Version:** 4.2
 **Last Updated:** February 2026
 **Status:** Production-ready
 
-Core protocol and templates for AI-assisted software development with Claude Code. 3 orchestrator workflows, 17 modular slash commands, 6 reusable skill packages, 21 specialized agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.
+Core protocol and templates for AI-assisted software development with Claude Code. 6 workflow commands, 19 reusable skill packages, 21 specialized agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.
 
 ---
 
@@ -39,18 +39,34 @@ cd ~/.claude && git pull
 - **CLAUDE.md** - Global user instructions and communication style
 - **PRD_TEMPLATE.md** - Product Requirements Document template (Lite + Full) with spec-flow analysis
 
-### Orchestrator Workflows (3)
-- **`/godmode`** - Full feature development: planning → execution → finalization
-- **`/bugfix`** - Bug fix with investigation: explore → fix → validate → ship
-- **`/quickfix`** - Minimal fix flow: fix → lite review → ship
+### Workflow Commands (6)
+- **`/explore`** - Reconnaissance & ideation: codebase exploration + brainstorming
+- **`/plan`** - Planning & requirements: PRD, deepen, review, issues, ADR
+- **`/implement`** - Implementation: start issue, tests, validation, security, recovery
+- **`/review`** - Code review: fresh eyes (full/lite), protocol compliance
+- **`/learn`** - Knowledge capture: save solved problems as reusable docs
+- **`/ship`** - Ship: commit/PR, finalize, refactor
 
-### Skills (6)
-- **Brainstorming** (`skills/brainstorm/`) - Structured divergent thinking methodology
-- **Knowledge Compounding** (`skills/compound/`) - Capture and reuse solved problems
-- **Fresh Eyes Review** (`skills/fresh-eyes-review/`) - 13-agent smart selection system with trigger patterns
-- **File Todos** (`skills/todos/`) - File-based todo tracking conventions
+### Skills (19)
+- **Brainstorm** (`skills/brainstorm/`) - Structured divergent thinking methodology
+- **Explore** (`skills/explore/`) - Multi-agent codebase exploration
+- **Generate PRD** (`skills/generate-prd/`) - PRD creation with research and spec-flow
+- **Deepen Plan** (`skills/deepen-plan/`) - Plan enrichment with parallel research
+- **Review Plan** (`skills/review-plan/`) - Multi-agent plan review with adversarial validation
+- **Create Issues** (`skills/create-issues/`) - GitHub issue generation from PRD
+- **Create ADR** (`skills/create-adr/`) - Architecture Decision Records
+- **Start Issue** (`skills/start-issue/`) - Issue startup with living plan
+- **Generate Tests** (`skills/generate-tests/`) - Comprehensive test generation
+- **Run Validation** (`skills/run-validation/`) - Tests + coverage + lint + security
 - **Security Review** (`skills/security-review/`) - OWASP security review methodology
-- **Plan Review** (`skills/review-plan/`) - Multi-agent plan review with adversarial validation
+- **Recovery** (`skills/recovery/`) - Failure recovery decision tree
+- **Refactor** (`skills/refactor/`) - Guided refactoring methodology
+- **Fresh Eyes Review** (`skills/fresh-eyes-review/`) - 13-agent smart selection review
+- **Review Protocol** (`skills/review-protocol/`) - Protocol compliance review
+- **Commit and PR** (`skills/commit-and-pr/`) - Commit and PR creation with gates
+- **Finalize** (`skills/finalize/`) - Final documentation and validation
+- **Learn** (`skills/learn/`) - Knowledge compounding (capture solved problems)
+- **File Todos** (`skills/todos/`) - File-based todo tracking conventions
 
 ### Checklists
 - **AI_CODE_SECURITY_REVIEW.md** - OWASP Top 10 2025 security checklist (45% of AI code has vulnerabilities!)
@@ -76,8 +92,8 @@ cd ~/.claude && git pull
 - **17 review agents** (`agents/review/`) - Security, code quality, edge case, supervisor, adversarial validator, performance, API contract, concurrency, error handling, data validation, dependency, testing adequacy, config/secrets, documentation, architecture, simplicity, spec-flow
 - **4 research agents** (`agents/research/`) - Codebase researcher, learnings researcher, best practices researcher, framework docs researcher
 
-### Commands (17)
-- **17 modular slash commands** - Reusable workflow commands with hybrid invocation and flow chaining (see below)
+### Workflow Commands
+- **6 workflow entry points** - Top-level orchestrators with AskUserQuestion sub-step selection (see below)
 
 ---
 
@@ -86,45 +102,66 @@ cd ~/.claude && git pull
 ```
 ~/.claude/
 ├── README.md                           # This file
-├── AI_CODING_AGENT_GODMODE.md         # Main SOP (v4.1)
+├── AI_CODING_AGENT_GODMODE.md         # Main SOP (v4.2)
 ├── QUICK_START.md                      # Quick reference guide
 ├── CLAUDE.md                           # Global instructions
 ├── PRD_TEMPLATE.md                     # PRD template (with spec-flow analysis)
 │
-├── skills/                             # 6 reusable knowledge packages
-│   ├── brainstorming/SKILL.md         # Brainstorming methodology
-│   ├── knowledge-compounding/SKILL.md # Knowledge capture methodology
+├── commands/                           # 6 workflow entry points
+│   ├── explore.md                     # Reconnaissance & ideation
+│   ├── plan.md                        # Planning & requirements
+│   ├── implement.md                   # Implementation
+│   ├── review.md                      # Code review
+│   ├── learn.md                       # Knowledge capture
+│   └── ship.md                        # Commit, PR & finalize
+│
+├── skills/                             # 19 reusable skill packages
+│   ├── brainstorm/SKILL.md            # Structured divergent thinking
+│   ├── explore/SKILL.md               # Multi-agent codebase exploration
+│   ├── generate-prd/SKILL.md          # PRD creation with research
+│   ├── deepen-plan/SKILL.md           # Plan enrichment with parallel research
+│   ├── review-plan/SKILL.md           # Multi-agent plan review
+│   ├── create-issues/SKILL.md         # GitHub issue generation
+│   ├── create-adr/SKILL.md            # Architecture Decision Records
+│   ├── start-issue/SKILL.md           # Issue startup with living plan
+│   ├── generate-tests/SKILL.md        # Comprehensive test generation
+│   ├── run-validation/SKILL.md        # Tests + coverage + lint + security
+│   ├── security-review/SKILL.md       # OWASP security methodology
+│   ├── recovery/SKILL.md              # Failure recovery decision tree
+│   ├── refactor/SKILL.md              # Guided refactoring
 │   ├── fresh-eyes-review/             # Smart selection review system
 │   │   ├── SKILL.md                   # 13-agent review methodology
 │   │   └── references/trigger-patterns.md # Agent trigger patterns
-│   ├── file-todos/SKILL.md            # File-based todo tracking
-│   ├── security-review/SKILL.md       # OWASP security methodology
-│   └── plan-review/SKILL.md           # Multi-agent plan review
+│   ├── review-protocol/SKILL.md       # Protocol compliance review
+│   ├── commit-and-pr/SKILL.md         # Commit and PR creation
+│   ├── finalize/SKILL.md              # Final documentation + validation
+│   ├── learn/SKILL.md                 # Knowledge compounding
+│   └── todos/SKILL.md                 # File-based todo tracking
 │
 ├── agents/
 │   ├── review/                        # 17 review agent definitions
-│   │   ├── security-reviewer.md       # OWASP Top 10, injection, auth
-│   │   ├── code-quality-reviewer.md   # Naming, structure, SOLID
-│   │   ├── edge-case-reviewer.md      # Null/empty/boundary (biggest AI blind spot)
-│   │   ├── supervisor.md              # Consolidate, deduplicate, prioritize
-│   │   ├── adversarial-validator.md   # Falsification over confirmation
-│   │   ├── performance-reviewer.md    # N+1, complexity, caching
-│   │   ├── api-contract-reviewer.md   # REST/GraphQL design, status codes
-│   │   ├── concurrency-reviewer.md    # Race conditions, thread safety
-│   │   ├── error-handling-reviewer.md # Try/catch, retries, circuit breakers
-│   │   ├── data-validation-reviewer.md# Input validation, sanitization
-│   │   ├── dependency-reviewer.md     # New deps, vulns, licenses
-│   │   ├── testing-adequacy-reviewer.md # Coverage, test quality
-│   │   ├── config-secrets-reviewer.md # Hardcoded values, env vars
-│   │   ├── documentation-reviewer.md  # Public API docs, naming
-│   │   ├── architecture-reviewer.md   # Component decomposition, patterns
-│   │   ├── simplicity-reviewer.md     # YAGNI, over-engineering
-│   │   └── spec-flow-reviewer.md      # User flow completeness
+│   │   ├── security-reviewer.md
+│   │   ├── code-quality-reviewer.md
+│   │   ├── edge-case-reviewer.md
+│   │   ├── supervisor.md
+│   │   ├── adversarial-validator.md
+│   │   ├── performance-reviewer.md
+│   │   ├── api-contract-reviewer.md
+│   │   ├── concurrency-reviewer.md
+│   │   ├── error-handling-reviewer.md
+│   │   ├── data-validation-reviewer.md
+│   │   ├── dependency-reviewer.md
+│   │   ├── testing-adequacy-reviewer.md
+│   │   ├── config-secrets-reviewer.md
+│   │   ├── documentation-reviewer.md
+│   │   ├── architecture-reviewer.md
+│   │   ├── simplicity-reviewer.md
+│   │   └── spec-flow-reviewer.md
 │   └── research/                      # 4 research agent definitions
-│       ├── codebase-researcher.md     # Repo structure, patterns, conventions
-│       ├── learnings-researcher.md    # Search docs/solutions/ for past learnings
-│       ├── best-practices-researcher.md # Web search for best practices
-│       └── framework-docs-researcher.md # Context7 MCP for framework docs
+│       ├── codebase-researcher.md
+│       ├── learnings-researcher.md
+│       ├── best-practices-researcher.md
+│       └── framework-docs-researcher.md
 │
 ├── checklists/
 │   ├── AI_CODE_SECURITY_REVIEW.md     # Security checklist (OWASP Top 10 2025)
@@ -145,29 +182,6 @@ cd ~/.claude && git pull
 │   ├── CONTEXT_OPTIMIZATION.md        # Reduce token usage
 │   ├── MULTI_AGENT_PATTERNS.md        # Multi-agent coordination
 │   └── GITHUB_PROJECT_INTEGRATION.md  # GitHub Projects workflow
-│
-├── commands/                           # 17 modular slash commands
-│   ├── workflows/                     # 3 orchestrator commands
-│   │   ├── godmode.md                 # Full feature orchestrator
-│   │   ├── bugfix.md                  # Bug fix with investigation
-│   │   └── quickfix.md               # Quick fix, no investigation
-│   ├── explore.md                     # Multi-agent codebase exploration
-│   ├── brainstorm.md                  # Structured divergent thinking
-│   ├── generate-prd.md                # PRD generation with spec-flow
-│   ├── deepen-plan.md                 # Parallel research enrichment
-│   ├── review-plan.md                 # Multi-agent plan review
-│   ├── create-adr.md                  # Architecture Decision Records
-│   ├── create-issues.md               # GitHub issue generation
-│   ├── start-issue.md                 # Begin issue with living plan
-│   ├── generate-tests.md              # Test generation
-│   ├── security-review.md             # Security checklist review
-│   ├── run-validation.md              # Tests + coverage + lint + security
-│   ├── fresh-eyes-review.md           # 13-agent smart selection review
-│   ├── recovery.md                    # Failure recovery decision tree
-│   ├── commit-and-pr.md               # Commit and PR creation
-│   ├── compound.md                    # Capture solved problems
-│   ├── refactor.md                    # Guided refactoring
-│   └── finalize.md                    # Final docs and validation
 │
 ├── docs/
 │   ├── solutions/                     # Knowledge compounding storage
@@ -206,101 +220,41 @@ This ensures agents pay full attention to critical safety rules while accessing 
 
 ---
 
-## Modular Commands
+## Workflow Commands
 
-17 reusable slash commands + 3 orchestrator workflows. Use individually or compose custom workflows. Every command offers next-step options after completion via `AskUserQuestion`.
+6 workflow entry points. Each workflow offers sub-step selection via `AskUserQuestion` and chains to the next workflow after completion. Individual skills are also directly invocable as slash commands.
 
-### Orchestrator Workflows
+### The 6 Workflows
 
-- `/godmode` - Full feature development: planning → execution → finalization
-- `/bugfix` - Bug fix with investigation: explore → fix → validate → ship
-- `/quickfix` - Minimal fix flow: fix → lite review → ship
-
-### Command Categories
-
-**Phase 0: Planning (7 commands)**
-- `/explore` - Multi-agent codebase exploration (4 parallel research agents)
-- `/brainstorm` - Structured divergent thinking with comparison matrices
-- `/generate-prd` - Create PRD with parallel research and spec-flow analysis
-- `/deepen-plan` - Enrich PRD with massive parallel research (10-20+ agents)
-- `/review-plan` - Multi-agent plan review with adversarial validation
-- `/create-adr` - Document architectural decisions
-- `/create-issues` - Generate GitHub issues from approved PRD
-
-**Phase 1: Execution (8 commands)**
-- `/start-issue` - Begin work with living plan and past learnings
-- `/generate-tests` - Generate comprehensive tests
-- `/security-review` - Run security checklist review
-- `/run-validation` - Run tests + coverage + lint + security scan
-- `/fresh-eyes-review` - 13-agent smart selection code review
-- `/recovery` - Evaluate Continue/Rollback/Abandon decision
-- `/commit-and-pr` - Commit changes and create pull request
-- `/compound` - Capture solved problems as reusable solution docs
-
-**Phase 2: Finalization (2 commands)**
-- `/refactor` - Guided refactoring pass
-- `/finalize` - Final documentation and validation
-
-### Key Features
-
-**Hybrid invocation:** All commands support interactive (asks questions) AND direct (executes with args) modes.
-
-**Interactive mode:**
-```bash
-/explore
-# Claude: What would you like to explore? _____
-```
-
-**Direct mode:**
-```bash
-/explore authentication patterns
-# Claude: [Immediately explores authentication patterns]
-```
+| Command | Purpose | Sub-steps |
+|---------|---------|-----------|
+| `/explore` | Reconnaissance & ideation | Codebase exploration, brainstorming |
+| `/plan` | Planning & requirements | Generate PRD, deepen plan, review plan, create issues, ADR |
+| `/implement` | Implementation | Start issue, generate tests, run validation, security review, recovery |
+| `/review` | Code review | Fresh eyes review (full/lite), protocol compliance |
+| `/learn` | Knowledge capture | Save solved problems as reusable solution docs |
+| `/ship` | Ship | Commit/PR, finalize, refactor |
 
 ### Example Workflows
 
-**Orchestrated (recommended):**
-```bash
-/godmode "OAuth 2.0 authentication"     # Full feature — guided workflow
-/bugfix 456                              # Bug fix with investigation
-/quickfix "fix typo in error message"    # Quick fix, no investigation
+**Full feature:**
+```
+/explore → /plan → /implement → /review → /learn → /ship
 ```
 
-**Manual full workflow:**
-```bash
-/explore authentication
-/brainstorm "auth approach"
-/generate-prd --full "OAuth 2.0 authentication"
-/deepen-plan docs/prds/2026-02-01-oauth-auth.md
-/review-plan docs/prds/2026-02-01-oauth-auth.md
-/create-issues docs/prds/2026-02-01-oauth-auth.md --immediate
-/start-issue 123
-# [Implement code — past learnings surfaced, living plan created]
-/generate-tests
-/security-review
-/run-validation
-/fresh-eyes-review
-# [Fix any findings]
-/compound
-/commit-and-pr --base experimental
-/refactor
-/finalize --all
+**Bug fix:**
+```
+/explore → /implement → /review → /learn → /ship
 ```
 
-**Quick Bug Fix:**
-```bash
-/start-issue 456
-# [Fix bug — past solutions searched automatically]
-/fresh-eyes-review --lite
-/compound
-/commit-and-pr --base main
+**Quick fix:**
+```
+/implement → /review → /ship
 ```
 
-**Just Review Existing Changes:**
-```bash
-# [Already have staged changes]
-/fresh-eyes-review
-/commit-and-pr
+**Just review:**
+```
+/review → /ship
 ```
 
 **See:** `QUICK_START.md` for full command reference and more example workflows.
@@ -346,16 +300,17 @@ This ensures agents pay full attention to critical safety rules while accessing 
 
 ## Key Features
 
-### Orchestrated Workflows
-- Three guided workflows: `/godmode` (full feature), `/bugfix` (with investigation), `/quickfix` (minimal)
-- `AskUserQuestion` chaining — every command offers contextual next-step options
+### 6 Workflow Commands
+- Six workflow entry points: `/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`
+- `AskUserQuestion` chaining — each workflow offers sub-step selection and next-workflow suggestions
 - Human-in-loop at every phase transition — skip, reorder, or exit at any point
-- Smart entry point detection — orchestrators skip phases based on existing context
+- All flat `godmode:` namespace (no sub-prefixes)
 
-### Reusable Skill Packages
-- 6 skill packages extract methodology from commands into reusable knowledge
-- Skills loaded by commands at execution time (just-in-time, not embedded)
-- Three-layer architecture: skills (knowledge) → commands (user-facing) → agents (expert personas)
+### 19 Reusable Skill Packages
+- 19 skill packages provide methodology for each sub-step
+- Skills loaded by workflow commands at execution time (just-in-time, not embedded)
+- All skills also user-invocable as slash commands
+- Two-layer architecture: skills (knowledge + user-facing) → agents (expert personas)
 
 ### Security-First
 - OWASP Top 10 2025 coverage (including new A03: Supply Chain, A10: Exceptional Conditions)
@@ -364,7 +319,7 @@ This ensures agents pay full attention to critical safety rules while accessing 
 - Adversarial validation challenges claims with evidence, not assertions
 
 ### Knowledge Compounding
-- Capture solved problems as searchable, reusable solution docs (`/compound`)
+- Capture solved problems as searchable, reusable solution docs (`/learn`)
 - Past learnings surfaced automatically during planning and implementation
 - Multi-pass Grep search across `docs/solutions/` (tags, category, full-text)
 - Knowledge grows over time — each captured solution makes future planning smarter
@@ -599,10 +554,18 @@ Use the context optimization guide. 30-50% cost savings possible.
 
 ## Version History
 
-**v4.1 (February 2026)** - Current
-- **MAJOR**: 3 orchestrator workflows (`/godmode`, `/bugfix`, `/quickfix`) for guided development
-- **MAJOR**: 6 reusable skill packages (`skills/`) — extracted methodology into knowledge layer
-- **MAJOR**: Programmatic flow chaining — every command offers next-step options via `AskUserQuestion`
+**v4.2 (February 2026)** - Current
+- **MAJOR**: Restructured to 6 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`)
+- **MAJOR**: 19 reusable skill packages (`skills/`) — all skills user-invocable as slash commands
+- **MAJOR**: Flat `godmode:` namespace — no sub-prefixes, clean command discovery
+- Removed orchestrator workflows (godmode, bugfix, quickfix) — replaced by 6 workflow commands with natural chaining
+- Renamed `/compound` to `/learn` for clarity
+- Two-layer architecture: skills (knowledge + user-facing) → agents (expert personas)
+
+**v4.1 (February 2026)**
+- 3 orchestrator workflows (`/godmode`, `/bugfix`, `/quickfix`) for guided development
+- 6 reusable skill packages (`skills/`) — extracted methodology into knowledge layer
+- Programmatic flow chaining — every command offers next-step options via `AskUserQuestion`
 - Three-layer architecture: skills (knowledge) → commands (user-facing) → agents (expert personas)
 - Smart entry point detection in orchestrators (skips completed phases)
 

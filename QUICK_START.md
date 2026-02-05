@@ -88,6 +88,13 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 | `create-adr` | Document architecture decisions |
 | `create-issues` | Generate GitHub issues from approved plan |
 
+### Issue Skills
+| Skill | Purpose |
+|-------|---------|
+| `file-issues` | Rapid-fire issue filing with sparse templates |
+| `file-issue` | File a single GitHub issue from a description |
+| `enhance-issue` | Refine sparse issues with exploration and planning |
+
 ### Execution Skills
 | Skill | Purpose |
 |-------|---------|
@@ -201,7 +208,7 @@ Use the recovery skill within `/implement`:
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
 | `commands/*.md` | **6 workflow commands** (explore, plan, implement, review, learn, ship) |
-| `skills/*/SKILL.md` | **19 reusable skill packages** |
+| `skills/*/SKILL.md` | **22 reusable skill packages** |
 | `agents/review/*.md` | **17 review agents** |
 | `agents/research/*.md` | **4 research agents** |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | Security checklist (OWASP Top 10) |

@@ -4,7 +4,7 @@
 **Last Updated:** February 2026
 **Purpose:** Safe, effective AI-assisted software development
 
-**NEW in v4.2:** 6 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`), 19 reusable skill packages, flat `godmode:` namespace, and natural workflow chaining via `AskUserQuestion`.
+**NEW in v4.2:** 6 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`), 22 reusable skill packages, flat `godmode:` namespace, and natural workflow chaining via `AskUserQuestion`.
 
 ---
 
@@ -23,7 +23,7 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 **For quick access:**
 - Critical safety rules → `~/.claude/CLAUDE.md` (auto-loaded with highest priority)
 - Workflow commands → `~/.claude/commands/*.md` (6 workflows)
-- Reusable skills → `~/.claude/skills/*/SKILL.md` (19 skill packages)
+- Reusable skills → `~/.claude/skills/*/SKILL.md` (22 skill packages)
 - Agent definitions → `~/.claude/agents/review/*.md` (17 review agents) + `~/.claude/agents/research/*.md` (4 research agents)
 - Quick reference → `~/.claude/QUICK_START.md`
 
@@ -929,7 +929,7 @@ After completing a feature or fixing a tricky bug:
 - `templates/ADR_TEMPLATE.md` - Architecture decisions
 - `agents/review/*.md` - 17 review agent definitions
 - `agents/research/*.md` - 4 research agent definitions
-- `skills/*/SKILL.md` - 19 reusable skill packages
+- `skills/*/SKILL.md` - 22 reusable skill packages
 - `commands/*.md` - 6 workflow commands
 - `guides/CONTEXT_OPTIMIZATION.md` - Advanced context techniques
 - `guides/MULTI_AGENT_PATTERNS.md` - Complex coordination
@@ -939,4 +939,4 @@ After completing a feature or fixing a tricky bug:
 
 ---
 
-*Last Updated: February 2026 | Version: 4.1 | Next Review: Quarterly*
+*Last Updated: February 2026 | Version: 4.2 | Next Review: Quarterly*

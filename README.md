@@ -3,7 +3,7 @@
 **Version:** 4.2.0
 **Status:** Production-ready
 
-A Claude Code plugin for AI-assisted software development. 6 workflow commands, 19 skill packages, 21 specialized agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.
+A Claude Code plugin for AI-assisted software development. 6 workflow commands, 22 skill packages, 21 specialized agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.
 
 ---
 
@@ -150,7 +150,7 @@ You: /learn
 ### Workflow Commands (6)
 Top-level orchestrators with sub-step selection via `AskUserQuestion`.
 
-### Skills (19)
+### Skills (22)
 Reusable methodology packages, each directly invocable:
 
 | Skill | Purpose |
@@ -162,6 +162,9 @@ Reusable methodology packages, each directly invocable:
 | `/review-plan` | Multi-agent plan review with adversarial validation |
 | `/create-issues` | GitHub issue generation from plan |
 | `/create-adr` | Architecture Decision Records |
+| `/file-issues` | Rapid-fire issue filing with sparse templates |
+| `/file-issue` | File a single GitHub issue from a description |
+| `/enhance-issue` | Refine sparse issues with exploration and planning |
 | `/start-issue` | Issue startup with living plan |
 | `/generate-tests` | Comprehensive test generation |
 | `/run-validation` | Tests + coverage + lint + security |
@@ -181,7 +184,7 @@ Reusable methodology packages, each directly invocable:
 
 ### Also Included
 - **Checklists** — OWASP Top 10 2025 security checklist, AI code review criteria
-- **Templates** — Plan (3-tier), test strategy, ADR, brainstorm, solution doc, todo, living plan, GitHub issue
+- **Templates** — Plan (3-tier), test strategy, ADR, brainstorm, solution doc, todo, living plan, GitHub issue, bug issue, recovery report
 - **Guides** — Fresh Eyes Review, failure recovery, context optimization, multi-agent patterns, GitHub Projects integration
 
 ---
@@ -220,7 +223,7 @@ commands/                              # 6 workflow entry points
 ├── learn.md
 └── ship.md
 
-skills/                                # 19 reusable skill packages
+skills/                                # 22 reusable skill packages
 ├── brainstorm/SKILL.md
 ├── explore/SKILL.md
 ├── generate-plan/SKILL.md
@@ -228,6 +231,9 @@ skills/                                # 19 reusable skill packages
 ├── review-plan/SKILL.md
 ├── create-issues/SKILL.md
 ├── create-adr/SKILL.md
+├── file-issues/SKILL.md
+├── file-issue/SKILL.md
+├── enhance-issue/SKILL.md
 ├── start-issue/SKILL.md
 ├── generate-tests/SKILL.md
 ├── run-validation/SKILL.md
@@ -265,8 +271,12 @@ docs/
 - `/generate-plan` skill is self-sufficient — runs its own 4-agent research (no prior `/explore` required)
 - Moved `docs/prds/` to `docs/plans/`, renamed `generate-prd` to `generate-plan`
 - New `PLAN_TEMPLATE.md` with structured templates for all 3 tiers
+- 22 skill packages (added `/file-issues`, `/file-issue`, `/enhance-issue`)
 
-**v4.1.1 (February 2026)**
+**v4.1.x (February 2026)**
+- `/file-issues` and `/file-issue` skills for rapid issue filing with sparse templates
+- `/enhance-issue` skill to refine `needs_refinement` issues with exploration and planning
+- Bug issue template (`templates/BUG_ISSUE_TEMPLATE.md`)
 - Fix workflow command namespacing (`/workflows:explore` instead of `/godmode:explore`)
 - Plugin marketplace installation support
 

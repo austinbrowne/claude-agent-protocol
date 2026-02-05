@@ -112,7 +112,33 @@ After generating initial plan content:
 5. **Offer to add gaps to Acceptance Criteria**
 6. **Add Spec-Flow Analysis section to plan output** (Comprehensive tier includes this in template; Standard tier appends if significant flows exist)
 
-### 6. Save Plan
+### 6. Present Plan for Acceptance
+
+**After generating the plan content, present it to the user and ask for explicit acceptance:**
+
+```
+AskUserQuestion:
+  question: "Here's the generated plan. Do you accept it?"
+  header: "Plan review"
+  options:
+    - label: "Accept plan"
+      description: "Plan looks good — save it and continue"
+    - label: "Request changes"
+      description: "I have specific changes I'd like to make"
+    - label: "Reject and start over"
+      description: "This approach isn't right — let me explain why"
+```
+
+**If "Accept plan":** Proceed to Step 7 (Save Plan).
+
+**If "Request changes":** Ask the user what they'd like to change. Incorporate their feedback into the plan, then present again for acceptance.
+
+**If "Reject and start over":** Ask the user to explain what's wrong with the approach. Use their feedback to understand the issue. Options:
+- Return to brainstorming (`skills/brainstorm/SKILL.md`) if the approach itself is wrong
+- Re-run plan generation with different constraints if requirements were misunderstood
+- End workflow if user wants to think more
+
+### 7. Save Plan
 
 **Filename format:** `docs/plans/YYYY-MM-DD-type-name-plan.md`
 - Replace `type` with: `minimal`, `standard`, or `comprehensive`

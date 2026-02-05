@@ -39,35 +39,86 @@ AskUserQuestion:
 
 ---
 
-## Step 3: Next Steps
+## Step 3: Next Steps (Context-Dependent)
 
+**After "Generate plan":**
 ```
 AskUserQuestion:
-  question: "Planning step complete. What would you like to do next?"
+  question: "Plan generated. What would you like to do next?"
   header: "Next step"
   options:
-    - label: "Another planning step"
-      description: "Run another planning activity (deepen, review, issues, ADR)"
-    - label: "Brainstorm approaches"
-      description: "Structured divergent thinking before committing to a solution"
+    - label: "Deepen this plan"
+      description: "Enrich with parallel research and review agents"
+    - label: "Review this plan"
+      description: "Multi-agent review with adversarial validation"
+    - label: "Create GitHub issues"
+      description: "Generate issues from this plan"
+    - label: "Start implementing"
+      description: "Move to /implement to begin coding"
+```
+
+**After "Deepen existing plan":**
+```
+AskUserQuestion:
+  question: "Plan deepened. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Review this plan"
+      description: "Multi-agent review with adversarial validation"
+    - label: "Create GitHub issues"
+      description: "Generate issues from this plan"
     - label: "Start implementing"
       description: "Move to /implement to begin coding"
     - label: "Done"
       description: "End workflow"
 ```
 
-**If "Another planning step":** Return to Step 1.
-**If "Brainstorm approaches":** Load and follow `skills/brainstorm/SKILL.md`.
-**If "Start implementing":** Suggest user invoke `/implement`.
-**If "Done":** End workflow.
+**After "Review plan":**
+```
+AskUserQuestion:
+  question: "Plan reviewed. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Create GitHub issues"
+      description: "Generate issues from the approved plan"
+    - label: "Start implementing"
+      description: "Move to /implement to begin coding"
+    - label: "Revise the plan"
+      description: "Go back and modify based on review feedback"
+    - label: "Done"
+      description: "End workflow"
+```
+
+**After "Create GitHub issues":**
+```
+AskUserQuestion:
+  question: "Issues created. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Start implementing"
+      description: "Move to /implement to begin coding"
+    - label: "Create another plan"
+      description: "Start a new planning activity"
+    - label: "Done"
+      description: "End workflow"
+```
+
+**Routing:**
+- **"Deepen this plan"** → Load `skills/deepen-plan/SKILL.md`
+- **"Review this plan"** → Load `skills/review-plan/SKILL.md`
+- **"Create GitHub issues"** → Load `skills/create-issues/SKILL.md`
+- **"Start implementing"** → Suggest user invoke `/implement`
+- **"Revise the plan"** → Return to Step 1 with "Generate plan" pre-selected
+- **"Create another plan"** → Return to Step 1
+- **"Done"** → End workflow
 
 ---
 
 ## Additional Skills Available
 
-These can also be invoked within the planning workflow:
+These can be invoked before planning or when explicitly requested:
 
 - **Create ADR** — `skills/create-adr/SKILL.md` — Document architecture decisions
-- **Brainstorm** — `skills/brainstorm/SKILL.md` — Structured divergent thinking
+- **Brainstorm** — `skills/brainstorm/SKILL.md` — Structured divergent thinking (use BEFORE generating a plan, not after)
 
-If the user mentions architecture decisions or brainstorming, offer these skills as options.
+If the user mentions architecture decisions, offer ADR. If they want to explore approaches before committing, offer brainstorm.

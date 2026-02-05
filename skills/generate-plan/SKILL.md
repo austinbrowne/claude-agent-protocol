@@ -131,12 +131,21 @@ AskUserQuestion:
 
 **If "Accept plan":** Proceed to Step 7 (Save Plan).
 
-**If "Request changes":** Ask the user what they'd like to change. Incorporate their feedback into the plan, then present again for acceptance.
+**If "Request changes":**
+1. **STOP and ask explicitly:** "What specific changes would you like me to make to this plan?"
+2. **Wait for user response** — do NOT infer, assume, or take action until the user provides specific feedback
+3. Make ONLY the changes the user explicitly requested
+4. Present the updated plan again for acceptance (return to Step 6)
 
-**If "Reject and start over":** Ask the user to explain what's wrong with the approach. Use their feedback to understand the issue. Options:
-- Return to brainstorming (`skills/brainstorm/SKILL.md`) if the approach itself is wrong
-- Re-run plan generation with different constraints if requirements were misunderstood
-- End workflow if user wants to think more
+**If "Reject and start over":**
+1. **STOP and ask explicitly:** "What's wrong with this approach? Please explain so I understand."
+2. **Wait for user response** — do NOT assume the problem or start over without understanding
+3. Based on their explanation, offer options:
+   - Return to brainstorming (`skills/brainstorm/SKILL.md`) if the approach itself is wrong
+   - Re-run plan generation with different constraints if requirements were misunderstood
+   - End workflow if user wants to think more
+
+**CRITICAL:** Never make autonomous changes based on vague feedback like "do more research" or "make it better". Always ask for specifics first.
 
 ### 7. Save Plan
 

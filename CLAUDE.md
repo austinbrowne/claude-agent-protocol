@@ -106,7 +106,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly in
 
 **Shipping skills:** `commit-and-pr`, `finalize`
 
-**Knowledge skills:** `learn`
+**Knowledge skills:** `learn`, `todos`
 
 ---
 

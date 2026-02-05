@@ -1,28 +1,22 @@
-# AI Coding Agent Protocol
+# GODMODE - AI Coding Agent Protocol
 
-**Version:** 4.0
-**Last Updated:** February 2026
+**Version:** 4.2.0
 **Status:** Production-ready
 
-Core protocol and templates for AI-assisted software development with Claude Code. 17 modular slash commands, 21 specialized agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.
+A Claude Code plugin for AI-assisted software development. 6 workflow commands, 19 skill packages, 21 specialized agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.
 
 ---
 
 ## Installation
 
-**Quick install:**
 ```bash
-git clone https://github.com/austinbrowne/claude-agent-protocol.git ~/.claude
-```
-
-**Pin to specific version:**
-```bash
-git clone --branch v4.0 https://github.com/austinbrowne/claude-agent-protocol.git ~/.claude
+/plugin marketplace add https://github.com/austinbrowne/claude-agent-protocol
+/plugin install godmode
 ```
 
 **Update to latest:**
 ```bash
-cd ~/.claude && git pull
+/plugin update godmode
 ```
 
 **Requirements:**
@@ -31,578 +25,270 @@ cd ~/.claude && git pull
 
 ---
 
+## Workflow
+
+```
+Explore → Plan → Implement → Review → Learn → Ship
+```
+
+| Command | Purpose |
+|---------|---------|
+| `/workflows:explore` | Reconnaissance & ideation — codebase exploration + brainstorming |
+| `/workflows:plan` | Planning & requirements — plan generation, deepen, review, issues, ADR |
+| `/workflows:implement` | Implementation — start issue, tests, validation, security, recovery |
+| `/workflows:review` | Code review — fresh eyes (full/lite), protocol compliance |
+| `/workflows:learn` | Knowledge capture — save solved problems as reusable docs |
+| `/workflows:ship` | Ship — commit/PR, finalize, refactor |
+
+Each workflow offers sub-step selection and chains to the next workflow after completion. Skip, reorder, or exit at any point.
+
+---
+
+## Example Flows
+
+### New Feature (Full Cycle)
+
+```
+You: /workflows:explore
+  → Claude explores the codebase, identifies relevant files and patterns
+  → Brainstorms approaches with comparison matrix
+  → "Ready to plan? → /workflows:plan"
+
+You: /workflows:plan
+  → Generates a plan (Minimal, Standard, or Comprehensive)
+  → Deepens the plan with parallel research agents
+  → Multi-agent plan review with adversarial validation
+  → Creates GitHub issues from approved plan
+  → "Ready to implement? → /workflows:implement"
+
+You: /workflows:implement
+  → Picks an issue, creates a branch
+  → Implements with living plan tracking
+  → Generates tests, runs validation
+  → Security review on auth/data/API changes
+  → "Ready for review? → /workflows:review"
+
+You: /workflows:review
+  → Fresh Eyes Review: 13 agents review code with zero context (no confirmation bias)
+  → Smart agent selection — core agents always run, conditional agents triggered by diff
+  → Adversarial validator challenges findings
+  → "Ready to ship? → /workflows:ship"
+
+You: /workflows:ship
+  → /commit-and-pr creates commit and pull request
+  → Final documentation and validation
+  → "Capture learnings? → /workflows:learn"
+```
+
+### Bug Fix
+
+```
+You: /workflows:explore
+  → Investigate the bug, identify root cause and affected files
+
+You: /workflows:implement
+  → Fix the bug, generate regression tests, run validation
+
+You: /workflows:review
+  → Fresh Eyes Review (lite mode for smaller changes)
+
+You: /workflows:ship
+  → Commit and PR
+```
+
+### Quick Fix (Root Cause Known)
+
+```
+You: /workflows:implement
+  → Apply the fix, run tests
+
+You: /workflows:review
+  → Quick review pass
+
+You: /workflows:ship
+  → Commit and PR
+```
+
+### Just Review Existing Changes
+
+```
+You: /workflows:review
+  → 13-agent review on staged/committed changes
+
+You: /workflows:ship
+  → Commit and PR with review findings addressed
+```
+
+### Individual Skills (Direct Invocation)
+
+Every sub-step is also directly invocable as a slash command:
+
+```
+You: /brainstorm "authentication approaches for the API"
+  → Structured divergent thinking with comparison matrix
+
+You: /fresh-eyes-review
+  → Full 13-agent code review on current changes
+
+You: /security-review
+  → OWASP Top 10 2025 security checklist on current changes
+
+You: /generate-tests
+  → Comprehensive test generation for implemented code
+
+You: /commit-and-pr
+  → Commit with finding verification gate and PR creation
+
+You: /learn
+  → Capture what you just solved as a reusable solution doc
+```
+
+---
+
 ## What's Included
 
-### Core Protocol
-- **AI_CODING_AGENT_GODMODE.md** - Standard Operating Procedure (SOP) for AI agents
-- **QUICK_START.md** - Quick reference for two entry points and common commands
-- **CLAUDE.md** - Global user instructions and communication style
-- **PRD_TEMPLATE.md** - Product Requirements Document template (Lite + Full) with spec-flow analysis
+### Workflow Commands (6)
+Top-level orchestrators with sub-step selection via `AskUserQuestion`.
 
-### Checklists
-- **AI_CODE_SECURITY_REVIEW.md** - OWASP Top 10 2025 security checklist (45% of AI code has vulnerabilities!)
-- **AI_CODE_REVIEW.md** - AI-specific code review criteria (edge cases, hallucinations, etc.)
+### Skills (19)
+Reusable methodology packages, each directly invocable:
 
-### Templates (8)
-- **TEST_STRATEGY.md** - Comprehensive test strategy matrix (unit, integration, E2E, security, performance)
-- **ADR_TEMPLATE.md** - Architecture Decision Records (prevent "why did we do this?" 6 months later)
-- **GITHUB_ISSUE_TEMPLATE.md** - Standard issue structure for AI-assisted development
-- **BRAINSTORM_TEMPLATE.md** - Brainstorm session output with YAML frontmatter
-- **SOLUTION_TEMPLATE.md** - Knowledge compound docs with searchable metadata
-- **TODO_TEMPLATE.md** - File-based todo tracking with status transitions
-- **LIVING_PLAN_TEMPLATE.md** - Implementation tracking with progress logs
-
-### Guides
-- **FRESH_EYES_REVIEW.md** - 13-agent smart selection code review process
-- **FAILURE_RECOVERY.md** - Recovery procedures for failed implementations
-- **CONTEXT_OPTIMIZATION.md** - Reduce token usage by 30-50%
-- **MULTI_AGENT_PATTERNS.md** - Coordinate multiple agents for complex tasks
-- **GITHUB_PROJECT_INTEGRATION.md** - GitHub Projects workflow with gh CLI
+| Skill | Purpose |
+|-------|---------|
+| `/explore` | Multi-agent codebase exploration |
+| `/brainstorm` | Structured divergent thinking |
+| `/generate-plan` | Plan creation (3 tiers) with integrated research and spec-flow |
+| `/deepen-plan` | Plan enrichment with parallel research |
+| `/review-plan` | Multi-agent plan review with adversarial validation |
+| `/create-issues` | GitHub issue generation from plan |
+| `/create-adr` | Architecture Decision Records |
+| `/start-issue` | Issue startup with living plan |
+| `/generate-tests` | Comprehensive test generation |
+| `/run-validation` | Tests + coverage + lint + security |
+| `/security-review` | OWASP security methodology |
+| `/recovery` | Failure recovery decision tree |
+| `/refactor` | Guided refactoring |
+| `/fresh-eyes-review` | 13-agent smart selection review |
+| `/review-protocol` | Protocol compliance review |
+| `/commit-and-pr` | Commit and PR with finding verification |
+| `/finalize` | Final documentation + validation |
+| `/learn` | Knowledge compounding |
+| `/todos` | File-based todo tracking |
 
 ### Agents (21)
-- **17 review agents** (`agents/review/`) - Security, code quality, edge case, supervisor, adversarial validator, performance, API contract, concurrency, error handling, data validation, dependency, testing adequacy, config/secrets, documentation, architecture, simplicity, spec-flow
-- **4 research agents** (`agents/research/`) - Codebase researcher, learnings researcher, best practices researcher, framework docs researcher
+- **17 review agents** — security, code quality, edge case, supervisor, adversarial validator, performance, API contract, concurrency, error handling, data validation, dependency, testing adequacy, config/secrets, documentation, architecture, simplicity, spec-flow
+- **4 research agents** — codebase researcher, learnings researcher, best practices researcher, framework docs researcher
 
-### Commands (17)
-- **17 modular slash commands** - Reusable workflow commands with hybrid invocation (see below)
+### Also Included
+- **Checklists** — OWASP Top 10 2025 security checklist, AI code review criteria
+- **Templates** — Plan (3-tier), test strategy, ADR, brainstorm, solution doc, todo, living plan, GitHub issue
+- **Guides** — Fresh Eyes Review, failure recovery, context optimization, multi-agent patterns, GitHub Projects integration
+
+---
+
+## Key Concepts
+
+### Security-First
+45% of AI code has vulnerabilities. The protocol enforces mandatory security review for auth, PII, and external APIs. OWASP Top 10 2025 checklist built in.
+
+### Knowledge Compounding
+Capture solved problems as searchable docs via `/learn`. Past learnings are surfaced automatically during planning and implementation. Your knowledge base grows with every solved problem.
+
+### Zero-Context Review
+Fresh Eyes Review gives agents zero conversation context — they review the diff cold. This eliminates confirmation bias that accumulates during implementation.
+
+### Smart Agent Selection
+Core review agents always run. Conditional agents (security, concurrency, API contract, etc.) trigger only when the diff content matches their expertise.
+
+### Human in the Loop
+Every phase transition pauses for human approval. Skip, reorder, or exit at any point. The protocol never merges, deploys, or finalizes without explicit consent.
 
 ---
 
 ## Directory Structure
 
 ```
-~/.claude/
-├── README.md                           # This file
-├── AI_CODING_AGENT_GODMODE.md         # Main SOP (v4.0)
-├── QUICK_START.md                      # Quick reference guide
-├── CLAUDE.md                           # Global instructions
-├── PRD_TEMPLATE.md                     # PRD template (with spec-flow analysis)
-│
-├── agents/
-│   ├── review/                        # 17 review agent definitions
-│   │   ├── security-reviewer.md       # OWASP Top 10, injection, auth
-│   │   ├── code-quality-reviewer.md   # Naming, structure, SOLID
-│   │   ├── edge-case-reviewer.md      # Null/empty/boundary (biggest AI blind spot)
-│   │   ├── supervisor.md              # Consolidate, deduplicate, prioritize
-│   │   ├── adversarial-validator.md   # Falsification over confirmation
-│   │   ├── performance-reviewer.md    # N+1, complexity, caching
-│   │   ├── api-contract-reviewer.md   # REST/GraphQL design, status codes
-│   │   ├── concurrency-reviewer.md    # Race conditions, thread safety
-│   │   ├── error-handling-reviewer.md # Try/catch, retries, circuit breakers
-│   │   ├── data-validation-reviewer.md# Input validation, sanitization
-│   │   ├── dependency-reviewer.md     # New deps, vulns, licenses
-│   │   ├── testing-adequacy-reviewer.md # Coverage, test quality
-│   │   ├── config-secrets-reviewer.md # Hardcoded values, env vars
-│   │   ├── documentation-reviewer.md  # Public API docs, naming
-│   │   ├── architecture-reviewer.md   # Component decomposition, patterns
-│   │   ├── simplicity-reviewer.md     # YAGNI, over-engineering
-│   │   └── spec-flow-reviewer.md      # User flow completeness
-│   └── research/                      # 4 research agent definitions
-│       ├── codebase-researcher.md     # Repo structure, patterns, conventions
-│       ├── learnings-researcher.md    # Search docs/solutions/ for past learnings
-│       ├── best-practices-researcher.md # Web search for best practices
-│       └── framework-docs-researcher.md # Context7 MCP for framework docs
-│
-├── checklists/
-│   ├── AI_CODE_SECURITY_REVIEW.md     # Security checklist (OWASP Top 10 2025)
-│   └── AI_CODE_REVIEW.md              # Code review criteria
-│
-├── templates/
-│   ├── TEST_STRATEGY.md               # Test strategy matrix
-│   ├── ADR_TEMPLATE.md                # Architecture decisions
-│   ├── GITHUB_ISSUE_TEMPLATE.md       # GitHub issue structure
-│   ├── BRAINSTORM_TEMPLATE.md         # Brainstorm session output
-│   ├── SOLUTION_TEMPLATE.md           # Knowledge compound docs
-│   ├── TODO_TEMPLATE.md               # File-based todo tracking
-│   └── LIVING_PLAN_TEMPLATE.md        # Implementation tracking
-│
-├── guides/
-│   ├── FRESH_EYES_REVIEW.md           # 13-agent smart selection review
-│   ├── FAILURE_RECOVERY.md            # Recovery procedures
-│   ├── CONTEXT_OPTIMIZATION.md        # Reduce token usage
-│   ├── MULTI_AGENT_PATTERNS.md        # Multi-agent coordination
-│   └── GITHUB_PROJECT_INTEGRATION.md  # GitHub Projects workflow
-│
-├── commands/                           # 17 modular slash commands
-│   ├── explore.md                     # Multi-agent codebase exploration
-│   ├── brainstorm.md                  # Structured divergent thinking
-│   ├── generate-prd.md                # PRD generation with spec-flow
-│   ├── deepen-plan.md                 # Parallel research enrichment
-│   ├── review-plan.md                 # Multi-agent plan review
-│   ├── create-adr.md                  # Architecture Decision Records
-│   ├── create-issues.md               # GitHub issue generation
-│   ├── start-issue.md                 # Begin issue with living plan
-│   ├── generate-tests.md              # Test generation
-│   ├── security-review.md             # Security checklist review
-│   ├── run-validation.md              # Tests + coverage + lint + security
-│   ├── fresh-eyes-review.md           # 13-agent smart selection review
-│   ├── recovery.md                    # Failure recovery decision tree
-│   ├── commit-and-pr.md               # Commit and PR creation
-│   ├── compound.md                    # Capture solved problems
-│   ├── refactor.md                    # Guided refactoring
-│   └── finalize.md                    # Final docs and validation
-│
-├── docs/
-│   ├── solutions/                     # Knowledge compounding storage
-│   ├── brainstorms/                   # Brainstorm session records
-│   └── prds/                          # Product Requirements Documents
-│
-└── .todos/                            # File-based todo tracking
+.claude-plugin/
+├── plugin.json                        # Plugin metadata
+└── marketplace.json                   # Marketplace listing
+
+commands/                              # 6 workflow entry points
+├── explore.md
+├── plan.md
+├── implement.md
+├── review.md
+├── learn.md
+└── ship.md
+
+skills/                                # 19 reusable skill packages
+├── brainstorm/SKILL.md
+├── explore/SKILL.md
+├── generate-plan/SKILL.md
+├── deepen-plan/SKILL.md
+├── review-plan/SKILL.md
+├── create-issues/SKILL.md
+├── create-adr/SKILL.md
+├── start-issue/SKILL.md
+├── generate-tests/SKILL.md
+├── run-validation/SKILL.md
+├── security-review/SKILL.md
+├── recovery/SKILL.md
+├── refactor/SKILL.md
+├── fresh-eyes-review/SKILL.md
+├── review-protocol/SKILL.md
+├── commit-and-pr/SKILL.md
+├── finalize/SKILL.md
+├── learn/SKILL.md
+└── todos/SKILL.md
+
+agents/
+├── review/                            # 17 review agent definitions
+└── research/                          # 4 research agent definitions
+
+checklists/                            # Security + code review checklists
+templates/                             # 10 reusable templates
+guides/                                # Process guides
+
+docs/
+├── solutions/                         # Knowledge compounding storage
+├── brainstorms/                       # Brainstorm session records
+└── plans/                             # Plans (Minimal, Standard, Comprehensive)
 ```
-
----
-
-## How It Works
-
-**GODMODE Protocol** (`AI_CODING_AGENT_GODMODE.md`) is optimized for LLM attention budget:
-- **~350 lines** with critical safety rules FIRST (not buried in middle)
-- **Mandatory STOP checkpoints** at decision points that force file reads
-- **References detailed files just-in-time** (not embedded - preserves attention for current task)
-- **Strong imperative language** (NEVER/ALWAYS/MUST) with repeated safety reminders
-
-**Detailed files are REQUIRED at checkpoints** (not optional reference material):
-- **Security Review**: Loaded when code touches auth/data/APIs
-- **Test Strategy**: Loaded when generating tests
-- **Fresh Eyes Code Review**: Loaded at Phase 1, Step 6 (multi-agent review with no conversation context)
-- **ADR Template**: Loaded for architectural decisions
-- **Context Optimization**: Loaded when starting complex tasks
-- **Multi-Agent Patterns**: Loaded for coordinating specialized agents (includes Fresh Eyes Review pattern)
-- **GitHub Project Integration**: Loaded when creating issues from PRD (Phase 0, Step 6)
-
-**Why this structure?**
-- Research shows LLMs have limited "attention budget" - every token depletes attention
-- Critical info in the middle gets less attention than beginning/end
-- Just-in-time loading preserves attention for current decision
-- Mandatory checkpoints ensure agents don't skip safety reviews
-
-This ensures agents pay full attention to critical safety rules while accessing detailed checklists exactly when needed.
-
----
-
-## Modular Commands
-
-17 reusable slash commands for flexible workflows. Use individually or compose custom workflows.
-
-### Command Categories
-
-**Phase 0: Planning (7 commands)**
-- `/explore` - Multi-agent codebase exploration (4 parallel research agents)
-- `/brainstorm` - Structured divergent thinking with comparison matrices
-- `/generate-prd` - Create PRD with parallel research and spec-flow analysis
-- `/deepen-plan` - Enrich PRD with massive parallel research (10-20+ agents)
-- `/review-plan` - Multi-agent plan review with adversarial validation
-- `/create-adr` - Document architectural decisions
-- `/create-issues` - Generate GitHub issues from approved PRD
-
-**Phase 1: Execution (8 commands)**
-- `/start-issue` - Begin work with living plan and past learnings
-- `/generate-tests` - Generate comprehensive tests
-- `/security-review` - Run security checklist review
-- `/run-validation` - Run tests + coverage + lint + security scan
-- `/fresh-eyes-review` - 13-agent smart selection code review
-- `/recovery` - Evaluate Continue/Rollback/Abandon decision
-- `/commit-and-pr` - Commit changes and create pull request
-- `/compound` - Capture solved problems as reusable solution docs
-
-**Phase 2: Finalization (2 commands)**
-- `/refactor` - Guided refactoring pass
-- `/finalize` - Final documentation and validation
-
-### Key Features
-
-**Hybrid invocation:** All commands support interactive (asks questions) AND direct (executes with args) modes.
-
-**Interactive mode:**
-```bash
-/explore
-# Claude: What would you like to explore? _____
-```
-
-**Direct mode:**
-```bash
-/explore authentication patterns
-# Claude: [Immediately explores authentication patterns]
-```
-
-### Example Workflows
-
-**Full GODMODE workflow (v4.0):**
-```bash
-/explore authentication
-/brainstorm "auth approach"
-/generate-prd --full "OAuth 2.0 authentication"
-/deepen-plan docs/prds/2026-02-01-oauth-auth.md
-/review-plan docs/prds/2026-02-01-oauth-auth.md
-/create-issues docs/prds/2026-02-01-oauth-auth.md --immediate
-/start-issue 123
-# [Implement code — past learnings surfaced, living plan created]
-/generate-tests
-/security-review
-/run-validation
-/fresh-eyes-review
-# [Fix any findings]
-/compound
-/commit-and-pr --base experimental
-/refactor
-/finalize --all
-```
-
-**Quick Bug Fix:**
-```bash
-/start-issue 456
-# [Fix bug — past solutions searched automatically]
-/fresh-eyes-review --lite
-/compound
-/commit-and-pr --base main
-```
-
-**Just Review Existing Changes:**
-```bash
-# [Already have staged changes]
-/fresh-eyes-review
-/commit-and-pr
-```
-
-**See:** `QUICK_START.md` for full command reference and more example workflows.
-
----
-
-## Quick Start
-
-### 0. Quick Reference
-
-**See `QUICK_START.md`** for:
-- Two entry points (new feature vs existing issue)
-- Common gh CLI commands
-- Typical workflows
-- Critical safety reminders
-
-### 1. Review the Core Documents
-
-**Start here:**
-1. Read `QUICK_START.md` - Understand the two entry points
-2. Read `AI_CODING_AGENT_GODMODE.md` - Full workflow details
-3. Review `CLAUDE.md` - Communication guidelines
-4. Familiarize yourself with `PRD_TEMPLATE.md` - Lite vs Full PRD
-
-### 2. Use the Checklists
-
-**Before merging any AI-generated code:**
-- Run through `AI_CODE_SECURITY_REVIEW.md` (especially for auth, data handling, APIs)
-- Use `AI_CODE_REVIEW.md` for general code quality
-
-### 3. Start Small
-
-**First task: Try a small feature**
-1. Generate a Lite PRD
-2. Implement with AI
-3. Run tests (use TEST_STRATEGY.md for guidance)
-4. Security review checklist
-5. Deploy
-
-**Then scale up to complex features** using the full protocol.
-
----
-
-## Key Features
-
-### Security-First
-- OWASP Top 10 2025 coverage (including new A03: Supply Chain, A10: Exceptional Conditions)
-- 45% of AI code has vulnerabilities - our checklist catches them
-- Mandatory security review for auth, PII, external APIs
-- Adversarial validation challenges claims with evidence, not assertions
-
-### Knowledge Compounding
-- Capture solved problems as searchable, reusable solution docs (`/compound`)
-- Past learnings surfaced automatically during planning and implementation
-- Multi-pass Grep search across `docs/solutions/` (tags, category, full-text)
-- Knowledge grows over time — each captured solution makes future planning smarter
-
-### 21 Specialized Agents
-- **17 review agents** with smart selection (core always run, conditional triggered by diff)
-- **4 research agents** for parallel codebase, learnings, best practices, and framework docs research
-- Adversarial validator challenges both implementation claims AND reviewer findings
-- Zero-context review (fresh eyes) eliminates confirmation bias
-
-### Structured Planning
-- Brainstorm with comparison matrices before committing to a solution
-- Plan deepening with massive parallel research (10-20+ agents per plan)
-- Multi-agent plan review with adversarial validation
-- Spec-flow analysis for user flow completeness (error/empty/edge/permission states)
-
-### Test-Driven
-- Specific guidance: not just "write tests" but exactly what tests for each scenario
-- Coverage targets: Unit >80%, Integration (critical paths), E2E (happy path + errors)
-- Security, performance, regression testing built-in
-
-### Architecture-Aware
-- ADRs prevent forgotten context (70% of tech debt comes from this!)
-- Document major decisions with clear rationale
-- Track alternatives considered
-
-### Context Optimized
-- Reduce token usage by 30-50%
-- Codebase maps and targeted file reading
-- MCP integration strategies
-
-### Dual Tracking
-- File-based todos (`.todos/` directory) for solo work
-- GitHub issues for team collaboration
-- Both modes supported per-project
-
----
-
-## Workflow at a Glance
-
-### For Simple Features (<1 day)
-
-```
-1. Create Lite PRD (5 min)
-2. Implement with AI (1-2 hours)
-3. Generate tests (30 min)
-4. Security review checklist (15 min)
-5. Deploy (15 min)
-
-Total: ~3 hours (vs 6-8 hours manual)
-```
-
-### For Complex Features (>1 day)
-
-```
-Phase 0: Explore & Plan
-1. Explore codebase (use Explore agent)
-2. Generate Full PRD
-3. Human review & approval
-
-Phase 1: Execute
-1. Implement Phase 1
-2. Run tests
-3. Security review
-4. Human feedback
-5. Iterate
-
-Repeat for each phase...
-
-Phase 2: Finalize
-1. Refactor
-2. Documentation
-3. Final review
-4. Deploy
-```
-
-### For GitHub Projects Workflow
-
-**Two entry points:**
-
-**Entry Point A: New Feature (Start at Phase 0)**
-```
-Phase 0: Explore & Plan
-1. Explore codebase
-2. Generate Full PRD
-3. Save PRD to docs/prds/YYYY-MM-DD-feature-name.md
-4. Human review & approval
-5. Create GitHub issues (/create-issues docs/prds/...)
-   a. Create first issue, note issue number (e.g., #123)
-   b. Rename PRD to docs/prds/123-YYYY-MM-DD-feature-name.md
-   c. Update issue to reference renamed PRD
-   - Each issue includes renamed PRD file reference
-   - Fork A: Immediate execution (assign & start Phase 1)
-   - Fork B: Backlog mode (park in "Ready" column, exit)
-
-If Fork A: Continue to Phase 1 with first issue
-If Fork B: Exit (pick up later via Entry Point B)
-```
-
-**Entry Point B: Pick Existing Issue (Start at Phase 1)**
-```
-Starting Point: 10 issues waiting in backlog
-
-1. List ready issues (gh project item-list)
-2. Pick an issue ("Let's work on issue #45")
-3. Load issue context (description, acceptance criteria, technical requirements, PRD reference)
-4. Verify dependencies and readiness
-5. Assign issue + create branch (issue-45-feature-name)
-6. Jump directly to Phase 1 implementation
-7. Reference PRD if needed for broader context (file path in issue)
-8. Commit changes to branch
-9. Ask: "Create Pull Request?"
-10. If yes: Create PR (auto-links to issue)
-11. User reviews & merges PR on GitHub
-12. Issue auto-closes on merge
-13. Pick next issue from backlog
-14. Repeat
-
-Benefits:
-- Skip planning for pre-planned work
-- Quick context switch between issues
-- All context in issue (self-contained)
-- Feature branch per issue
-- PR review before merge
-- PRD available if broader context needed
-- Visual kanban board for tracking
-- Can work through backlog systematically
-```
-
-**Overall Benefits:**
-- Visual kanban board for tracking
-- Issues persist between sessions
-- Clear acceptance criteria for each unit of work
-- Can @claude tag for assignment
-- Full audit trail of decisions
-- Two workflows: plan-then-execute OR pick-from-backlog
-```
-
----
-
-## When to Use What
-
-### Use Lite PRD when:
-- Feature is <1 day of work
-- Requirements are clear
-- Low complexity, low risk
-
-### Use Full PRD when:
-- Feature is >1 day of work
-- Significant architectural decisions
-- High risk (security, performance, breaking changes)
-- Multiple stakeholders
-
-### Use ADR when:
-- Major architectural decision (database, framework, cloud provider)
-- Significant tradeoffs between alternatives
-- Decision is hard to reverse
-- Pattern will be reused across codebase
-
-### Use Security Checklist when:
-- ANY code touching auth, data handling, or external APIs
-- User input processing
-- File uploads
-- Database queries with user input
-
-### Use GitHub Projects workflow when:
-- Multi-phase PRD with multiple work units
-- Want persistent issue tracking between sessions
-- Working with team (issues can be assigned to different developers/agents)
-- Need visual board for stakeholder visibility
-- Building backlog for future work
-- Want audit trail of implementation decisions
-
----
-
-## Best Practices
-
-### 1. Start Every Task with Exploration
-Don't guess. Use the Explore agent or read relevant files first.
-
-### 2. Security is Non-Negotiable
-45% of AI code has vulnerabilities. Always use the security checklist.
-
-### 3. Test Everything
-AI forgets edge cases. Use the test strategy matrix for comprehensive coverage.
-
-### 4. Document Decisions
-Use ADRs for major decisions. Your future self will thank you.
-
-### 5. Optimize Context
-Use the context optimization guide. 30-50% cost savings possible.
-
----
-
-## Common Pitfalls to Avoid
-
-❌ **Don't:** Skip security review ("it's just a small change")
-✅ **Do:** Always run security checklist for auth, data, APIs
-
-❌ **Don't:** Accept AI code without reviewing edge cases
-✅ **Do:** Use AI_CODE_REVIEW.md checklist
-
-❌ **Don't:** Paste entire directories into context
-✅ **Do:** Use Grep to find specific files, read targeted sections
-
-❌ **Don't:** Add dependencies without vetting
-✅ **Do:** Vet security, licenses, bundle size
-
-❌ **Don't:** Forget to document architectural decisions
-✅ **Do:** Create ADRs for major choices
-
----
-
-## Resources & References
-
-### Industry Standards
-- **OWASP Top 10 2025** - [https://owasp.org/Top10/](https://owasp.org/Top10/)
-- **Model Context Protocol (MCP)** - [https://spec.modelcontextprotocol.io](https://spec.modelcontextprotocol.io)
-- **Microsoft Agent Framework** - [https://learn.microsoft.com/en-us/agent-framework/](https://learn.microsoft.com/en-us/agent-framework/)
-
-### Research
-- DX Research (2024): AI coding assistants save 25-50% time
-- Veracode Study: 45% of AI code has OWASP Top 10 flaws
-- Microsoft Research: TypeScript reduces bugs by 45%
-
-### Books
-- "Coding With AI All the Time" - Ken Kocienda (2025)
-- "Clean Code" - Robert C. Martin
-- "Refactoring" - Martin Fowler
 
 ---
 
 ## Version History
 
-**v4.0 (February 2026)** - Current
-- **MAJOR**: 17 modular slash commands (added `/brainstorm`, `/deepen-plan`, `/review-plan`, `/compound`)
-- **MAJOR**: 21 specialized agents (17 review + 4 research) with smart selection
-- **MAJOR**: Knowledge compounding — capture and reuse solved problems (`docs/solutions/`)
-- 13-agent smart selection Fresh Eyes Review (core always run, conditional triggered by diff content)
-- Adversarial validator — falsification over confirmation, challenges claims AND findings
-- Structured brainstorming with comparison matrices
-- Plan deepening with massive parallel research (10-20+ agents)
-- Multi-agent plan review with adversarial validation
-- Spec-flow analysis for user flow completeness
-- Dual tracking: file-based `.todos/` AND GitHub issues
-- Living implementation plans with progress tracking
-- Incremental commit guidance (`Part of #NNN` for intermediate)
+**v4.2.0 (February 2026)** - Current
+- Renamed "PRD" to "Plan" throughout — clearer terminology
+- 3-tier plan system: Minimal, Standard, Comprehensive (replaces Lite/Full)
+- `/generate-plan` skill is self-sufficient — runs its own 4-agent research (no prior `/explore` required)
+- Moved `docs/prds/` to `docs/plans/`, renamed `generate-prd` to `generate-plan`
+- New `PLAN_TEMPLATE.md` with structured templates for all 3 tiers
 
-**v3.2 (December 2025)**
-- Added `--pipeline` flag to `/start-issue` for full automated workflow
-- Enforced Fresh Eyes Review as mandatory gate in `/commit-and-pr`
+**v4.1.1 (February 2026)**
+- Fix workflow command namespacing (`/workflows:explore` instead of `/godmode:explore`)
+- Plugin marketplace installation support
 
-**v3.1 (November 2025)**
-- Optimized GODMODE protocol from 672 lines to ~438 lines
-- Restructured with critical safety rules FIRST (LLM attention budget optimization)
-- Added mandatory STOP checkpoints that force file reads at decision points
-- Changed from embedded content to just-in-time file references
-- Strengthened language (NEVER/ALWAYS/MUST) with repeated safety reminders
+**v4.1.0 (February 2026)**
+- 6 workflow commands replacing 21 individual commands
+- 19 reusable skill packages extracted into `skills/`
+- Renamed `/compound` to `/learn`
+- Two-layer architecture: skills (knowledge + user-facing) → agents (expert personas)
 
-**v3.0 (November 2025)**
-- Added OWASP Top 10 2025 security checklist
-- Added AI-specific code review criteria
-- Added test strategy matrix
-- Added ADR template
-- Added context optimization guide
-- Added multi-agent workflow patterns
-- Updated PRD template with test strategy and security sections
+**v4.0 (February 2026)**
+- 17 modular slash commands
+- 21 specialized agents (17 review + 4 research) with smart selection
+- Knowledge compounding (`docs/solutions/`)
+- 13-agent Fresh Eyes Review with smart selection
+- Adversarial validator
+- Structured brainstorming, plan deepening, spec-flow analysis
 
-**v2.0 (Referenced in AI_CODING_AGENT_GODMODE.md)**
-- Original protocol with Phase 0-2 workflow
-- PRD template
-- Basic status indicators
-
----
-
-## Contributing
-
-This protocol is a living document. Update it as workflows evolve.
-
-**To update:**
-1. Make changes to relevant files
-2. Test in real projects
-3. Document what worked/didn't work
-4. Update this README if structure changes
+**v3.x (November-December 2025)**
+- Optimized protocol for LLM attention budget
+- Mandatory STOP checkpoints
+- OWASP Top 10 2025 security checklist
 
 ---
 
 **Built with research from:** Anthropic, Microsoft, Google, OWASP, DX Research, Veracode, and real-world usage.
-
-**Status:** Production-ready
-
-**Last Review:** February 2026

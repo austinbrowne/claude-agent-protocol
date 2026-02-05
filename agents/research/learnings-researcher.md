@@ -1,7 +1,7 @@
 ---
 name: learnings-researcher
 model: inherit
-description: Search docs/solutions/ for relevant past solutions using multi-pass Grep filtering.
+description: Search docs/solutions/ for relevant past solutions using multi-pass Grep filtering on enum-validated YAML frontmatter.
 ---
 
 # Learnings Research Agent
@@ -14,43 +14,78 @@ Learn from the past to avoid repeating mistakes. This agent mines the project's 
 
 - **`/explore`** — Search for learnings related to exploration target
 - **`/start-issue`** — Find past solutions relevant to the issue
-- **`/generate-prd`** — Surface learnings for the feature domain
+- **`/generate-plan`** — Surface learnings for the feature domain
 - **`/deepen-plan`** — Per-section learnings lookup
 - **`/brainstorm`** — Past solutions to inform approach selection
 
 ## Research Process
 
-### Multi-Pass Grep Strategy
+### Step 1: Category Narrowing
 
-Run multiple parallel Grep passes against `docs/solutions/` to maximize recall:
+If the problem domain is clear, narrow search to the specific category subdirectory first:
+
+| problem_type | Directory |
+|---|---|
+| `build_error` | `docs/solutions/build-errors/` |
+| `test_failure` | `docs/solutions/test-failures/` |
+| `runtime_error` | `docs/solutions/runtime-errors/` |
+| `performance_issue` | `docs/solutions/performance-issues/` |
+| `database_issue` | `docs/solutions/database-issues/` |
+| `security_issue` | `docs/solutions/security-issues/` |
+| `ui_bug` | `docs/solutions/ui-bugs/` |
+| `integration_issue` | `docs/solutions/integration-issues/` |
+| `logic_error` | `docs/solutions/logic-errors/` |
+| `developer_experience` | `docs/solutions/developer-experience/` |
+| `workflow_issue` | `docs/solutions/workflow-issues/` |
+| `best_practice` | `docs/solutions/best-practices/` |
+| `documentation_gap` | `docs/solutions/documentation-gaps/` |
+
+If domain is unclear, search all of `docs/solutions/`.
+
+### Step 2: Multi-Pass Grep Strategy
+
+Run multiple parallel Grep passes to maximize recall:
 
 1. **Pass 1: Tag matching**
    - Grep for tags from the current context (feature area, technology, pattern)
-   - Example: `Grep pattern="tags:.*authentication" path="docs/solutions/"`
+   - Example: `Grep pattern="tags:.*(authentication|oauth|token)" path="docs/solutions/"`
 
-2. **Pass 2: Category matching**
-   - Grep for matching categories (auth, api, database, testing, security, etc.)
-   - Example: `Grep pattern="category: auth" path="docs/solutions/"`
+2. **Pass 2: Module matching**
+   - Grep for the module/area being worked on
+   - Example: `Grep pattern="module:.*Authentication" path="docs/solutions/"`
 
-3. **Pass 3: Problem summary matching**
-   - Grep for keywords from the current task description
-   - Example: `Grep pattern="token|refresh|session" path="docs/solutions/"`
+3. **Pass 3: Problem type matching**
+   - Grep for the relevant problem type enum
+   - Example: `Grep pattern="problem_type: security_issue" path="docs/solutions/"`
 
-4. **Pass 4: Full-text search**
+4. **Pass 4: Component matching**
+   - Grep for the technical component involved
+   - Example: `Grep pattern="component: auth" path="docs/solutions/"`
+
+5. **Pass 5: Symptom matching**
+   - Grep for keywords from observed symptoms or task description
+   - Example: `Grep pattern="symptoms:.*token|symptoms:.*session" path="docs/solutions/"`
+
+6. **Pass 6: Root cause matching**
+   - Grep for known root cause patterns
+   - Example: `Grep pattern="root_cause: race_condition" path="docs/solutions/"`
+
+7. **Pass 7: Full-text search**
    - Grep for domain-specific terms in solution body content
-   - Example: `Grep pattern="race condition|deadlock" path="docs/solutions/"`
+   - Example: `Grep pattern="race condition|deadlock|concurrent" path="docs/solutions/"`
 
-### Relevance Scoring
+### Step 3: Relevance Scoring
 
 For each matched solution file:
 1. Read the full file
-2. Assess relevance to the current task (HIGH / MEDIUM / LOW)
-3. Extract applicable gotchas and recommendations
-4. Note if the solution's context matches (same language, framework, complexity)
+2. Count how many passes matched (higher count = higher relevance)
+3. Assess relevance to the current task (HIGH / MEDIUM / LOW)
+4. Extract applicable gotchas and recommendations
+5. Note if the solution's context matches (same language, framework, component)
 
-### Deduplication
+### Step 4: Deduplication
 
-If multiple passes find the same file, count it once but note which passes matched (higher match count = higher relevance).
+If multiple passes find the same file, count it once but note which passes matched.
 
 ## Output Format
 
@@ -60,17 +95,19 @@ LEARNINGS RESEARCH FINDINGS:
 Solutions Found: N files matched across M search passes
 
 HIGH RELEVANCE:
-1. [filename] — [problem_summary]
+1. [category/filename] — [problem summary from title]
+   - Module: [module]
+   - Problem type: [problem_type]
+   - Root cause: [root_cause]
    - Applicable gotcha: [specific gotcha from solution]
    - Recommendation: [how to apply this learning]
-   - Confidence: [HIGH/MEDIUM — how sure we are this applies]
+   - Matched passes: [which Grep passes found it]
 
-2. [filename] — [problem_summary]
-   - Applicable gotcha: [gotcha]
-   - Recommendation: [recommendation]
+2. [category/filename] — [problem summary]
+   - ...
 
 MEDIUM RELEVANCE:
-1. [filename] — [problem_summary]
+1. [category/filename] — [problem summary]
    - Why partially relevant: [explanation]
 
 NO RELEVANT SOLUTIONS FOUND:
@@ -90,15 +127,21 @@ Task: Implementing OAuth 2.0 authentication
 
 Search passes:
 - Tags: "oauth", "authentication", "token" → 3 matches
-- Category: "auth" → 5 matches
-- Keywords: "refresh token", "session" → 2 matches
+- Module: "Authentication" → 5 matches
+- Problem type: "security_issue" → 4 matches
+- Component: "auth" → 6 matches
+- Symptoms: "token", "session" → 2 matches
 
 HIGH RELEVANCE:
-1. auth-jwt-refresh-token-race-condition.md
+1. security-issues/jwt-refresh-token-race-condition-20260115.md
+   - Module: Authentication
+   - Root cause: race_condition
    - Gotcha: Concurrent refresh requests can invalidate tokens
    - Recommendation: Implement token rotation with grace period
 
-2. auth-session-cookie-secure-flags.md
+2. security-issues/session-cookie-secure-flags-20260120.md
+   - Module: Authentication
+   - Root cause: config_error
    - Gotcha: Missing SameSite=Strict allows CSRF
    - Recommendation: Always set Secure, HttpOnly, SameSite=Strict
 ```
@@ -107,9 +150,17 @@ HIGH RELEVANCE:
 ```
 Task: Implementing WebSocket real-time updates
 
-Search passes: 4 passes, 0 matches
+Search passes: 7 passes, 0 matches
 
 NO RELEVANT SOLUTIONS FOUND.
 This appears to be a new domain for this project.
-Consider running `/compound` after implementation to capture learnings.
+Consider running `/learn` after implementation to capture learnings.
 ```
+
+## Compatibility
+
+This agent's search strategy is compatible with solution docs created by:
+- The `/learn` command (this project)
+- The compound-engineering plugin's `compound-docs` skill
+
+Both produce docs in `docs/solutions/{category}/` with the same YAML frontmatter fields.

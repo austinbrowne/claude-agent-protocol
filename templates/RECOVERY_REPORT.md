@@ -216,7 +216,7 @@ Chose Abandon because:
 ## Links
 
 - **Original Issue:** #NNN
-- **Original PRD:** `docs/prds/NNN-YYYY-MM-DD-feature-name.md`
+- **Original Plan:** `docs/plans/NNN-YYYY-MM-DD-type-feature-name-plan.md`
 - **Related Issues:** [List any related issues]
 
 ---

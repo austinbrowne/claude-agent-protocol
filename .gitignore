@@ -6,7 +6,7 @@ projects/
 session-env/
 shell-snapshots/
 statsig/
-todos/
+/todos/
 
 # OS files
 .DS_Store

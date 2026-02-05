@@ -120,12 +120,65 @@ SUMMARY: [1-2 sentence assessment]
 
 ---
 
+## Post-Review Actions
+
+After presenting the review report, ask the user how to proceed:
+
+```
+AskUserQuestion:
+  question: "How would you like to address the review findings?"
+  header: "Next action"
+  options:
+    - label: "Accept findings and update plan"
+      description: "I'll make the suggested changes myself"
+    - label: "Run additional research first"
+      description: "Research the flagged areas before updating"
+    - label: "Dismiss findings and proceed"
+      description: "I disagree with the findings — continue anyway"
+    - label: "Discuss findings"
+      description: "I have questions about specific findings"
+```
+
+**If "Accept findings and update plan":**
+1. Ask: "Which findings would you like me to address? (list numbers, or 'all')"
+2. Wait for user response
+3. Update the plan with ONLY the specified changes
+4. Present updated plan for acceptance
+5. Offer to re-run review on updated plan
+
+**If "Run additional research first":**
+1. Ask: "What specific areas need more research?" (pre-populate with reviewer suggestions if any)
+2. Wait for user response
+3. **ACTUALLY RUN THE RESEARCH** — launch appropriate research agents:
+   - Codebase research: `subagent_type: "Explore"`
+   - Best practices: `subagent_type: "general-purpose"` with web search
+   - Framework docs: `subagent_type: "general-purpose"` with Context7 MCP
+4. Present research findings to user
+5. Ask: "Based on this research, what changes should I make to the plan?"
+6. Wait for user response
+7. Update the plan with research-informed changes
+8. Offer to re-run review
+
+**If "Dismiss findings and proceed":**
+1. Confirm: "Are you sure? The following CRITICAL/HIGH findings will be unaddressed: [list]"
+2. If confirmed, mark plan as `APPROVED_WITH_EXCEPTIONS` and note dismissed findings
+3. Proceed to next workflow step
+
+**If "Discuss findings":**
+1. Ask which findings they want to discuss
+2. Provide clarification
+3. Return to post-review action selection
+
+---
+
 ## Revision Workflow
 
-If REVISION_REQUESTED:
-1. User updates plan with priority fixes
+If user chooses to revise after review:
+1. Make ONLY the changes explicitly requested by user
 2. Re-run plan review (all 5 agents run fresh)
 3. Each run is independent — no memory of previous reviews
+
+**CRITICAL:** Never skip research when research is selected. Never update the plan without completing the requested action first.
 
 ---
 

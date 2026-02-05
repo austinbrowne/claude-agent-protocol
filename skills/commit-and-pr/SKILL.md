@@ -73,7 +73,7 @@ git push
 gh pr create --title "..." --body "..." --base [branch]
 ```
 
-**PR body includes:** Summary, Changes, Test Plan, Security status, PRD reference, Fresh Eyes verdict.
+**PR body includes:** Summary, Changes, Test Plan, Security status, Plan reference, Fresh Eyes verdict.
 
 ---
 

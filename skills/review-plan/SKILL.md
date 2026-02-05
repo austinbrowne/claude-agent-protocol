@@ -14,7 +14,7 @@ referenced_by:
 
 ## When to Apply
 
-- After generating a PRD (via generate-prd skill) and optionally deepening it
+- After generating a plan (via generate-plan skill) and optionally deepening it
 - Before creating issues and starting implementation
 - As a formal approval gate between planning and execution
 
@@ -22,7 +22,7 @@ referenced_by:
 
 ## Prerequisites
 
-- PRD/plan file exists
+- Plan file exists
 - Plan should be in `READY_FOR_REVIEW` or `DEEPENED_READY_FOR_REVIEW` status
 
 ---
@@ -52,30 +52,30 @@ Receives the plan AND all 4 reviewer outputs.
 
 ## Execution Steps
 
-### Step 1: Load PRD/plan
+### Step 1: Load Plan
 
 **If path provided:**
-- Read specified PRD file
+- Read specified plan file
 
 **If no path:**
-- Check conversation for most recent PRD reference
-- If not found, list available PRDs: `ls docs/prds/*.md`
+- Check conversation for most recent plan reference
+- If not found, list available plans: `ls docs/plans/*.md`
 - Ask user to select
 
-**Read the full PRD content** for use in all reviewer prompts.
+**Read the full plan content** for use in all reviewer prompts.
 
 ### Step 2: Launch 4 review agents IN PARALLEL
 
 **CRITICAL: Launch ALL 4 agents in a SINGLE message with multiple Task calls.**
 
-Each reviewer receives ONLY the PRD content (zero conversation context).
+Each reviewer receives ONLY the plan content (zero conversation context).
 
 **Reviewer prompt template:**
 ```
 You are a [specialist type]. Reference [agent definition file].
 
 Review this plan:
-[full PRD content]
+[full plan content]
 
 Evaluate: [agent-specific criteria]
 
@@ -96,7 +96,7 @@ SUMMARY: [1-2 sentence assessment]
 ### Step 3: Launch Adversarial Validator AFTER all 4 complete
 
 **Adversarial Validator receives:**
-- Full PRD content
+- Full plan content
 - All 4 reviewer outputs
 
 **Tasks:**
@@ -123,7 +123,7 @@ SUMMARY: [1-2 sentence assessment]
 ## Revision Workflow
 
 If REVISION_REQUESTED:
-1. User updates PRD with priority fixes
+1. User updates plan with priority fixes
 2. Re-run plan review (all 5 agents run fresh)
 3. Each run is independent — no memory of previous reviews
 
@@ -166,7 +166,7 @@ Confidence: [HIGH | MEDIUM | LOW]
 
 - **5 total agents:** 4 specialist reviewers run in parallel, then 1 adversarial validator runs sequentially after all 4 complete
 - **Adversarial validator is key:** Catches cases where all 4 reviewers agree on something wrong or miss the same blind spot
-- **Zero conversation context:** Each reviewer sees only the PRD content, not conversation history
+- **Zero conversation context:** Each reviewer sees only the plan content, not conversation history
 - **Re-runnable:** If REVISION_REQUESTED, fix the plan and re-run. Each run is independent
 - **Pairs with deepen-plan:** Run deepen first for research enrichment, then review for formal approval
 - **Not a replacement for human review:** AI review supplements, doesn't replace
@@ -176,7 +176,7 @@ Confidence: [HIGH | MEDIUM | LOW]
 
 ## Integration Points
 
-- **Input**: PRD file from generate-prd or deepen-plan skills
+- **Input**: Plan file from generate-plan or deepen-plan skills
 - **Output**: Review verdict + findings
 - **Agent definitions**: `agents/review/*.md`
 - **Consumed by**: `/plan` workflow command

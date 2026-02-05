@@ -48,7 +48,7 @@ AskUserQuestion:
     - label: "Brainstorm approaches"
       description: "Structured divergent thinking to compare solution strategies"
     - label: "Start planning"
-      description: "Move to /plan to generate PRD and plan implementation"
+      description: "Move to /plan to create a plan and prepare for implementation"
     - label: "Done"
       description: "End workflow — exploration findings available in conversation"
 ```

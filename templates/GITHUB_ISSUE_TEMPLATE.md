@@ -8,7 +8,7 @@ This template is used by `/create-issues` to generate well-structured issues for
 [Clear, descriptive title in imperative mood, 5-10 words]
 
 ## Description
-[Thorough description of what needs to be built/changed and why. Include context from the PRD, user needs being addressed, and how this fits into the larger system.]
+[Thorough description of what needs to be built/changed and why. Include context from the plan, user needs being addressed, and how this fits into the larger system.]
 
 ## User Story
 As a [type of user]
@@ -50,13 +50,14 @@ So that [benefit/value]
 - [ ] Review `~/.claude/checklists/AI_CODE_SECURITY_REVIEW.md` before implementation
 - [ ] Complete OWASP Top 10 2025 checklist items
 
-## PRD Reference
+## Plan Reference
 
-**Source PRD:** `docs/prds/NNN-YYYY-MM-DD-feature-name.md`
+**Source plan:** `docs/plans/NNN-YYYY-MM-DD-type-feature-name-plan.md`
 
-**Example:** `docs/prds/123-2025-11-29-user-authentication.md`
+**Example:** `docs/plans/123-2026-02-04-standard-user-authentication-plan.md`
 - `123` = This issue number
-- `2025-11-29` = Date PRD was created
+- `2026-02-04` = Date plan was created
+- `standard` = Plan tier (minimal/standard/comprehensive)
 - `user-authentication` = Feature name
 
 **Purpose:**

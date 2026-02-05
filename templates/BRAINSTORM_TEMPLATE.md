@@ -12,7 +12,7 @@ status: decided | open | abandoned
 chosen_approach: "[Name of chosen approach, if decided]"
 tags: [keyword1, keyword2, keyword3]
 related_solutions: []
-feeds_into: "[PRD reference, e.g., docs/prds/YYYY-MM-DD-feature-name.md]"
+feeds_into: "[Plan reference, e.g., docs/plans/YYYY-MM-DD-type-feature-name-plan.md]"
 ---
 
 # Brainstorm: [Title]
@@ -112,7 +112,7 @@ feeds_into: "[PRD reference, e.g., docs/prds/YYYY-MM-DD-feature-name.md]"
 
 ## Next Steps
 
-- [ ] Generate PRD: `/generate-prd`
+- [ ] Generate plan: `/generate-plan`
 - [ ] Create ADR if architectural decision: `/create-adr`
 ```
 

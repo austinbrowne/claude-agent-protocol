@@ -34,7 +34,7 @@ Methodology for beginning work on a GitHub issue with context loading, past lear
 gh issue view NNN --json title,body,labels,assignees,state
 ```
 
-Extract: Title, Description, Acceptance criteria, Labels, PRD reference, Dependencies.
+Extract: Title, Description, Acceptance criteria, Labels, Plan reference, Dependencies.
 
 ### 2. Search Past Solutions
 

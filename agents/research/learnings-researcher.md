@@ -14,7 +14,7 @@ Learn from the past to avoid repeating mistakes. This agent mines the project's 
 
 - **`/explore`** — Search for learnings related to exploration target
 - **`/start-issue`** — Find past solutions relevant to the issue
-- **`/generate-prd`** — Surface learnings for the feature domain
+- **`/generate-plan`** — Surface learnings for the feature domain
 - **`/deepen-plan`** — Per-section learnings lookup
 - **`/brainstorm`** — Past solutions to inform approach selection
 

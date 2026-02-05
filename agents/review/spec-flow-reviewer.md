@@ -14,7 +14,7 @@ Features are not screens, they are flows. Every user flow has a happy path and a
 
 - **Plan Review** -- Validates user flow completeness in proposed plans
 - **`/deepen-plan`** -- Identifies missing states in detailed plan sections
-- **`/generate-prd`** -- Reviews PRD for flow completeness before issue creation
+- **`/generate-plan`** -- Reviews plan for flow completeness before issue creation
 
 ## Review Process
 

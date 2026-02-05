@@ -24,7 +24,7 @@
 
 ### Does it actually solve the problem?
 
-- [ ] **Requirements match:** Code implements all acceptance criteria from PRD
+- [ ] **Requirements match:** Code implements all acceptance criteria from plan
 - [ ] **No hallucinated solutions:** AI didn't invent features that don't exist
 - [ ] **Business logic correct:** Edge cases from domain knowledge handled
 - [ ] **No silent failures:** Errors aren't swallowed without handling

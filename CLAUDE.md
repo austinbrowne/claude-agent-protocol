@@ -72,7 +72,7 @@ Use workflow commands as entry points. Each workflow offers sub-step selection v
 | Command | Purpose |
 |---------|---------|
 | `/explore` | Reconnaissance & ideation — codebase exploration + brainstorming |
-| `/plan` | Planning & requirements — PRD, deepen, review, issues, ADR |
+| `/plan` | Planning & requirements — plan generation, deepen, review, issues, ADR |
 | `/implement` | Implementation — start issue, tests, validation, security, recovery |
 | `/review` | Code review — fresh eyes review (full/lite), protocol compliance |
 | `/learn` | Knowledge capture — save solved problems as reusable solution docs |
@@ -96,7 +96,7 @@ Use workflow commands as entry points. Each workflow offers sub-step selection v
 
 Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly invocable as slash commands:
 
-**Planning skills:** `explore`, `brainstorm`, `generate-prd`, `deepen-plan`, `review-plan`, `create-adr`, `create-issues`
+**Planning skills:** `explore`, `brainstorm`, `generate-plan`, `deepen-plan`, `review-plan`, `create-adr`, `create-issues`
 
 **Execution skills:** `start-issue`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor`
 
@@ -124,7 +124,7 @@ For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
 | `docs/brainstorms/` | Brainstorm session records |
 | `.todos/` | File-based todo tracking (committed to git) |
-| `docs/prds/` | Product Requirements Documents |
+| `docs/plans/` | Plans (Minimal, Standard, Comprehensive) |
 
 ---
 
@@ -198,4 +198,4 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
-| `templates/*.md` | 8 reusable templates |
+| `templates/*.md` | 10 reusable templates |

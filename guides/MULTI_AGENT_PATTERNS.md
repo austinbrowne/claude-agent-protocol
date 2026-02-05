@@ -104,14 +104,14 @@ Review Agent:
 ```
 Complex Task
 ├── 1. Explore Agent → Research codebase, gather context
-├── 2. Plan Agent → Create detailed PRD
-└── 3. Execute Agent → Implement based on PRD
+├── 2. Plan Agent → Create detailed plan
+└── 3. Execute Agent → Implement based on plan
 ```
 
 **Workflow:**
 1. **Explore agent** uses Explore agent to understand codebase
-2. **Plan agent** creates PRD with all context gathered
-3. **Execute agent** implements feature using PRD (doesn't re-explore)
+2. **Plan agent** creates plan with all context gathered
+3. **Execute agent** implements feature using plan (doesn't re-explore)
 
 **Benefits:**
 - Separation of exploration and implementation
@@ -130,14 +130,14 @@ Explore Agent:
 
 Plan Agent:
 - Reads exploration summary
-- Generates PRD with:
+- Generates plan with:
   - Current authentication approach
   - Proposed OAuth integration
   - Database changes needed
   - Security considerations
 
 Execute Agent:
-- Reads PRD only (doesn't re-explore)
+- Reads plan only (doesn't re-explore)
 - Implements OAuth provider integration
 - Updates database schema
 - Adds tests
@@ -459,10 +459,10 @@ Coordinator
 1. User: "Explore the codebase for authentication patterns"
    [Task tool with subagent_type=Explore]
 
-2. User: "Based on exploration, create a PRD for OAuth integration"
+2. User: "Based on exploration, create a plan for OAuth integration"
    [Task tool with subagent_type=Plan]
 
-3. User: "Implement the OAuth integration per the PRD"
+3. User: "Implement the OAuth integration per the plan"
    [Standard execution]
 ```
 
@@ -485,8 +485,8 @@ execute_agent = Agent("execute", tools=[write, edit, bash])
 orchestrator = Orchestrator()
 orchestrator.add_workflow([
     explore_agent.task("Explore codebase for auth patterns"),
-    plan_agent.task("Generate PRD based on exploration"),
-    execute_agent.task("Implement per PRD")
+    plan_agent.task("Generate plan based on exploration"),
+    execute_agent.task("Implement per plan")
 ])
 
 result = orchestrator.run()
@@ -506,7 +506,7 @@ result = orchestrator.run()
 | Agent | Responsibility | Tools | Outputs |
 |-------|----------------|-------|---------|
 | Explore | Understand codebase | Grep, Read, Glob | Exploration summary |
-| Plan | Create PRD | Read, Write | PRD document |
+| Plan | Create plan | Read, Write | Plan document |
 | Execute | Implement code | Write, Edit, Bash | Code, tests |
 | Review | Security/quality review | Read | Approval or feedback |
 

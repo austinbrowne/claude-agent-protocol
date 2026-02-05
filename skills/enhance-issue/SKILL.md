@@ -21,7 +21,7 @@ Takes a sparse `needs_refinement` issue, explores the codebase, runs through pla
 ## Skills Referenced
 
 - `skills/explore/SKILL.md` — Codebase exploration to understand the problem
-- `commands/plan.md` — Full planning workflow (PRD, deepen, review, create sub-issues)
+- `commands/plan.md` — Full planning workflow (plan generation, deepen, review, create sub-issues)
 
 ---
 
@@ -73,8 +73,8 @@ Present findings to the user before proceeding.
 
 Chain into `/workflows:plan` with the issue as context:
 
-- **For bugs:** Generate a Lite PRD covering the fix approach, affected areas, and testing strategy
-- **For features:** Generate Lite or Full PRD depending on scope
+- **For bugs:** Generate a Minimal plan covering the fix approach, affected areas, and testing strategy
+- **For features:** Generate a Minimal, Standard, or Comprehensive plan depending on scope
 - Deepen the plan if needed (user's choice via workflow)
 - Review the plan if needed (user's choice via workflow)
 
@@ -91,17 +91,17 @@ gh issue edit NNN --body-file /tmp/enhanced-issue-body.md
 **For bugs**, fill in all TBD sections:
 - Root Cause Hypothesis (from exploration)
 - Affected Files (from exploration)
-- Acceptance Criteria (from PRD)
-- Technical Requirements (from PRD)
-- Testing Notes / Edge Cases (from PRD)
+- Acceptance Criteria (from plan)
+- Technical Requirements (from plan)
+- Testing Notes / Edge Cases (from plan)
 - Security Considerations (if applicable)
 
 **For features**, fill in all template sections:
-- Acceptance Criteria (from PRD)
-- Technical Requirements (from PRD)
-- Testing Notes (from PRD)
+- Acceptance Criteria (from plan)
+- Technical Requirements (from plan)
+- Testing Notes (from plan)
 - Developer Notes (from exploration)
-- Performance / Security Considerations (from PRD)
+- Performance / Security Considerations (from plan)
 
 ### 6. Swap Labels
 
@@ -134,7 +134,7 @@ AskUserQuestion:
 
 - **Preserve user's original description.** Don't overwrite what they wrote — enrich around it.
 - **Root cause is a hypothesis.** Mark it clearly as such until implementation confirms it.
-- **Planning depth scales with issue complexity.** Small bugs get Lite PRD. Large features may get Full PRD + deepen.
+- **Planning depth scales with issue complexity.** Small bugs get Minimal plan. Large features may get Comprehensive plan + deepen.
 - **The user controls planning depth** via `/workflows:plan` sub-step selection. Don't force full planning on a trivial bug.
 
 ---

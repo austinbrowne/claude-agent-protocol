@@ -13,7 +13,7 @@ Understand before proposing. This agent's job is to build a complete mental mode
 ## When to Invoke
 
 - **`/explore`** — Primary agent for codebase exploration (always runs)
-- **`/generate-prd`** — Codebase pattern research before PRD generation
+- **`/generate-plan`** — Codebase pattern research before plan generation
 - **`/deepen-plan`** — Per-section codebase context gathering
 
 ## Research Process

@@ -8,13 +8,13 @@ referenced_by:
 
 # Plan Deepening Skill
 
-Methodology for enriching a PRD/plan with parallel research, multi-agent review, and past learnings integration.
+Methodology for enriching a plan with parallel research, multi-agent review, and past learnings integration.
 
 ---
 
 ## When to Apply
 
-- After generating a PRD and before implementation
+- After generating a plan and before implementation
 - Complex features where shallow planning leads to rework
 - High-risk features (security, performance, breaking changes) that benefit from multi-agent scrutiny
 
@@ -24,7 +24,7 @@ Methodology for enriching a PRD/plan with parallel research, multi-agent review,
 
 ### Phase 1: Parse and Analyze Plan
 
-1. **Load PRD file** and parse into sections (problem, goals, solution, technical approach, phases, tests, security, risks, open questions)
+1. **Load plan file** and parse into sections (problem, goals, solution, technical approach, phases, tests, security, risks, open questions)
 2. **Classify each section by research needs** — codebase research, framework docs, security deep-dive, performance analysis, open questions
 
 ### Phase 2: Parallel Research Layer
@@ -61,9 +61,9 @@ For each HIGH RELEVANCE solution found in Phase 2, launch a subagent to extract 
 
 1. **Merge all outputs** from research, review, and learnings phases
 2. **Deduplicate findings** — if 3+ agents flag same issue, mark HIGH PRIORITY
-3. **Update PRD in-place** with `[DEEPENED]` annotations per section
-4. **Add Enhancement Summary** at end of PRD with counts, priority fixes, suggestions, learnings applied
-5. **Save updated PRD** — status: `DEEPENED_READY_FOR_REVIEW`
+3. **Update plan in-place** with `[DEEPENED]` annotations per section
+4. **Add Enhancement Summary** at end of plan with counts, priority fixes, suggestions, learnings applied
+5. **Save updated plan** — status: `DEEPENED_READY_FOR_REVIEW`
 
 ---
 
@@ -77,7 +77,7 @@ For each HIGH RELEVANCE solution found in Phase 2, launch a subagent to extract 
 
 ## Integration Points
 
-- **Input**: PRD file from generate-prd skill
-- **Output**: Enriched PRD with `[DEEPENED]` annotations
+- **Input**: Plan file from generate-plan skill
+- **Output**: Enriched plan with `[DEEPENED]` annotations
 - **Agent definitions**: `agents/research/*.md`, `agents/review/*.md`
 - **Consumed by**: `/plan` workflow command

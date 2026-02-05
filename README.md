@@ -1,6 +1,6 @@
 # GODMODE - AI Coding Agent Protocol
 
-**Version:** 4.1.1
+**Version:** 4.2.0
 **Status:** Production-ready
 
 A Claude Code plugin for AI-assisted software development. 6 workflow commands, 19 skill packages, 21 specialized agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.
@@ -34,7 +34,7 @@ Explore → Plan → Implement → Review → Learn → Ship
 | Command | Purpose |
 |---------|---------|
 | `/workflows:explore` | Reconnaissance & ideation — codebase exploration + brainstorming |
-| `/workflows:plan` | Planning & requirements — PRD, deepen, review, issues, ADR |
+| `/workflows:plan` | Planning & requirements — plan generation, deepen, review, issues, ADR |
 | `/workflows:implement` | Implementation — start issue, tests, validation, security, recovery |
 | `/workflows:review` | Code review — fresh eyes (full/lite), protocol compliance |
 | `/workflows:learn` | Knowledge capture — save solved problems as reusable docs |
@@ -55,10 +55,10 @@ You: /workflows:explore
   → "Ready to plan? → /workflows:plan"
 
 You: /workflows:plan
-  → Generates a PRD (Lite or Full)
+  → Generates a plan (Minimal, Standard, or Comprehensive)
   → Deepens the plan with parallel research agents
   → Multi-agent plan review with adversarial validation
-  → Creates GitHub issues from approved PRD
+  → Creates GitHub issues from approved plan
   → "Ready to implement? → /workflows:implement"
 
 You: /workflows:implement
@@ -157,10 +157,10 @@ Reusable methodology packages, each directly invocable:
 |-------|---------|
 | `/explore` | Multi-agent codebase exploration |
 | `/brainstorm` | Structured divergent thinking |
-| `/generate-prd` | PRD creation with research and spec-flow |
+| `/generate-plan` | Plan creation (3 tiers) with integrated research and spec-flow |
 | `/deepen-plan` | Plan enrichment with parallel research |
 | `/review-plan` | Multi-agent plan review with adversarial validation |
-| `/create-issues` | GitHub issue generation from PRD |
+| `/create-issues` | GitHub issue generation from plan |
 | `/create-adr` | Architecture Decision Records |
 | `/start-issue` | Issue startup with living plan |
 | `/generate-tests` | Comprehensive test generation |
@@ -181,7 +181,7 @@ Reusable methodology packages, each directly invocable:
 
 ### Also Included
 - **Checklists** — OWASP Top 10 2025 security checklist, AI code review criteria
-- **Templates** — PRD, test strategy, ADR, brainstorm, solution doc, todo, living plan, GitHub issue
+- **Templates** — Plan (3-tier), test strategy, ADR, brainstorm, solution doc, todo, living plan, GitHub issue
 - **Guides** — Fresh Eyes Review, failure recovery, context optimization, multi-agent patterns, GitHub Projects integration
 
 ---
@@ -223,7 +223,7 @@ commands/                              # 6 workflow entry points
 skills/                                # 19 reusable skill packages
 ├── brainstorm/SKILL.md
 ├── explore/SKILL.md
-├── generate-prd/SKILL.md
+├── generate-plan/SKILL.md
 ├── deepen-plan/SKILL.md
 ├── review-plan/SKILL.md
 ├── create-issues/SKILL.md
@@ -246,20 +246,27 @@ agents/
 └── research/                          # 4 research agent definitions
 
 checklists/                            # Security + code review checklists
-templates/                             # 8 reusable templates
+templates/                             # 10 reusable templates
 guides/                                # Process guides
 
 docs/
 ├── solutions/                         # Knowledge compounding storage
 ├── brainstorms/                       # Brainstorm session records
-└── prds/                              # Product Requirements Documents
+└── plans/                             # Plans (Minimal, Standard, Comprehensive)
 ```
 
 ---
 
 ## Version History
 
-**v4.1.1 (February 2026)** - Current
+**v4.2.0 (February 2026)** - Current
+- Renamed "PRD" to "Plan" throughout — clearer terminology
+- 3-tier plan system: Minimal, Standard, Comprehensive (replaces Lite/Full)
+- `/generate-plan` skill is self-sufficient — runs its own 4-agent research (no prior `/explore` required)
+- Moved `docs/prds/` to `docs/plans/`, renamed `generate-prd` to `generate-plan`
+- New `PLAN_TEMPLATE.md` with structured templates for all 3 tiers
+
+**v4.1.1 (February 2026)**
 - Fix workflow command namespacing (`/workflows:explore` instead of `/godmode:explore`)
 - Plugin marketplace installation support
 

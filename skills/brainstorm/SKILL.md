@@ -37,7 +37,7 @@ Reusable methodology for structured divergent thinking before committing to a so
 - Direct instructions from user that leave no ambiguity
 
 **If unclear whether brainstorming is worthwhile:**
-- Ask the user whether to brainstorm or skip directly to PRD generation
+- Ask the user whether to brainstorm or skip directly to plan generation
 
 ### 2. Search Past Learnings
 
@@ -135,7 +135,7 @@ status: decided | open | abandoned
 chosen_approach: "Name of chosen approach"
 tags: [keyword1, keyword2, keyword3]
 related_solutions: []
-feeds_into: "docs/prds/YYYY-MM-DD-feature-name.md"
+feeds_into: "docs/plans/YYYY-MM-DD-type-feature-name-plan.md"
 ```
 
 ---
@@ -156,6 +156,6 @@ feeds_into: "docs/prds/YYYY-MM-DD-feature-name.md"
 
 - **Input from `/explore`**: Exploration findings inform the problem space
 - **Input from `docs/solutions/`**: Past learnings prevent repeating mistakes
-- **Output to PRD generation**: Chosen approach becomes the technical direction
+- **Output to plan generation**: Chosen approach becomes the technical direction
 - **Output to ADR creation**: Major decisions may warrant an ADR
 - **Template**: `templates/BRAINSTORM_TEMPLATE.md`

@@ -7,7 +7,7 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 | Command | Purpose | Sub-steps |
 |---------|---------|-----------|
 | `/explore` | Reconnaissance & ideation | Codebase exploration, brainstorming |
-| `/plan` | Planning & requirements | Generate PRD, deepen plan, review plan, create issues, ADR |
+| `/plan` | Planning & requirements | Generate plan, deepen plan, review plan, create issues, ADR |
 | `/implement` | Implementation | Start issue, generate tests, run validation, security review, recovery |
 | `/review` | Code review | Fresh eyes review (full/lite), protocol compliance |
 | `/learn` | Knowledge capture | Save solved problems as reusable solution docs |
@@ -45,7 +45,7 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 
 ```bash
 1. /explore                    # Understand the codebase
-2. /plan                       # Generate PRD → select "Generate PRD"
+2. /plan                       # Generate plan → select "Generate plan"
 3. /plan                       # Review plan → select "Review plan"
 4. /plan                       # Create issues → select "Create GitHub issues"
 5. /implement                  # Start issue → select "Start issue"
@@ -82,11 +82,11 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 |-------|---------|
 | `explore` | Multi-agent codebase exploration (4 parallel research agents) |
 | `brainstorm` | Structured divergent thinking with comparison matrices |
-| `generate-prd` | Create PRD with parallel research and spec-flow analysis |
-| `deepen-plan` | Enrich PRD with massive parallel research (10-20+ agents) |
+| `generate-plan` | Create plan (Minimal/Standard/Comprehensive) with integrated research and spec-flow analysis |
+| `deepen-plan` | Enrich plan with massive parallel research (10-20+ agents) |
 | `review-plan` | Multi-agent plan review with adversarial validation |
 | `create-adr` | Document architecture decisions |
-| `create-issues` | Generate GitHub issues from approved PRD |
+| `create-issues` | Generate GitHub issues from approved plan |
 
 ### Execution Skills
 | Skill | Purpose |
@@ -149,8 +149,8 @@ gh project item-list 3 --owner OWNER
 # View issue
 gh issue view 45
 
-# List PRDs
-ls docs/prds/
+# List plans
+ls docs/plans/
 
 # Create issue manually
 gh issue create --title "..." --body-file issue.md --label "type: feature"
@@ -208,7 +208,7 @@ Use the recovery skill within `/implement`:
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
-| `templates/*.md` | 8 reusable templates |
+| `templates/*.md` | 10 reusable templates |
 | `docs/solutions/` | Knowledge compounding storage |
 | `docs/brainstorms/` | Brainstorm session records |
 | `.todos/` | File-based todo tracking |

@@ -1,11 +1,11 @@
 ---
 name: workflows:plan
-description: "Planning & requirements — PRD generation, deepening, review, issues, and ADR"
+description: "Planning & requirements — plan generation, deepening, review, issues, and ADR"
 ---
 
 # /plan — Planning & Requirements
 
-**Workflow command.** Hub for all planning activities: PRD creation, plan enrichment, plan review, issue creation, and architecture decision records.
+**Workflow command.** Hub for all planning activities: plan creation, plan enrichment, plan review, issue creation, and architecture decision records.
 
 ---
 
@@ -16,14 +16,14 @@ AskUserQuestion:
   question: "Which planning step would you like to run?"
   header: "Plan"
   options:
-    - label: "Generate PRD"
-      description: "Create a Product Requirements Document (Lite or Full)"
+    - label: "Generate plan"
+      description: "Create a plan (Minimal, Standard, or Comprehensive) with integrated research"
     - label: "Deepen existing plan"
-      description: "Enrich a PRD with parallel research and review agents"
+      description: "Enrich a plan with parallel research and review agents"
     - label: "Review plan"
       description: "Multi-agent plan review with adversarial validation"
     - label: "Create GitHub issues"
-      description: "Generate GitHub issues from an approved PRD"
+      description: "Generate GitHub issues from an approved plan"
 ```
 
 ---
@@ -32,7 +32,7 @@ AskUserQuestion:
 
 **Based on selection:**
 
-- **"Generate PRD"** → Load and follow `skills/generate-prd/SKILL.md`
+- **"Generate plan"** → Load and follow `skills/generate-plan/SKILL.md`
 - **"Deepen existing plan"** → Load and follow `skills/deepen-plan/SKILL.md`
 - **"Review plan"** → Load and follow `skills/review-plan/SKILL.md`
 - **"Create GitHub issues"** → Load and follow `skills/create-issues/SKILL.md`

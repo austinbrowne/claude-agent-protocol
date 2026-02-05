@@ -20,7 +20,7 @@ OWASP Top 10 adapted for AI code review with common AI blind spot detection.
 - Database queries with user input
 - External API calls
 - File uploads
-- Issue or PRD flagged as `SECURITY_SENSITIVE`
+- Issue or plan flagged as `SECURITY_SENSITIVE`
 
 ---
 

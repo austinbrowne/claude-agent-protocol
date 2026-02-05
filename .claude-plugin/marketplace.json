@@ -13,8 +13,8 @@
         "repo": "austinbrowne/claude-agent-protocol",
         "ref": "release/v4.1"
       },
-      "description": "GODMODE v4.1 — 6 workflow commands, 22 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
-      "version": "4.1.3",
+      "description": "GODMODE v4.2 — 6 workflow commands, 22 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
+      "version": "4.2.0",
       "keywords": [
         "workflow",
         "ai-coding",

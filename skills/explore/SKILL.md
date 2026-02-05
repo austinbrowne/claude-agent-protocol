@@ -124,4 +124,4 @@ If exploration is "full" codebase overview:
 - **Output**: Structured exploration summary
 - **Agent definitions**: `agents/research/*.md`
 - **Consumed by**: `/explore` workflow command, `/plan` workflow
-- **Feeds into**: Brainstorming, PRD generation, issue creation
+- **Feeds into**: Brainstorming, plan generation, issue creation

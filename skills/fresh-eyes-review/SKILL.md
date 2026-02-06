@@ -1,10 +1,11 @@
 ---
 name: fresh-eyes-review
-version: "1.1"
-description: 13-agent smart selection code review system with zero-context methodology
+version: "2.0"
+description: 14-agent smart selection code review system with zero-context methodology and optional Agent Teams mode
 referenced_by:
   - commands/review.md
   - guides/FRESH_EYES_REVIEW.md
+  - guides/AGENT_TEAMS_GUIDE.md
 ---
 
 # Fresh Eyes Review Skill
@@ -25,6 +26,17 @@ Zero-context multi-agent code review with smart agent selection.
 ## Core Principle
 
 Review agents receive **zero conversation context** — they only see the code diff and their review checklist. This eliminates confirmation bias and ensures truly unbiased review.
+
+---
+
+## Step 0: Detect Execution Mode
+
+Check if the TeammateTool is available in your tool list.
+
+- **Available** → follow `[TEAM MODE]` instructions throughout this skill
+- **Not available** → follow `[SUBAGENT MODE]` instructions (existing Task tool behavior)
+
+See `guides/AGENT_TEAMS_GUIDE.md` for full team formation patterns and best practices (Pattern A: Review Team).
 
 ---
 
@@ -122,7 +134,71 @@ Proceed with this selection? (yes / customize): ___
 
 ## Execution Pattern
 
-### Phase 1: Specialist Reviews (Parallel)
+### `[TEAM MODE]` — Agent Teams Execution
+
+**Phase 1: Spawn Specialist Teammates**
+
+Form a Review Team. You (the Lead) act as Coordinator, Supervisor, and Adversarial Validator.
+
+1. Spawn one teammate per specialist from the roster (core + triggered conditional agents)
+2. Each teammate receives a spawn prompt containing:
+   - Zero conversation context (fresh eyes principle preserved)
+   - The diff content from `/tmp/review-diff.txt`
+   - Their agent definition file reference
+   - Relevant checklist (security agent gets `checklists/AI_CODE_SECURITY_REVIEW.md`)
+3. Create a shared task list with one review task per specialist
+4. Teammates execute their reviews independently
+
+**Teammate spawn prompt template:**
+```
+You are a [specialist type] with zero context about this project.
+Read your review process from [agent definition file].
+Review the code changes in /tmp/review-diff.txt.
+
+Instructions:
+- Post findings to the task list with severity (CRITICAL/HIGH/MEDIUM/LOW)
+- Include file:line references and specific fixes
+- If you find a CRITICAL issue, broadcast it to the team immediately
+- If your finding overlaps with another reviewer's domain, message them
+- When the Lead asks a question, respond with specific evidence from the code
+- Format: [ID] severity:LEVEL file:line description
+
+Mark your task as done when complete.
+```
+
+**Inter-agent communication during Phase 1:**
+- Specialists may message each other about overlapping findings
+- CRITICAL findings are broadcast to the entire team
+- Lead monitors progress via the shared task list
+
+**Phase 2: Lead Consolidation (Supervisor Role)**
+
+After all specialists complete:
+1. Read all specialist findings from the task list and messages
+2. Identify duplicate findings — message involved specialists: "You and [other specialist] both flagged [location]. Can you clarify the distinction?"
+3. For ambiguous findings — message the specialist: "What evidence supports [finding]? Is this exploitable or theoretical?"
+4. Remove false positives based on specialist responses
+5. Prioritize by severity AND real-world impact
+6. Create todo specifications for CRITICAL/HIGH findings
+
+**Phase 3: Lead Adversarial Validation**
+
+After consolidation:
+1. Inventory all claims from the implementation and the review
+2. Challenge findings by messaging specialists directly: "Security Reviewer, what evidence confirms [claim]?"
+3. Specialists respond with evidence or retract their finding
+4. Classify claims: VERIFIED | UNVERIFIED | DISPROVED | INCOMPLETE
+5. DISPROVED claims on CRITICAL/HIGH findings escalate to BLOCK verdict
+6. Challenge your own consolidation decisions — did you remove any valid findings?
+
+**Team cleanup:**
+After producing the final report, shut down all specialist teammates and clean up the team.
+
+---
+
+### `[SUBAGENT MODE]` — Task Tool Execution (Fallback)
+
+**Phase 1: Specialist Reviews (Parallel)**
 
 Launch ALL specialist agents in a **single message** with multiple Task tool calls.
 
@@ -155,16 +231,18 @@ Include file:line references and specific fixes.
 - `agents/review/config-secrets-reviewer.md` (if triggered)
 - `agents/review/documentation-reviewer.md` (if triggered)
 
-### Phase 2: Supervisor (Sequential, after Phase 1)
+**Phase 2: Supervisor (Sequential, after Phase 1)**
 
+Launch Supervisor as a Task tool call with all specialist outputs:
 - Validates each finding against code diff
 - Removes false positives
 - Consolidates duplicates
 - Prioritizes by severity AND impact
 - Creates todo specifications for CRITICAL/HIGH
 
-### Phase 3: Adversarial Validation (Sequential, after Phase 2)
+**Phase 3: Adversarial Validation (Sequential, after Phase 2)**
 
+Launch Adversarial Validator as a Task tool call with all specialist outputs + Supervisor report:
 - Inventories every claim in the implementation
 - Demands evidence for each claim
 - Challenges review findings

@@ -11,10 +11,10 @@
       "source": {
         "source": "github",
         "repo": "austinbrowne/claude-agent-protocol",
-        "ref": "main"
+        "ref": "experimental/agent-teams"
       },
-      "description": "GODMODE v4.2 — 6 workflow commands, 22 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
-      "version": "4.2.0",
+      "description": "GODMODE v5.0-experimental — 6 workflow commands, 24 skill packages, 21 agents, Agent Teams integration for parallel reviews and implementation swarms, knowledge compounding.",
+      "version": "5.0.0-experimental",
       "keywords": [
         "workflow",
         "ai-coding",
@@ -24,7 +24,9 @@
         "orchestrator",
         "multi-agent",
         "knowledge-compounding",
-        "adversarial-validation"
+        "adversarial-validation",
+        "agent-teams",
+        "swarm"
       ]
     }
   ]

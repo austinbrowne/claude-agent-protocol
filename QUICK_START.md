@@ -8,7 +8,7 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 |---------|---------|-----------|
 | `/explore` | Reconnaissance & ideation | Codebase exploration, brainstorming |
 | `/plan` | Planning & requirements | Generate plan, deepen plan, review plan, create issues, ADR |
-| `/implement` | Implementation | Start issue, generate tests, run validation, security review, recovery |
+| `/implement` | Implementation | Start issue, swarm plan, swarm issues, generate tests, validation, security review, recovery |
 | `/review` | Code review | Fresh eyes review (full/lite), protocol compliance |
 | `/learn` | Knowledge capture | Save solved problems as reusable solution docs |
 | `/ship` | Ship | Commit/PR, finalize, refactor |
@@ -99,6 +99,8 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 | Skill | Purpose |
 |-------|---------|
 | `start-issue` | Begin work with living plan and past learnings |
+| `swarm-plan` | Parallel implementation of plan tasks using Agent Teams |
+| `swarm-issues` | Batch-implement multiple GitHub issues in parallel using Agent Teams |
 | `generate-tests` | Generate comprehensive test suites |
 | `run-validation` | Tests + coverage + lint + security checks |
 | `security-review` | OWASP security checklist review |
@@ -108,7 +110,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 ### Review Skills
 | Skill | Purpose |
 |-------|---------|
-| `fresh-eyes-review` | 13-agent smart selection review with adversarial validation |
+| `fresh-eyes-review` | 14-agent smart selection review with adversarial validation (Agent Teams mode available) |
 | `review-protocol` | Protocol compliance check and status report |
 
 ### Shipping Skills
@@ -208,13 +210,14 @@ Use the recovery skill within `/implement`:
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
 | `commands/*.md` | **6 workflow commands** (explore, plan, implement, review, learn, ship) |
-| `skills/*/SKILL.md` | **22 reusable skill packages** |
+| `skills/*/SKILL.md` | **24 reusable skill packages** |
 | `agents/review/*.md` | **17 review agents** |
 | `agents/research/*.md` | **4 research agents** |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | Security checklist (OWASP Top 10) |
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
+| `guides/AGENT_TEAMS_GUIDE.md` | Agent Teams patterns and best practices |
 | `templates/*.md` | 10 reusable templates |
 | `docs/solutions/` | Knowledge compounding storage |
 | `docs/brainstorms/` | Brainstorm session records |
@@ -232,6 +235,6 @@ Use the recovery skill within `/implement`:
 
 ---
 
-**Version:** 4.2
+**Version:** 5.0.0-experimental
 **Last Updated:** February 2026
 **Full docs:** See `README.md`

@@ -1,9 +1,10 @@
 ---
 name: review-plan
-version: "1.1"
-description: Multi-agent plan review methodology with adversarial validation
+version: "2.0"
+description: Multi-agent plan review methodology with adversarial validation and optional Agent Teams mode
 referenced_by:
   - commands/plan.md
+  - guides/AGENT_TEAMS_GUIDE.md
 ---
 
 # Plan Review Skill
@@ -24,6 +25,17 @@ referenced_by:
 
 - Plan file exists
 - Plan should be in `READY_FOR_REVIEW` or `DEEPENED_READY_FOR_REVIEW` status
+
+---
+
+## Step 0: Detect Execution Mode
+
+Check if the TeammateTool is available in your tool list.
+
+- **Available** → follow `[TEAM MODE]` instructions throughout this skill
+- **Not available** → follow `[SUBAGENT MODE]` instructions (existing Task tool behavior)
+
+See `guides/AGENT_TEAMS_GUIDE.md` for full team formation patterns and best practices (Pattern A: Review Team).
 
 ---
 
@@ -64,7 +76,41 @@ Receives the plan AND all 4 reviewer outputs.
 
 **Read the full plan content** for use in all reviewer prompts.
 
-### Step 2: Launch 4 review agents IN PARALLEL
+### Step 2: Launch Specialist Reviews
+
+#### `[TEAM MODE]` — Agent Teams Execution
+
+Form a Plan Review Team. You (the Lead) act as Coordinator and Adversarial Validator.
+
+1. Spawn 4 specialist teammates — one per reviewer domain
+2. Each teammate receives a spawn prompt containing:
+   - Zero conversation context (only the plan content)
+   - Their agent definition file reference
+   - Agent-specific evaluation criteria
+3. Create a shared task list with one review task per specialist
+4. Teammates can message each other about trade-offs: "Architecture Reviewer, your scalability concern at Phase 3 conflicts with my simplicity finding — can we discuss?"
+5. Teammates broadcast CRITICAL findings immediately
+
+**Teammate spawn prompt template:**
+```
+You are a [specialist type]. Read your review process from [agent definition file].
+
+Review this plan:
+[full plan content]
+
+Evaluate: [agent-specific criteria]
+
+Instructions:
+- Post findings to the task list with severity (CRITICAL/HIGH/MEDIUM/LOW)
+- If you find a CRITICAL issue, broadcast it to the team immediately
+- If your finding relates to another reviewer's domain, message them
+- When the Lead asks a question, respond with specific reasoning
+- Format findings as: VERDICT, FINDINGS list, SUMMARY
+
+Mark your task as done when complete.
+```
+
+#### `[SUBAGENT MODE]` — Task Tool Execution (Fallback)
 
 **CRITICAL: Launch ALL 4 agents in a SINGLE message with multiple Task calls.**
 
@@ -86,14 +132,30 @@ FINDINGS:
 SUMMARY: [1-2 sentence assessment]
 ```
 
-**Agent-specific evaluation criteria:**
+#### Agent-specific evaluation criteria (both modes):
 
 - **Architecture:** Component decomposition, data flow, dependency management, scalability, consistency, separation of concerns
 - **Simplicity:** Over-engineering, YAGNI, abstraction level, phase simplification, technology choices, cognitive load
 - **Spec-Flow:** Acceptance criteria testability, phase ordering, dependencies, success metrics, completeness, edge cases, user flow
 - **Security:** Authentication/authorization design, data protection, input validation, injection prevention, secrets management, transport security, error handling, logging
 
-### Step 3: Launch Adversarial Validator AFTER all 4 complete
+### Step 3: Adversarial Validation
+
+#### `[TEAM MODE]`
+
+After all 4 specialist teammates complete, the Lead performs adversarial validation directly:
+
+1. Read all specialist findings from the task list and messages
+2. For ambiguous findings, message the specialist: "What evidence supports [finding]?"
+3. Specialists respond with reasoning or concede the finding
+4. Challenge plan claims — assumptions validated? Estimates realistic? Hidden dependencies?
+5. Challenge reviewer findings — false positives? False negatives? Contradictions between reviewers?
+6. Identify systemic blind spots — what is nobody thinking about?
+7. Shut down specialist teammates and clean up the team
+
+#### `[SUBAGENT MODE]`
+
+Launch Adversarial Validator as a Task tool call after all 4 specialists complete.
 
 **Adversarial Validator receives:**
 - Full plan content

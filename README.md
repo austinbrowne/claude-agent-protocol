@@ -1,9 +1,9 @@
 # GODMODE - AI Coding Agent Protocol
 
-**Version:** 4.2.0
-**Status:** Production-ready
+**Version:** 5.0.0-experimental
+**Status:** Experimental (Agent Teams integration)
 
-A Claude Code plugin for AI-assisted software development. 6 workflow commands, 22 skill packages, 21 specialized agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.
+A Claude Code plugin for AI-assisted software development. 6 workflow commands, 24 skill packages, 21 specialized agents (17 review + 4 research), Agent Teams integration for parallel reviews and implementation swarms, knowledge compounding, and structured phases for planning, execution, and finalization.
 
 ---
 
@@ -35,7 +35,7 @@ Explore → Plan → Implement → Review → Learn → Ship
 |---------|---------|
 | `/workflows:explore` | Reconnaissance & ideation — codebase exploration + brainstorming |
 | `/workflows:plan` | Planning & requirements — plan generation, deepen, review, issues, ADR |
-| `/workflows:implement` | Implementation — start issue, tests, validation, security, recovery |
+| `/workflows:implement` | Implementation — start issue, swarm plan, swarm issues, tests, validation, security, recovery |
 | `/workflows:review` | Code review — fresh eyes (full/lite), protocol compliance |
 | `/workflows:learn` | Knowledge capture — save solved problems as reusable docs |
 | `/workflows:ship` | Ship — commit/PR, finalize, refactor |
@@ -150,7 +150,7 @@ You: /learn
 ### Workflow Commands (6)
 Top-level orchestrators with sub-step selection via `AskUserQuestion`.
 
-### Skills (22)
+### Skills (24)
 Reusable methodology packages, each directly invocable:
 
 | Skill | Purpose |
@@ -158,20 +158,22 @@ Reusable methodology packages, each directly invocable:
 | `/explore` | Multi-agent codebase exploration |
 | `/brainstorm` | Structured divergent thinking |
 | `/generate-plan` | Plan creation (3 tiers) with integrated research and spec-flow |
-| `/deepen-plan` | Plan enrichment with parallel research |
-| `/review-plan` | Multi-agent plan review with adversarial validation |
+| `/deepen-plan` | Plan enrichment with parallel research (Agent Teams mode available) |
+| `/review-plan` | Multi-agent plan review with adversarial validation (Agent Teams mode available) |
 | `/create-issues` | GitHub issue generation from plan |
 | `/create-adr` | Architecture Decision Records |
 | `/file-issues` | Rapid-fire issue filing with sparse templates |
 | `/file-issue` | File a single GitHub issue from a description |
 | `/enhance-issue` | Refine sparse issues with exploration and planning |
 | `/start-issue` | Issue startup with living plan |
+| `/swarm-plan` | Parallel implementation of plan tasks using Agent Teams |
+| `/swarm-issues` | Batch-implement multiple GitHub issues in parallel using Agent Teams |
 | `/generate-tests` | Comprehensive test generation |
 | `/run-validation` | Tests + coverage + lint + security |
 | `/security-review` | OWASP security methodology |
 | `/recovery` | Failure recovery decision tree |
 | `/refactor` | Guided refactoring |
-| `/fresh-eyes-review` | 13-agent smart selection review |
+| `/fresh-eyes-review` | 14-agent smart selection review (Agent Teams mode available) |
 | `/review-protocol` | Protocol compliance review |
 | `/commit-and-pr` | Commit and PR with finding verification |
 | `/finalize` | Final documentation + validation |
@@ -185,7 +187,7 @@ Reusable methodology packages, each directly invocable:
 ### Also Included
 - **Checklists** — OWASP Top 10 2025 security checklist, AI code review criteria
 - **Templates** — Plan (3-tier), test strategy, ADR, brainstorm, solution doc, todo, living plan, GitHub issue, bug issue, recovery report
-- **Guides** — Fresh Eyes Review, failure recovery, context optimization, multi-agent patterns, GitHub Projects integration
+- **Guides** — Fresh Eyes Review, Agent Teams guide, failure recovery, context optimization, multi-agent patterns, GitHub Projects integration
 
 ---
 
@@ -223,7 +225,7 @@ commands/                              # 6 workflow entry points
 ├── learn.md
 └── ship.md
 
-skills/                                # 22 reusable skill packages
+skills/                                # 24 reusable skill packages
 ├── brainstorm/SKILL.md
 ├── explore/SKILL.md
 ├── generate-plan/SKILL.md
@@ -235,6 +237,8 @@ skills/                                # 22 reusable skill packages
 ├── file-issue/SKILL.md
 ├── enhance-issue/SKILL.md
 ├── start-issue/SKILL.md
+├── swarm-plan/SKILL.md               # Agent Teams — parallel plan implementation
+├── swarm-issues/SKILL.md             # Agent Teams — batch issue implementation
 ├── generate-tests/SKILL.md
 ├── run-validation/SKILL.md
 ├── security-review/SKILL.md
@@ -265,7 +269,16 @@ docs/
 
 ## Version History
 
-**v4.2.0 (February 2026)** - Current
+**v5.0.0-experimental (February 2026)** - Current (experimental/agent-teams branch)
+- Agent Teams integration — tiered strategy with implementation swarms
+- `fresh-eyes-review`, `review-plan`, `deepen-plan` support team mode (inter-agent discussion, live cross-validation)
+- New `/swarm-plan` skill — parallel plan implementation with swarmability assessment
+- New `/swarm-issues` skill — batch GitHub issue implementation with triage
+- Agent Teams guide (`guides/AGENT_TEAMS_GUIDE.md`) — formation patterns, detection, fallback
+- Automatic fallback to subagent mode when Agent Teams is disabled
+- 24 skill packages (added `swarm-plan`, `swarm-issues`)
+
+**v4.2.0 (February 2026)**
 - Renamed "PRD" to "Plan" throughout — clearer terminology
 - 3-tier plan system: Minimal, Standard, Comprehensive (replaces Lite/Full)
 - `/generate-plan` skill is self-sufficient — runs its own 4-agent research (no prior `/explore` required)

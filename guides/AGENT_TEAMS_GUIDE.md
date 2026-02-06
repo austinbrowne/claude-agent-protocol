@@ -15,12 +15,17 @@ Every skill that supports team mode checks for availability at its start:
 ```
 Step 0: Detect Execution Mode
 
+CRITICAL: Check your tool list RIGHT NOW. Do NOT use conversation history to decide.
+Each skill invocation re-evaluates independently.
+
 Check if the TeammateTool is available in your tool list.
   → Available: follow [TEAM MODE] instructions throughout this skill
   → Not available: follow [SUBAGENT MODE] instructions (existing Task tool behavior)
 ```
 
-This is prompt-level detection. No config files, no environment variable checks. The agent inspects its own available tools.
+This is prompt-level detection. No config files, no environment variable checks. The agent inspects its own available tools **at invocation time**.
+
+**Re-evaluate every time.** If you used subagent mode earlier in this conversation, that does NOT mean you should use subagent mode now. Check your tool list fresh. Conversation history is not a valid signal for tool availability.
 
 **Fallback is mandatory.** Agent Teams is experimental and may not be available. Every skill MUST have a working `[SUBAGENT MODE]` path that produces identical output.
 
@@ -46,7 +51,7 @@ This is prompt-level detection. No config files, no environment variable checks.
 | `review-plan` | Team | Reviewers can debate trade-offs, Lead challenges live |
 | `deepen-plan` | Team | Research findings inform review focus in real-time |
 | `swarm-plan` | Team | Teammates coordinate on shared implementation |
-| `swarm-issues` | Team | Teammates work independent issues in parallel |
+| `triage-issues` | Subagent | Fire-and-forget planning per issue, no inter-agent discussion needed |
 | `generate-plan` | Subagent | Fire-and-forget research, no inter-agent discussion needed |
 | `explore` | Subagent | Fire-and-forget research |
 | `start-issue` | Subagent | Single learnings query |
@@ -216,68 +221,9 @@ Project context:
 
 ---
 
-### Pattern D: Issue Swarm
+### Note: Issue Triage (not an Agent Teams pattern)
 
-**Used by:** `swarm-issues`
-
-**Structure:**
-```
-Lead (you) = Coordinator + Triager
-Teammates = Issue implementers (one per issue)
-```
-
-**Lead responsibilities:**
-- Fetch open issues from GitHub via `gh issue list`
-- Triage for swarm-readiness (well-defined, independent, unblocked, implementation-sized)
-- Present candidates to user for approval
-- Spawn teammates, each assigned one issue
-- Monitor progress, handle blockers
-- Present summary with branch names when all complete
-
-**Issue implementer teammate responsibilities:**
-- Execute the full start-issue protocol for their assigned issue:
-  1. Load issue context (title, body, acceptance criteria, labels)
-  2. Search `docs/solutions/` for relevant past learnings
-  3. Create branch: `feat/issue-{number}-{slug}`
-  4. Create living plan at `.todos/{issue-number}-plan.md`
-  5. Implement the solution
-  6. Generate tests
-  7. Run validation
-- Message Lead when done or blocked
-- Do NOT interact with other teammates' files or branches
-
-**Spawn prompt template for issue implementer teammates:**
-```
-You are implementing GitHub issue #{number}. Follow the FULL protocol pipeline.
-
-Issue: #{number} — {title}
-Body: {body}
-Acceptance criteria: {criteria}
-Labels: {labels}
-
-Protocol pipeline (follow ALL steps):
-1. Create and switch to branch: feat/issue-{number}-{slug}
-2. Search docs/solutions/ for past learnings relevant to this issue
-3. Create a living plan at .todos/{number}-plan.md
-4. Implement the solution
-5. Generate tests (happy path + edge cases + error conditions)
-6. Run validation: lint, type-check, all tests pass
-
-Rules:
-- Stay on YOUR branch — do not touch other branches
-- Do NOT modify files that other teammates are working on
-- If you discover a blocker, message the Lead immediately
-- When done, mark your task as complete and message the Lead with:
-  - Branch name
-  - Files changed
-  - Summary of changes
-  - Test results
-
-Project context:
-- Read CLAUDE.md for project conventions
-- Check docs/solutions/ for past learnings
-- Follow existing patterns in the codebase
-```
+`triage-issues` uses subagents only — no Agent Teams required. Each planning subagent works on a separate issue independently (no inter-agent communication needed). After triage, each issue is implemented separately via `/implement` → `start-issue` or `swarm-plan` per issue. See `skills/triage-issues/SKILL.md` for details.
 
 ---
 
@@ -359,16 +305,9 @@ If two tasks share a file, they're either:
 
 This keeps the branch model simple: one branch, one combined diff for review at the `/review` step.
 
-### Swarm Issues (Pattern D)
+### Per-Issue Implementation
 
-Each teammate works on their **own branch**: `feat/issue-{number}-{slug}`.
-
-Branches are reviewed independently at `/review` time. The user can:
-- Review each branch individually
-- Merge branches first, then review the combined diff
-- Review in batches
-
-This matches the natural "one issue, one branch, one PR" workflow.
+When implementing individual issues (after triage), each issue gets its own branch via the standard `start-issue` or `swarm-plan` flow: `feat/issue-{number}-{slug}`. Each issue is implemented and reviewed independently — one branch, one PR per issue.
 
 ---
 
@@ -463,4 +402,4 @@ From the official Agent Teams documentation:
 ---
 
 **Last Updated:** February 2026
-**Referenced by:** `skills/fresh-eyes-review/SKILL.md`, `skills/review-plan/SKILL.md`, `skills/deepen-plan/SKILL.md`, `skills/swarm-plan/SKILL.md`, `skills/swarm-issues/SKILL.md`
+**Referenced by:** `skills/fresh-eyes-review/SKILL.md`, `skills/review-plan/SKILL.md`, `skills/deepen-plan/SKILL.md`, `skills/swarm-plan/SKILL.md`, `skills/triage-issues/SKILL.md`

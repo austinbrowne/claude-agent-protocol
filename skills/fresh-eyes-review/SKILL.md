@@ -1,6 +1,6 @@
 ---
 name: fresh-eyes-review
-version: "2.0"
+version: "2.1"
 description: 14-agent smart selection code review system with zero-context methodology and optional Agent Teams mode
 referenced_by:
   - commands/review.md
@@ -30,6 +30,8 @@ Review agents receive **zero conversation context** — they only see the code d
 ---
 
 ## Step 0: Detect Execution Mode
+
+**CRITICAL: Check your tool list RIGHT NOW.** Do NOT rely on what you did earlier in this conversation. Each skill invocation must re-evaluate independently — conversation history is not a valid signal for tool availability.
 
 Check if the TeammateTool is available in your tool list.
 
@@ -262,15 +264,91 @@ Launch Adversarial Validator as a Task tool call with all specialist outputs + S
 
 ---
 
-## Findings Tracking
+## Post-Review Actions
 
-After review, offer tracking options:
-1. **File-based todos** (`.todos/` directory) — recommended for solo work
-2. **GitHub issues** — recommended for teams
-3. **Both** — file-based + GitHub issues
-4. **None** — just show findings
+After presenting the review report, ask the user how to proceed. Options vary by verdict.
 
-For CRITICAL and HIGH findings, create tracking items automatically. For MEDIUM findings, ask user preference.
+**If verdict is BLOCK or FIX_BEFORE_COMMIT:**
+
+```
+AskUserQuestion:
+  question: "Review found {N} issues ({C} CRITICAL, {H} HIGH). How should we proceed?"
+  header: "Fix findings"
+  options:
+    - label: "Fix all findings"
+      description: "Fix all {N} issues sequentially, then re-validate"
+    - label: "Fix CRITICAL/HIGH only"
+      description: "Fix {C+H} priority issues, defer {M+L} MEDIUM/LOW to later"
+    - label: "Let me choose"
+      description: "I'll specify which findings to fix"
+    - label: "Dismiss and proceed"
+      description: "I disagree with the findings — skip fixes"
+```
+
+**If verdict is APPROVED_WITH_NOTES:**
+
+```
+AskUserQuestion:
+  question: "Review found {N} minor issues (MEDIUM/LOW only). How should we proceed?"
+  header: "Fix findings"
+  options:
+    - label: "Fix all findings"
+      description: "Fix all {N} issues before committing"
+    - label: "Proceed without fixing"
+      description: "MEDIUM/LOW findings — address later"
+    - label: "Let me choose"
+      description: "I'll specify which findings to fix"
+```
+
+**If verdict is APPROVED:** Skip post-review actions, proceed to commit.
+
+### Fix Flow
+
+**If "Fix all findings" or "Fix CRITICAL/HIGH only":**
+1. Lead fixes each finding sequentially on the current branch
+   - Apply each fix directly (small, well-scoped edits)
+   - No parallel agents needed — review findings are small, same-branch fixes
+2. Run validation: `lint, type-check, all tests pass`
+3. Re-stage changes: `git add` the fixed files
+4. Present fix summary:
+
+```
+Fresh Eyes Review — Fixes Applied
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Findings fixed: [N/N]
+  ✅ [SEC-1] CRITICAL: SQL injection in user query — parameterized
+  ✅ [CQ-3] HIGH: Missing null check in processOrder — added guard
+  ✅ [EC-2] HIGH: Empty array not handled in calculateTotal — added check
+  ⏭️ [CQ-5] MEDIUM: Function too long (deferred)
+  ⏭️ [DOC-1] LOW: Missing JSDoc on exported function (deferred)
+
+Validation: ✅ All tests passing, lint clean
+```
+
+5. Ask whether to re-run review on the fixed code:
+
+```
+AskUserQuestion:
+  question: "Fixes applied and validated. Re-run fresh-eyes-review on updated code?"
+  header: "Re-review"
+  options:
+    - label: "Re-run review (Recommended)"
+      description: "Verify fixes didn't introduce new issues"
+    - label: "Skip re-review"
+      description: "Fixes are clean — proceed to commit"
+```
+
+**If "Let me choose":**
+1. Ask: "Which findings should I fix? (list IDs, e.g. SEC-1, CQ-3, EC-2)"
+2. Wait for user response
+3. Fix selected findings sequentially
+4. Continue from step 2 above (validate, re-stage, summary)
+
+**If "Dismiss and proceed":**
+1. If CRITICAL/HIGH findings exist, confirm: "Are you sure? The following CRITICAL/HIGH findings will be unaddressed: [list]"
+2. If confirmed, note dismissed findings in commit context
+3. Proceed to commit
 
 ---
 
@@ -301,8 +379,7 @@ Skip: Adversarial Validator, all conditional agents.
 ## Integration Points
 
 - **Input**: Staged git changes (diff)
-- **Output**: Verdict + findings with severity
-- **Tracking**: File-based todos (`.todos/`) or GitHub issues
+- **Output**: Verdict + findings with severity + fixes applied (if user chooses)
 - **Consumed by**: `/ship` (commit-and-pr) as mandatory gate
 - **Agent definitions**: `agents/review/*.md`
 - **Checklists**: `checklists/AI_CODE_SECURITY_REVIEW.md`, `checklists/AI_CODE_REVIEW.md`

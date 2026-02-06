@@ -100,7 +100,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly in
 
 **Issue skills:** `file-issues`, `file-issue`, `enhance-issue`
 
-**Execution skills:** `start-issue`, `swarm-plan`, `swarm-issues`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor`
+**Execution skills:** `start-issue`, `swarm-plan`, `triage-issues`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor`
 
 **Review skills:** `fresh-eyes-review`, `review-protocol`
 
@@ -182,6 +182,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - Modify dependency lock files without approval
 - **Skip fresh-eyes review before committing** - even if context was summarized, run it
 - Ignore edge cases (null, empty, boundaries)
+- **Use conversation history to determine execution mode** - always re-check your tool list at Step 0 of each skill invocation. If TeammateTool is available NOW, use team mode — regardless of what you did earlier
 
 **Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When shipping, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/review` again.
 

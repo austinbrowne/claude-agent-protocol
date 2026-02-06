@@ -36,7 +36,7 @@ Claude Code now ships Agent Teams as an experimental feature that solves all fou
 ## Goals
 - Upgrade `fresh-eyes-review`, `review-plan`, and `deepen-plan` to use Agent Teams for inter-agent discussion and live cross-validation
 - Add swarm plan assessment to `/implement` workflow — analyze plan tasks for parallelizability, let user choose team or standard execution, teammates follow full protocol pipeline
-- Add `/swarm-issues` as standalone command — triage open GitHub issues, dispatch teammates to implement in parallel, each following full protocol pipeline
+- Add `/triage-issues` as standalone command — batch-triage open GitHub issues, parallel-plan sparse ones via subagents, get all issues to `ready_for_dev`
 - Keep subagent-based execution as fallback when Agent Teams is disabled
 - Keep `generate-plan`, `explore`, `start-issue` on subagents (fire-and-forget research doesn't justify team coordination overhead)
 - Maintain backward compatibility — protocol works identically without Agent Teams enabled
@@ -86,18 +86,19 @@ Each teammate runs the complete implementation protocol:
 
 Fresh-eyes review does NOT happen per-teammate — it happens at the `/review` step on the **combined diff of all teammates' work**, catching integration issues holistically.
 
-### Tier 3: Swarm Issues (Batch Issue Execution)
+### Tier 3: Triage Issues (Batch Issue Readiness)
 
-Standalone command for parallel issue execution:
+Standalone command for batch issue triage and planning (no implementation):
 
 ```
-User has 10 open issues → /swarm-issues
-  → Triage: filter for swarm-ready issues (well-defined, independent, unblocked)
-  → Present candidates with recommendation
-  → User approves issue set
-  → Spawn teammates, each claims an issue
-  → Each teammate runs full protocol: start-issue → implement → tests → validate
-  → User runs /review on combined results
+User has 10 open issues → /triage-issues
+  → Triage: categorize as READY, NEEDS_PLANNING, or NOT_ELIGIBLE
+  → Present categorized candidates
+  → User selects which sparse issues to plan
+  → Launch parallel subagents (Task tool) to enhance sparse issues
+  → Collect plans, present for user approval
+  → All issues now ready_for_dev on GitHub
+  → User implements each issue separately: /implement → start-issue or swarm-plan
 ```
 
 ## Technical Approach
@@ -177,25 +178,22 @@ Flow:
 8. All teammates complete → user proceeds to /review
 ```
 
-**Pattern D: Issue Swarm — Two-Phase (swarm-issues)**
+**Triage Issues (subagent-only, no Agent Teams)**
 ```
 Lead = Coordinator + Triager
-Phase 1 Teammates = Planners (one per sparse issue)
-Phase 2 Teammates = Implementers (one per approved issue)
+Subagents = Planners (one per sparse issue, via Task tool)
 
 Flow:
 1. Lead fetches open issues from GitHub via gh CLI
 2. Lead triages into: READY (has plan/criteria), NEEDS_PLANNING (sparse), NOT_ELIGIBLE
 3. Lead presents categorized candidates to user
-4. User chooses: "Plan and implement all" / "Only implement ready" / "Custom"
-5. Phase 1 (if sparse issues selected): Spawn planning teammates
+4. User chooses: "Plan all sparse" / "Custom selection" / "Skip planning" / "Cancel"
+5. Launch parallel planning subagents (Task tool) for sparse issues
    - Each explores codebase, generates plan, enriches issue, swaps to ready_for_dev
-   - Lead collects plan summaries, presents for user approval
-6. Phase 2: Spawn implementation teammates for all approved issues
-   - Each runs full protocol: start-issue → learnings → code → tests → validate
-   - Each on own branch: feat/issue-{number}-{slug}
-7. Teammates message Lead when done or blocked
-8. All complete → user proceeds to /review per branch
+   - Subagents used because planners work independently — no inter-agent communication needed
+6. Lead collects plan summaries, presents for user approval
+7. All issues now ready_for_dev — triage complete
+8. User implements each issue separately: /implement → start-issue or swarm-plan per issue
 ```
 
 ### Swarmability Assessment Algorithm
@@ -227,7 +225,7 @@ The user always makes the final call.
 
 **Swarm Plan:** All teammates work on the **same feature branch**. Tasks are assigned to minimize file overlap (the whole point of swarmability assessment). If two tasks share a file, they're assigned to the same teammate or serialized. This keeps the branch model simple — one branch, one combined diff for review.
 
-**Swarm Issues:** Each teammate works on their **own branch** (one branch per issue, per existing convention). Branches are reviewed independently at `/review` time, or the user can merge them first for a combined review. This matches the natural "one issue, one branch, one PR" workflow.
+**Per-Issue Implementation (after triage):** Each issue gets its own branch via `start-issue` or `swarm-plan`: `feat/issue-{number}-{slug}`. One branch, one PR per issue. Each issue is implemented and reviewed independently.
 
 ### Data Flow
 
@@ -326,13 +324,13 @@ User → /review → fresh-eyes-review on combined diff
 - Route to `skills/swarm-plan/SKILL.md`
 - Only available when a plan exists and Agent Teams is enabled
 
-### Phase 6: Swarm Issues — two-phase planning + implementation
+### Phase 6: Triage Issues — batch triage and planning (no implementation)
 
 **Files:**
-- NEW: `skills/swarm-issues/SKILL.md`
+- NEW: `skills/triage-issues/SKILL.md`
 - EDIT: `commands/implement.md` (add as option)
 
-**New skill `swarm-issues` (two-phase):**
+**New skill `triage-issues` (subagent-only, no Agent Teams required):**
 1. Fetch open issues from GitHub: `gh issue list --state open --json number,title,labels,body,assignees`
 2. Triage and categorize each issue:
    - **READY**: Has `ready_for_dev` label or clear acceptance criteria, unassigned, unblocked, implementation-sized
@@ -340,27 +338,24 @@ User → /review → fresh-eyes-review on combined diff
    - **NOT_ELIGIBLE**: Assigned, blocked, too large, or insufficient info
 3. Present categorized candidates to user via AskUserQuestion:
    - Show READY and NEEDS_PLANNING separately with counts
-   - Flag file overlap between candidates
-   - Options: "Plan and implement all" / "Only implement ready ones" / "Custom selection" / "Cancel"
-4. **Phase 1 — Planning (if NEEDS_PLANNING issues selected):**
-   - Spawn planning teammates (one per sparse issue)
+   - Options: "Plan all sparse issues" / "Custom selection" / "Skip planning" / "Cancel"
+4. **Planning Phase (if NEEDS_PLANNING issues selected):**
+   - Launch parallel planning subagents via Task tool (one per sparse issue)
+   - Subagents used because planners work independently on separate issues — no inter-agent communication needed
    - Each explores codebase, searches learnings, generates plan, enriches GitHub issue, swaps label to `ready_for_dev`
-   - Planning teammates do NOT implement — only plan and enhance
-   - Lead collects plan summaries, presents for user approval before implementation
-5. **Phase 2 — Implementation (all approved issues):**
-   - Spawn implementation teammates (one per issue)
-   - Each runs full protocol: create branch → search learnings → living plan → implement → tests → validate
-   - Each teammate on own branch: `feat/issue-{number}-{slug}`
-6. Lead monitors progress, handles blockers
-7. When all complete: Lead presents summary with branch names, suggests user proceed to `/review`
+   - Planning subagents do NOT implement — only plan and enhance
+   - Lead collects plan summaries, presents for user approval
+5. Present summary of all ready issues, suggest next steps
 
-**Key design: planning work persists.** Even if user cancels after Phase 1, the GitHub issues are already updated with enriched content and `ready_for_dev` labels. That work isn't lost.
+**Implementation is separate.** After triage, the user runs `/implement` for each issue — either sequentially or in parallel Claude Code tabs. Complex issues use `swarm-plan` for task decomposition; simple issues use `start-issue`.
+
+**Key design: planning work persists.** Even if user cancels, the GitHub issues are already updated with enriched content and `ready_for_dev` labels. That work isn't lost.
 
 ### Phase 7: Documentation updates
 
 **Files:**
 - EDIT: `AI_CODING_AGENT_GODMODE.md` — Add Agent Teams section: tiered strategy, swarm capabilities, experimental status
-- EDIT: `CLAUDE.md` — Add Agent Teams to reference files, mention swarm-plan and swarm-issues skills
+- EDIT: `CLAUDE.md` — Add Agent Teams to reference files, mention swarm-plan and triage-issues skills
 - EDIT: `README.md` — Add Agent Teams integration to features, new skills to skill table
 - EDIT: `QUICK_START.md` — Note team mode availability, new swarm commands
 - EDIT: `guides/MULTI_AGENT_PATTERNS.md` — Add team patterns alongside existing subagent patterns
@@ -378,13 +373,13 @@ User → /review → fresh-eyes-review on combined diff
 **New files:**
 - `guides/AGENT_TEAMS_GUIDE.md` — Team formation reference guide
 - `skills/swarm-plan/SKILL.md` — Swarmability assessment + implementation swarm
-- `skills/swarm-issues/SKILL.md` — Issue triage + batch implementation swarm
+- `skills/triage-issues/SKILL.md` — Batch issue triage and planning (subagent-only)
 
 **Edited files:**
 - `skills/fresh-eyes-review/SKILL.md` — Add team mode path
 - `skills/review-plan/SKILL.md` — Add team mode path
 - `skills/deepen-plan/SKILL.md` — Add team mode path
-- `commands/implement.md` — Add swarm-plan and swarm-issues options
+- `commands/implement.md` — Add swarm-plan and triage-issues options
 - `AI_CODING_AGENT_GODMODE.md` — Agent Teams documentation
 - `CLAUDE.md` — Reference updates, new skills listed
 - `README.md` — Feature documentation, skill table
@@ -418,12 +413,13 @@ User → /review → fresh-eyes-review on combined diff
 - [ ] Fresh-eyes review happens at `/review` step on combined diff, not per-teammate
 - [ ] Standard sequential mode (fallback) is identical to current behavior
 
-**Tier 3: Swarm Issues**
+**Tier 3: Triage Issues**
 - [ ] GitHub issues fetched and triaged correctly via `gh` CLI
-- [ ] Swarm-ready issues identified (clear criteria, unblocked, independent, implementation-sized)
-- [ ] User approves issue batch before teammates spawn
-- [ ] Each teammate creates own branch, runs full protocol pipeline per issue
-- [ ] Summary presented with branch names for review
+- [ ] Issues categorized: READY, NEEDS_PLANNING, NOT_ELIGIBLE
+- [ ] User selects which sparse issues to plan
+- [ ] Parallel subagents enhance sparse issues and swap labels to `ready_for_dev`
+- [ ] Planning work persists on GitHub even if user cancels
+- [ ] Summary presented with ready issues and implementation recommendations
 
 **Infrastructure**
 - [ ] `AGENT_TEAMS_GUIDE.md` exists and is referenced by all upgraded skills
@@ -450,17 +446,18 @@ User → /review → fresh-eyes-review on combined diff
 - Edge case: Teammate gets stuck → lead detects and handles (reassign or escalate)
 - Edge case: File conflict between teammates → message exchange resolves it
 
-**Tier 3 — Swarm Issues:**
-- Manual: Repo with 10 open issues, varying readiness → triage correctly filters
-- Manual: Approve batch of 4 issues → 4 teammates spawn, each on own branch
-- Manual: Issues with file overlap → flagged in triage, user warned
-- Edge case: No swarm-ready issues found → clear message, no team spawned
-- Edge case: Issue has no acceptance criteria → filtered out with reason
+**Tier 3 — Triage Issues:**
+- Manual: Repo with 10 open issues, varying readiness → triage correctly categorizes
+- Manual: Select sparse issues → subagents enhance and swap labels
+- Manual: Planning summaries collected and presented for approval
+- Edge case: No eligible issues found → clear message, skill ends
+- Edge case: Issue too vague to even plan → subagent reports why
+- Edge case: Issue is actually an epic → subagent flags it
 
 ## Security Review
 
 - [x] N/A for most — no auth, no user data, no external APIs in review/research teams
-- [x] `swarm-issues` uses `gh` CLI which requires GitHub auth — inherits user's existing auth, no new credentials
+- [x] `triage-issues` uses `gh` CLI which requires GitHub auth — inherits user's existing auth, no new credentials
 - [x] No hardcoded secrets — team config uses Claude Code's built-in storage
 - [x] No new dependencies — uses Claude Code's built-in Agent Teams feature
 - [x] Permissions inherit from lead session — documented in guide
@@ -479,14 +476,14 @@ User → /review → fresh-eyes-review on combined diff
 7. All complete → Success: summary presented | Error: partial completion, user informed
 8. User proceeds to `/review` → Combined diff reviewed
 
-### Primary Flow: Swarm Issues
+### Primary Flow: Triage Issues
 
-1. User invokes `/swarm-issues` → Success: fetch issues | Error: `gh` CLI not configured
-2. Triage issues → Success: candidates presented | Error: no issues found | Empty: no swarm-ready issues
-3. User approves batch → Success: teammates spawn | Error: team formation fails
-4. Teammates execute per-issue protocol → Success: issues implemented | Error: teammate stuck
-5. All complete → Success: summary with branches | Error: partial completion
-6. User proceeds to `/review` per branch
+1. User invokes `/triage-issues` → Success: fetch issues | Error: `gh` CLI not configured
+2. Triage issues → Success: candidates categorized | Error: no issues found | Empty: no eligible issues
+3. User selects sparse issues to plan → Success: subagents launched | Empty: skip planning, show ready issues only
+4. Subagents enhance and plan sparse issues → Success: plans collected | Error: subagent fails for one issue
+5. User approves plans → Success: all issues ready_for_dev | Revise: re-launch subagents with feedback
+6. Summary presented → User implements each issue via `/implement` per issue
 
 ### Alternative Flows
 
@@ -500,7 +497,7 @@ User → /review → fresh-eyes-review on combined diff
 - **Agent Teams instability:** Feature is experimental — teammates may hang or fail to message. Skills handle gracefully with fallback.
 - **Token exhaustion:** Teams use significantly more tokens. If teammate hits limits, lead synthesizes available findings and notes incomplete work.
 - **Git conflicts (swarm-plan):** Minimized by swarmability assessment. If conflicts occur, teammates message each other to resolve. Unresolvable conflicts escalate to lead → user.
-- **Git conflicts (swarm-issues):** Not possible — each teammate on separate branch.
+- **Git conflicts (triage-issues):** N/A — triage-issues only plans, does not create branches or write code.
 - **Stale task status:** Known Agent Teams limitation. Lead nudges teammates if tasks appear stuck.
 
 ## Alternatives Considered
@@ -523,7 +520,7 @@ User → /review → fresh-eyes-review on combined diff
 |------|-----------|--------|------------|
 | Agent Teams API changes (experimental) | High | High | Fallback always available; `AGENT_TEAMS_GUIDE.md` centralizes patterns for single-point updates |
 | Token cost increase surprises users | Medium | Medium | Document costs in guide; teams only activate when user explicitly enables + approves |
-| Swarm teammates create merge conflicts | Medium | High | Swarmability assessment minimizes overlap; same-branch strategy for swarm-plan; separate branches for swarm-issues |
+| Swarm teammates create merge conflicts | Medium | High | Swarmability assessment minimizes overlap; same-branch strategy for swarm-plan |
 | Skill files become complex with dual paths | Medium | Medium | Guide absorbs shared logic; skills only add mode-specific steps |
 | Teammates skip protocol steps | Medium | High | Spawn prompts explicitly list every step; living plan tracks progress |
 | Implementation quality drops with parallelism | Low | High | Each teammate runs full pipeline (learnings + tests + validation); `/review` catches integration issues |
@@ -534,7 +531,7 @@ User → /review → fresh-eyes-review on combined diff
 
 1. Switch back to `main` branch — `experimental/agent-teams` changes are isolated
 2. If partially merged: revert skill file changes to pre-team versions
-3. Delete new files: `guides/AGENT_TEAMS_GUIDE.md`, `skills/swarm-plan/SKILL.md`, `skills/swarm-issues/SKILL.md`
+3. Delete new files: `guides/AGENT_TEAMS_GUIDE.md`, `skills/swarm-plan/SKILL.md`, `skills/triage-issues/SKILL.md`
 4. Revert documentation changes
 5. Revert version bump
 6. Verify all skills work in subagent-only mode (they should — fallback paths are the original behavior)
@@ -543,5 +540,5 @@ User → /review → fresh-eyes-review on combined diff
 
 - **Claude Code Agent Teams** — experimental feature, must be enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
 - **TeammateTool availability** — detection is prompt-based, no code dependency
-- **`gh` CLI** — required for swarm-issues (GitHub issue fetching). Already used by existing skills.
+- **`gh` CLI** — required for triage-issues (GitHub issue fetching). Already used by existing skills.
 - **No new external dependencies**

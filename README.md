@@ -167,7 +167,7 @@ Reusable methodology packages, each directly invocable:
 | `/enhance-issue` | Refine sparse issues with exploration and planning |
 | `/start-issue` | Issue startup with living plan |
 | `/swarm-plan` | Parallel implementation of plan tasks using Agent Teams |
-| `/swarm-issues` | Batch-implement multiple GitHub issues in parallel using Agent Teams |
+| `/triage-issues` | Batch-triage and plan open GitHub issues — get them ready_for_dev |
 | `/generate-tests` | Comprehensive test generation |
 | `/run-validation` | Tests + coverage + lint + security |
 | `/security-review` | OWASP security methodology |
@@ -238,7 +238,7 @@ skills/                                # 24 reusable skill packages
 ├── enhance-issue/SKILL.md
 ├── start-issue/SKILL.md
 ├── swarm-plan/SKILL.md               # Agent Teams — parallel plan implementation
-├── swarm-issues/SKILL.md             # Agent Teams — batch issue implementation
+├── triage-issues/SKILL.md            # Batch issue triage and planning
 ├── generate-tests/SKILL.md
 ├── run-validation/SKILL.md
 ├── security-review/SKILL.md
@@ -273,10 +273,10 @@ docs/
 - Agent Teams integration — tiered strategy with implementation swarms
 - `fresh-eyes-review`, `review-plan`, `deepen-plan` support team mode (inter-agent discussion, live cross-validation)
 - New `/swarm-plan` skill — parallel plan implementation with swarmability assessment
-- New `/swarm-issues` skill — batch GitHub issue implementation with triage
+- New `/triage-issues` skill — batch GitHub issue triage and planning
 - Agent Teams guide (`guides/AGENT_TEAMS_GUIDE.md`) — formation patterns, detection, fallback
 - Automatic fallback to subagent mode when Agent Teams is disabled
-- 24 skill packages (added `swarm-plan`, `swarm-issues`)
+- 24 skill packages (added `swarm-plan`, `triage-issues`)
 
 **v4.2.0 (February 2026)**
 - Renamed "PRD" to "Plan" throughout — clearer terminology

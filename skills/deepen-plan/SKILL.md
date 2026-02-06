@@ -23,6 +23,8 @@ Methodology for enriching a plan with parallel research, multi-agent review, and
 
 ## Step 0: Detect Execution Mode
 
+**CRITICAL: Check your tool list RIGHT NOW.** Do NOT rely on what you did earlier in this conversation. Each skill invocation must re-evaluate independently — conversation history is not a valid signal for tool availability.
+
 Check if the TeammateTool is available in your tool list.
 
 - **Available** → follow `[TEAM MODE]` instructions throughout this skill

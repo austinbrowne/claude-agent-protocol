@@ -100,7 +100,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 |-------|---------|
 | `start-issue` | Begin work with living plan and past learnings |
 | `swarm-plan` | Parallel implementation of plan tasks using Agent Teams |
-| `swarm-issues` | Batch-implement multiple GitHub issues in parallel using Agent Teams |
+| `triage-issues` | Batch-triage and plan open GitHub issues — get them ready_for_dev |
 | `generate-tests` | Generate comprehensive test suites |
 | `run-validation` | Tests + coverage + lint + security checks |
 | `security-review` | OWASP security checklist review |

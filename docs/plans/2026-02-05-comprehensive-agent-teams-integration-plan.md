@@ -177,20 +177,25 @@ Flow:
 8. All teammates complete → user proceeds to /review
 ```
 
-**Pattern D: Issue Swarm (swarm-issues)**
+**Pattern D: Issue Swarm — Two-Phase (swarm-issues)**
 ```
 Lead = Coordinator + Triager
-Teammates = Issue implementers (one per issue)
+Phase 1 Teammates = Planners (one per sparse issue)
+Phase 2 Teammates = Implementers (one per approved issue)
 
 Flow:
 1. Lead fetches open issues from GitHub via gh CLI
-2. Lead triages: well-defined? independent? unblocked? small enough?
-3. Lead presents swarm-ready candidates to user
-4. User approves issue set
-5. Lead spawns teammates, each assigned one issue
-6. Each teammate runs full protocol: start-issue → implement → tests → validate
+2. Lead triages into: READY (has plan/criteria), NEEDS_PLANNING (sparse), NOT_ELIGIBLE
+3. Lead presents categorized candidates to user
+4. User chooses: "Plan and implement all" / "Only implement ready" / "Custom"
+5. Phase 1 (if sparse issues selected): Spawn planning teammates
+   - Each explores codebase, generates plan, enriches issue, swaps to ready_for_dev
+   - Lead collects plan summaries, presents for user approval
+6. Phase 2: Spawn implementation teammates for all approved issues
+   - Each runs full protocol: start-issue → learnings → code → tests → validate
+   - Each on own branch: feat/issue-{number}-{slug}
 7. Teammates message Lead when done or blocked
-8. All complete → user proceeds to /review
+8. All complete → user proceeds to /review per branch
 ```
 
 ### Swarmability Assessment Algorithm
@@ -321,30 +326,35 @@ User → /review → fresh-eyes-review on combined diff
 - Route to `skills/swarm-plan/SKILL.md`
 - Only available when a plan exists and Agent Teams is enabled
 
-### Phase 6: Swarm Issues — new standalone command
+### Phase 6: Swarm Issues — two-phase planning + implementation
 
 **Files:**
 - NEW: `skills/swarm-issues/SKILL.md`
 - EDIT: `commands/implement.md` (add as option)
 
-**New skill `swarm-issues`:**
+**New skill `swarm-issues` (two-phase):**
 1. Fetch open issues from GitHub: `gh issue list --state open --json number,title,labels,body,assignees`
-2. Triage each issue for swarm-readiness:
-   - Has clear acceptance criteria? (check body for checkboxes/criteria)
-   - Has assignee already? (skip assigned issues)
-   - Has blocking labels? (skip "blocked", "needs-design", "question")
-   - Is implementation-sized? (not an epic or meta-issue)
-   - File independence: estimate affected files from title/body, check overlap with other candidates
-3. Present swarm-ready candidates to user via AskUserQuestion:
-   - List each candidate with readiness assessment
-   - Flag any overlap between issues
-   - Recommend batch size (max ~5 teammates for manageability)
-   - Options: "Approve this batch" / "Adjust selection" / "Cancel"
-4. Spawn teammates, each assigned one issue:
-   - Each teammate's spawn prompt includes: issue number, title, body, acceptance criteria, instruction to follow full protocol (start-issue → search learnings → implement → tests → validate)
-   - Each teammate creates their own branch: `feat/issue-{number}-{slug}`
-5. Lead monitors progress, handles blockers
-6. When all complete: Lead presents summary with branch names, suggests user proceed to `/review` for each branch
+2. Triage and categorize each issue:
+   - **READY**: Has `ready_for_dev` label or clear acceptance criteria, unassigned, unblocked, implementation-sized
+   - **NEEDS_PLANNING**: Has `needs_refinement` label or sparse body, unassigned, unblocked, implementation-sized
+   - **NOT_ELIGIBLE**: Assigned, blocked, too large, or insufficient info
+3. Present categorized candidates to user via AskUserQuestion:
+   - Show READY and NEEDS_PLANNING separately with counts
+   - Flag file overlap between candidates
+   - Options: "Plan and implement all" / "Only implement ready ones" / "Custom selection" / "Cancel"
+4. **Phase 1 — Planning (if NEEDS_PLANNING issues selected):**
+   - Spawn planning teammates (one per sparse issue)
+   - Each explores codebase, searches learnings, generates plan, enriches GitHub issue, swaps label to `ready_for_dev`
+   - Planning teammates do NOT implement — only plan and enhance
+   - Lead collects plan summaries, presents for user approval before implementation
+5. **Phase 2 — Implementation (all approved issues):**
+   - Spawn implementation teammates (one per issue)
+   - Each runs full protocol: create branch → search learnings → living plan → implement → tests → validate
+   - Each teammate on own branch: `feat/issue-{number}-{slug}`
+6. Lead monitors progress, handles blockers
+7. When all complete: Lead presents summary with branch names, suggests user proceed to `/review`
+
+**Key design: planning work persists.** Even if user cancels after Phase 1, the GitHub issues are already updated with enriched content and `ready_for_dev` labels. That work isn't lost.
 
 ### Phase 7: Documentation updates
 

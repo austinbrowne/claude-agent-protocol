@@ -54,5 +54,5 @@ AskUserQuestion:
 ```
 
 **If "Brainstorm approaches":** Load and follow `skills/brainstorm/SKILL.md`.
-**If "Start planning":** Suggest user invoke `/plan`.
+**If "Start planning":** Load and follow `commands/plan.md`.
 **If "Done":** End workflow.

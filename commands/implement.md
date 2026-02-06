@@ -67,6 +67,6 @@ AskUserQuestion:
 ```
 
 **If "Another implementation step":** Return to Step 1.
-**If "Review code":** Suggest user invoke `/review`.
+**If "Review code":** Load and follow `commands/review.md`.
 **If "Recovery":** Load and follow `skills/recovery/SKILL.md`.
 **If "Done":** End workflow.

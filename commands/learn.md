@@ -67,5 +67,5 @@ AskUserQuestion:
       description: "End workflow — solution saved to docs/solutions/"
 ```
 
-**If "Ship it":** Suggest user invoke `/ship`.
+**If "Ship it":** Load and follow `commands/ship.md`.
 **If "Done":** End workflow.

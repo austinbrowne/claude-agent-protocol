@@ -14,6 +14,19 @@ Zero-context multi-agent code review with smart agent selection.
 
 ---
 
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has mandatory AskUserQuestion gates. You MUST hit them. NEVER skip them. NEVER replace them with plain text questions.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Post-Review Actions** | After presenting review report | Fix all / Fix CRITICAL+HIGH / Let me choose / Dismiss | User loses control of fix decisions — UNACCEPTABLE |
+| **Re-Review Offer** | After applying fixes | Re-run review / Skip re-review | User can't verify fixes — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
+
+---
+
 ## When to Apply
 
 - After validation passes (tests/lint/security all green)

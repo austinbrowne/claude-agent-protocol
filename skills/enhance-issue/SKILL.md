@@ -125,7 +125,7 @@ AskUserQuestion:
 ```
 
 **If "Enhance another":** Return to Step 1.
-**If "Start implementing":** Suggest user invoke `/workflows:implement`.
+**If "Start implementing":** Load and follow `commands/implement.md`.
 **If "Done":** End workflow.
 
 ---

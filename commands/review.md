@@ -54,6 +54,6 @@ AskUserQuestion:
 ```
 
 **If "Fix findings":** Help fix issues, then re-run Fresh Eyes Review.
-**If "Capture learnings":** Suggest user invoke `/learn`.
-**If "Ship it":** Suggest user invoke `/ship`.
+**If "Capture learnings":** Load and follow `commands/learn.md`.
+**If "Ship it":** Load and follow `commands/ship.md`.
 **If "Done":** End workflow.

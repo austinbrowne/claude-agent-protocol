@@ -183,6 +183,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - **Skip fresh-eyes review before committing** - even if context was summarized, run it
 - Ignore edge cases (null, empty, boundaries)
 - **Use conversation history to determine execution mode** - always re-check your tool list at Step 0 of each skill invocation. If TeammateTool is available NOW, use team mode — regardless of what you did earlier
+- **Replace AskUserQuestion gates with plain text** - skills and workflow commands define mandatory `AskUserQuestion` interaction points. ALWAYS use the AskUserQuestion tool with the exact options defined in the skill file. NEVER substitute with a prose question like "what would you like to do next?"
 
 **Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When shipping, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/review` again.
 

@@ -12,6 +12,19 @@ Methodology for creating plans with integrated multi-agent research, brainstorm 
 
 ---
 
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has TWO mandatory AskUserQuestion gates. You MUST hit both. NEVER skip them. NEVER replace them with plain text questions.**
+
+| Gate | Step | AskUserQuestion | What Happens If Skipped |
+|------|------|-----------------|------------------------|
+| **Plan Acceptance** | Step 6 | Accept / Request Changes / Reject | Plan gets saved without user approval — UNACCEPTABLE |
+| **Next Steps** | Handled by calling workflow (`commands/plan.md` Step 3) | Deepen / Review / Create Issues / Implement | User loses control of workflow — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
+
+---
+
 ## When to Apply
 
 - Ready to formalize requirements for a feature, fix, or change
@@ -112,7 +125,9 @@ After generating initial plan content:
 5. **Offer to add gaps to Acceptance Criteria**
 6. **Add Spec-Flow Analysis section to plan output** (Comprehensive tier includes this in template; Standard tier appends if significant flows exist)
 
-### 6. Present Plan for Acceptance
+### 6. Present Plan for Acceptance — MANDATORY GATE
+
+**STOP. Do NOT save the plan yet. Do NOT proceed to Step 7. You MUST present the plan and get explicit acceptance via AskUserQuestion FIRST.**
 
 **After generating the plan content, present it to the user and ask for explicit acceptance:**
 
@@ -146,6 +161,8 @@ AskUserQuestion:
    - End workflow if user wants to think more
 
 **CRITICAL:** Never make autonomous changes based on vague feedback like "do more research" or "make it better". Always ask for specifics first.
+
+**CRITICAL:** Do NOT proceed to Step 7 until the user selects "Accept plan". No exceptions.
 
 ### 7. Save Plan
 

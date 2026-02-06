@@ -13,6 +13,18 @@ referenced_by:
 
 ---
 
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has a mandatory AskUserQuestion gate. You MUST hit it. NEVER skip it. NEVER replace it with a plain text question.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Post-Review Actions** | After presenting review report | Accept findings / Research / Dismiss / Discuss | User loses control of next steps — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
+
+---
+
 ## When to Apply
 
 - After generating a plan (via generate-plan skill) and optionally deepening it
@@ -184,7 +196,9 @@ Launch Adversarial Validator as a Task tool call after all 4 specialists complet
 
 ---
 
-## Post-Review Actions
+## Post-Review Actions — MANDATORY GATE
+
+**STOP. You MUST use AskUserQuestion here. Do NOT ask in plain text. Do NOT skip this step.**
 
 After presenting the review report, ask the user how to proceed:
 

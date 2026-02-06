@@ -39,7 +39,9 @@ AskUserQuestion:
 
 ---
 
-## Step 3: Next Steps (Context-Dependent)
+## Step 3: Next Steps — MANDATORY GATE
+
+**CRITICAL: After EVERY skill completes, you MUST present the appropriate AskUserQuestion below. NEVER ask "what would you like to do next?" in plain text. NEVER skip this step. NEVER collapse it into the skill's output.**
 
 **After "Generate plan":**
 ```
@@ -107,7 +109,7 @@ AskUserQuestion:
 - **"Deepen this plan"** → Load `skills/deepen-plan/SKILL.md`
 - **"Review this plan"** → Load `skills/review-plan/SKILL.md`
 - **"Create GitHub issues"** → Load `skills/create-issues/SKILL.md`
-- **"Start implementing"** → Suggest user invoke `/implement`
+- **"Start implementing"** → Load and follow `commands/implement.md`
 - **"Revise the plan"** → Return to Step 1 with "Generate plan" pre-selected
 - **"Create another plan"** → Return to Step 1
 - **"Done"** → End workflow

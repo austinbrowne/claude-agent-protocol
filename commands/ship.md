@@ -53,5 +53,5 @@ AskUserQuestion:
 ```
 
 **If "Another shipping step":** Return to Step 1.
-**If "Capture learnings":** Suggest user invoke `/learn`.
+**If "Capture learnings":** Load and follow `commands/learn.md`.
 **If "Done":** End workflow.

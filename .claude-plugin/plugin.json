@@ -1,6 +1,6 @@
 {
   "name": "godmode",
-  "version": "5.0.0-experimental",
+  "version": "5.0.1-experimental",
   "description": "AI-powered development workflow with Agent Teams. 6 workflow commands, 24 skill packages, 21 agents (17 review + 4 research), Agent Teams integration for parallel reviews and implementation swarms, knowledge compounding, and structured phases for planning, execution, and finalization.",
   "author": {
     "name": "Austin Browne",

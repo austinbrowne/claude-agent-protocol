@@ -14,7 +14,7 @@
         "ref": "experimental-agent-teams"
       },
       "description": "GODMODE v5.0-experimental — 6 workflow commands, 24 skill packages, 21 agents, Agent Teams integration for parallel reviews and implementation swarms, knowledge compounding.",
-      "version": "5.0.0-experimental",
+      "version": "5.0.1-experimental",
       "keywords": [
         "workflow",
         "ai-coding",

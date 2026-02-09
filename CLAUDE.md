@@ -77,7 +77,7 @@ Use workflow commands as entry points. Each workflow offers sub-step selection v
 | `/review` | Code review — fresh eyes review (full/lite), protocol compliance |
 | `/learn` | Knowledge capture — save solved problems as reusable solution docs |
 | `/ship` | Ship — commit/PR, finalize, refactor |
-| `/loop` | Autonomous loop — iterates plan tasks with Ralph Wiggum context rotation (requires ralph-wiggum plugin) |
+| `/loop` | Autonomous loop — iterates plan tasks with Task subagent context rotation |
 
 ### Quick Workflows
 
@@ -93,7 +93,7 @@ Use workflow commands as entry points. Each workflow offers sub-step selection v
 **Just review:**
 `/review` → `/ship`
 
-**Autonomous (requires ralph-wiggum plugin):**
+**Autonomous:**
 `/loop <description>` — plan, implement each task, review, commit (all local)
 `/loop --plan docs/plans/my-plan.md` — iterate through existing plan tasks
 `/loop --issue 42` — enhance if needed, plan, implement, review

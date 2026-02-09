@@ -1,37 +1,35 @@
 ---
 name: workflows:loop
-description: "Autonomous development loop — iterates plan tasks with Ralph Wiggum context rotation"
+description: "Autonomous development loop with context rotation via Task subagents"
 argument-hint: "<description | --plan PATH | --issue N> [--max-iterations N]"
 ---
 
 # /loop — Autonomous Development Loop
 
-**Workflow command.** Autonomous plan-and-implement loop using Ralph Wiggum for context rotation. Each iteration gets fresh context and reads plan file checkboxes for state.
+**Workflow command.** Autonomous plan-and-implement loop using Task subagents for context rotation. Each worker gets fresh context and reads files for state. No external plugin dependencies.
 
-**Requires:** `ralph-wiggum` plugin (`/install ralph-wiggum`)
+```
+Level 0: Thin Shell (this conversation — stays small, resists compaction)
+  │  Reads ONLY loop-context.md per cycle (~500 tokens)
+  │
+  ├── Spawn Worker (general-purpose Task, mode: dontAsk)
+  │   → reads plan, implements 1 task, tests, commits, checks [x], updates counts
+  │   → returns one-line summary
+  │
+  ├── Read loop-context.md → print progress → spawn next worker
+  │
+  ├── ...repeat until done or max_iterations...
+  │
+  ├── Spawn Review worker (lite: Security + Edge Case + Supervisor)
+  │
+  └── Print completion summary
+```
+
+Sequential. One worker at a time. Zero concurrency risks.
 
 ---
 
-## Prerequisites
-
-### Check 1: Ralph Wiggum Plugin
-
-Verify `/ralph-wiggum:ralph-loop` is available in your skill/tool list.
-
-**If NOT available**, halt immediately:
-
-```
-HALT_PENDING_DECISION
-
-The `/loop` command requires the `ralph-wiggum` plugin for context rotation.
-
-Install it:
-  /install ralph-wiggum
-
-Then re-run your `/loop` command.
-```
-
-### Check 2: Arguments
+## Step 1: Parse Arguments
 
 Parse `$ARGUMENTS`:
 
@@ -55,182 +53,195 @@ Usage:
 Options:
   --max-iterations N                 Maximum iterations (default: 50)
 
-Cancel anytime: /ralph-wiggum:cancel-ralph
+Cancel: Ctrl+C (re-run with --plan to resume)
 ```
 
 Extract `--max-iterations` if provided (default: 50).
 
 ---
 
-## Setup Phase (Before Ralph Loop)
+## Step 2: Setup Phase
 
-### Create Loop Context File
+Runs ONCE before entering the thin shell loop.
 
-Create `.claude/loop-context.md` based on input mode:
+### Stale Loop Detection
+
+If `.claude/loop-context.md` exists with `status: running`:
+- `started_at` < 30 minutes ago → AskUserQuestion: "A loop appears to be running (started {time}). Override and start fresh?" (**only gate in the entire command**)
+- `started_at` > 30 minutes ago → treat as stale, overwrite
+
+### Mode-Specific Setup
 
 **Feature mode:**
-```markdown
----
-mode: feature
-task: "<user's description>"
-plan_path: null
-issue_number: null
-review_done: false
-started_at: "<ISO timestamp>"
----
-
-<user's full task description>
-```
+1. Create `.claude/loop-context.md` (see format below)
+2. Spawn `general-purpose` Task subagent to generate plan (Standard tier, `skills/generate-plan/SKILL.md` methodology). Auto-accept — user opted into autonomous mode.
+3. Verify generated plan has at least one `[ ]` checkbox task. If not, halt with error.
+4. Count `[ ]` tasks, update loop-context.md: set `plan_path`, `tasks_total`, `status: running`
 
 **Plan mode:**
-```markdown
----
-mode: plan
-task: "Iterate tasks from existing plan"
-plan_path: "<provided path>"
-issue_number: null
-review_done: false
-started_at: "<ISO timestamp>"
----
-
-Iterating tasks from: <provided path>
-```
+1. Verify plan file exists. If not, halt with error.
+2. Count `[ ]` tasks. If zero: "Nothing to do — plan already complete" or "All tasks blocked."
+3. Create `.claude/loop-context.md` with `plan_path`, task counts, `status: running`
 
 **Issue mode:**
-```markdown
+1. Fetch issue: `gh issue view N --json title,body,labels`. If fails, halt with error.
+2. If `needs_refinement` label: spawn subagent to enhance issue, re-fetch
+3. Spawn subagent to generate plan from issue body
+4. Verify plan has `[ ]` tasks, create loop-context.md
+
+### loop-context.md Format
+
+```yaml
 ---
-mode: issue
-task: "<issue title>"
-plan_path: null
-issue_number: <N>
+mode: feature | plan | issue
+task: "<description>"
+plan_path: "<path>"
+tasks_total: 0
+tasks_completed: 0
+tasks_blocked: 0
+max_iterations: 50
 review_done: false
+status: running
 started_at: "<ISO timestamp>"
+start_commit: "<current HEAD sha>"
 ---
-
-<issue body fetched via gh issue view N>
 ```
-
-### Issue Mode: Enhance If Needed
-
-For issue mode only — before starting the Ralph loop:
-
-1. Check if the issue has the `needs_refinement` label: `gh issue view N --json labels`
-2. If yes, run `skills/enhance-issue/SKILL.md` inline with auto-accept decisions to flesh out the issue
-3. Re-fetch the issue body and update `.claude/loop-context.md`
-
-This runs BEFORE the loop to get full context for enhancement.
 
 ---
 
-## Start Ralph Loop
+## Step 3: Thin Shell Loop
 
-Invoke the ralph-wiggum plugin:
-
-```
-/ralph-wiggum:ralph-loop "<state-machine-prompt>" --completion-promise "LOOP_COMPLETE" --max-iterations {N}
-```
-
-The state machine prompt below is what Ralph re-injects each iteration. The agent has **zero memory** of previous iterations — it reads files for all state.
-
----
-
-## State Machine Prompt
+**This is the critical section.** Level 0 reads ONLY `loop-context.md` — never the plan file. Workers update task counts in loop-context.md after each task, so Level 0 always has current progress.
 
 ```
-You are running an autonomous development loop. Read .claude/loop-context.md for the task.
+stall_count = 0
 
-## State Machine — Follow in Order
+WHILE true:
+  1. Read .claude/loop-context.md (ONLY this file)
+     → status == "complete"  → break to Step 5 (Completion)
+     → status == "review"    → break to Step 4 (Review)
+     → (tasks_completed + tasks_blocked) >= tasks_total  → set status "review", break
+     → iterations >= max_iterations  → set status "complete", break
 
-### Phase 1: Plan
-Read .claude/loop-context.md for plan_path.
-- If plan_path is null or the file doesn't exist:
-  → Generate a plan using skills/generate-plan/SKILL.md methodology (Standard tier).
-  → AUTO-ACCEPT the plan (skip the AskUserQuestion gate).
-  → Save to docs/plans/YYYY-MM-DD-standard-{slug}-plan.md
-  → Update .claude/loop-context.md with plan_path.
-  → STOP HERE for this iteration. Do not continue to Phase 2.
+  2. Spawn Worker subagent (general-purpose, mode: dontAsk)
+     with the WORKER PROMPT below
 
-### Phase 2: Implement Next Task
-Read the plan file. Find the FIRST unchecked task (marked with [ ]).
-- If unchecked tasks exist:
-  → Implement ONLY the first unchecked task.
-  → Follow existing codebase patterns. Write/update tests for changed code.
-  → Run tests for the affected code. If tests fail, fix them (up to 3 attempts).
-  → If tests pass: check off the task [x] in the plan file.
-  → Stage and commit: git add <specific files> && git commit -m "feat: <task summary>"
-  → STOP HERE for this iteration. Do not continue to Phase 3.
-- If no [ ] tasks remain (all are [x] or [!]):
-  → Continue to Phase 3.
+  3. On error/timeout:
+     → Read loop-context.md to check if worker made partial progress
+     → If no progress: stall_count++
+     → If stall_count >= 3: set status "complete", break
+     → Continue loop
 
-### Phase 3: Review
-Read .claude/loop-context.md for review_done.
-- If review_done is false:
-  → Run lite fresh-eyes-review (Security + Edge Case + Supervisor only).
-  → Auto-fix CRITICAL and HIGH findings. Defer MEDIUM/LOW.
-  → Commit fixes if any.
-  → Update .claude/loop-context.md: review_done: true
-  → STOP HERE for this iteration.
-- If review_done is true:
-  → Continue to Phase 4.
+  4. Read loop-context.md for updated counts
+     → Print: "Task {completed}/{total} complete ({blocked} blocked)"
+     → Reset stall_count to 0
+     → Continue loop
+```
 
-### Phase 4: Complete
-Output a summary of all work done, then output:
-<promise>LOOP_COMPLETE</promise>
+### Worker Prompt
+
+Each worker is a `general-purpose` Task subagent spawned with `mode: dontAsk`. The prompt:
+
+```
+You are implementing ONE task from a development plan. You have ZERO memory
+of previous work — read files for ALL context.
+
+## Instructions
+
+1. Read `.claude/loop-context.md` for plan_path
+2. Read the plan file at that path
+3. Find the FIRST unchecked task (marked with `[ ]`). Skip `[x]` and `[!]`.
+4. Implement ONLY that one task:
+   a. Read CLAUDE.md for project conventions
+   b. Search docs/solutions/ for relevant past learnings
+   c. Write the code changes
+   d. Write/update tests for changed code
+   e. Run tests. If tests fail, fix them (up to 3 attempts).
+   f. If tests pass: stage specific files and commit:
+      git add <specific files changed>
+      git commit -m "feat: <concise task summary>"
+   g. ONLY AFTER commit succeeds: check off the task [x] in the plan file
+      (Use Edit tool: old_string="- [ ] <full task text>" new_string="- [x] <full task text>")
+   h. Update `.claude/loop-context.md`: increment tasks_completed by 1
+5. If stuck after 3 test-fix attempts:
+   a. Mark the task [!] (blocked) in the plan file
+   b. Update `.claude/loop-context.md`: increment tasks_blocked by 1
+6. Output a ONE-LINE summary: "DONE: <task>" or "BLOCKED: <task> — <reason>"
 
 ## Rules
-- ONE task per iteration. Do not implement multiple tasks in one pass.
-- Commit after EACH task. Small, atomic commits.
+- ONE task only. Do not implement multiple tasks.
+- Commit BEFORE checking [x] — if commit fails, leave task as [ ].
 - Do NOT push to remote. Local commits only.
-- Do NOT create PRs.
-- Do NOT modify: .claude/ directory (except loop-context.md and plan files), CI/CD configuration, deployment scripts, commands/*.md, or agents/*.md.
-- If stuck on a task after 3 test-fix attempts, mark it [!] (blocked) and move to the next task.
-- Skip [!] (blocked) tasks — they are not [ ] (unchecked). When no [ ] tasks remain, proceed to Phase 3 regardless of [!] count.
-- Read .claude/loop-context.md and the plan file FIRST every iteration.
+- Do NOT create PRs or modify CI/CD configs.
+- Do NOT modify .claude/ directory except loop-context.md.
+- Do NOT modify commands/*.md or agents/*.md.
+- Use the FULL task line text in Edit old_string to avoid "not unique" errors.
+- Read files BEFORE editing. Follow existing codebase patterns.
 ```
+
+---
+
+## Step 4: Review Phase
+
+When Level 0 sees `status: review`:
+
+1. Read `start_commit` from loop-context.md
+2. Spawn a `general-purpose` Task subagent (mode: dontAsk) with instructions:
+   - Generate diff: `git diff {start_commit}..HEAD`
+   - Run lite fresh-eyes-review: Security + Edge Case reviewers (sequential)
+   - Auto-fix CRITICAL and HIGH findings
+   - Commit fixes if any
+3. Update loop-context.md: `review_done: true`, `status: complete`
+
+---
+
+## Step 5: Completion
+
+Read loop-context.md and output:
+
+```
+Loop Complete
+━━━━━━━━━━━━
+Tasks: {completed}/{total} completed, {blocked} blocked
+Commits: (git log --oneline {start_commit}..HEAD)
+Review: {review_done ? "Lite review passed" : "Skipped"}
+
+{if blocked > 0}
+Blocked tasks (manual attention needed):
+  - [!] task description
+  ...
+{/if}
+
+Next: /review for full fresh-eyes review, then /ship to commit and PR.
+```
+
+Set `status: complete` in loop-context.md.
+
+---
+
+## Cancel & Resume
+
+- **Cancel:** Ctrl+C. loop-context.md stays with `status: running`.
+- **Resume:** `/loop --plan <path>` picks up from first unchecked `[ ]` task. Plan checkboxes are the source of truth.
+- **Feature mode** always creates a fresh plan. Use `--plan` to resume a cancelled loop.
 
 ---
 
 ## Safety Model
 
-`/loop` deliberately bypasses AskUserQuestion gates because the user explicitly opted into autonomous execution by invoking this command.
+`/loop` bypasses AskUserQuestion gates because the user explicitly opted into autonomous execution.
 
-### Autonomous (no human needed)
-
+**Autonomous (no human needed):**
 - Plan generation and acceptance
 - Issue enhancement (if `needs_refinement`)
 - Task implementation (one per iteration)
 - Test running and fixing
-- Lite code review (3 agents: Security, Edge Case, Supervisor)
+- Lite code review (Security + Edge Case + Supervisor)
 - Auto-fix of CRITICAL and HIGH findings
 - Local git commits
 
-### NOT Autonomous (still requires human)
-
+**NOT autonomous (still requires human):**
 - `git push` / PR creation
 - Merging
 - Full 14-agent review (user runs `/review` after loop)
 - Deleting files or branches
-
-### Cancel Anytime
-
-```
-/ralph-wiggum:cancel-ralph
-```
-
-Re-running `/loop` after cancellation picks up where it left off — it reads plan file checkboxes and `.claude/loop-context.md` for state.
-
----
-
-## Key Design Decisions
-
-1. **One task per iteration.** Each task gets its own clean context window. Prevents context pollution. A 14-task plan = 14+ iterations, each with fresh context.
-
-2. **Plan file as state tracker.** Checkboxes (`[ ]` / `[x]`) track progress. No separate state database. Human-readable at all times.
-
-3. **Loop context file.** `.claude/loop-context.md` stores mode, plan path, and review status. Survives context rotation.
-
-4. **Issue enhancement before loop.** Runs BEFORE Ralph starts so it gets full context for the enhancement conversation.
-
-5. **Lite review only.** 3 agents (Security, Edge Case, Supervisor) not 14. Keeps autonomous loops fast. User runs full `/review` after if desired.
-
-6. **Blocked task marker.** `[!]` for tasks that fail after 3 attempts. Loop skips them and continues. User handles blocked tasks manually after.

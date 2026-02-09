@@ -1,7 +1,7 @@
 {
   "name": "godmode",
   "version": "5.1.0-experimental",
-  "description": "AI-powered development workflow with Agent Teams. 7 workflow commands, 24 skill packages, 21 agents (17 review + 4 research), Agent Teams integration for parallel reviews and implementation swarms, autonomous loops with Ralph Wiggum context rotation, knowledge compounding, and structured phases for planning, execution, and finalization.",
+  "description": "AI-powered development workflow with Agent Teams. 7 workflow commands, 24 skill packages, 21 agents (17 review + 4 research), Agent Teams integration for parallel reviews and implementation swarms, autonomous development loops, knowledge compounding, and structured phases for planning, execution, and finalization.",
   "author": {
     "name": "Austin Browne",
     "url": "https://github.com/austinbrowne"
@@ -22,7 +22,6 @@
     "adversarial-validation",
     "agent-teams",
     "swarm",
-    "ralph-wiggum",
     "autonomous-loop"
   ]
 }

@@ -12,7 +12,7 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 | `/review` | Code review | Fresh eyes review (full/lite), protocol compliance |
 | `/learn` | Knowledge capture | Save solved problems as reusable solution docs |
 | `/ship` | Ship | Commit/PR, finalize, refactor |
-| `/loop` | Autonomous loop | Plan, implement each task, review — all with Ralph Wiggum context rotation (requires ralph-wiggum plugin) |
+| `/loop` | Autonomous loop | Plan, implement each task, review — all with Task subagent context rotation |
 
 ---
 
@@ -38,14 +38,14 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 /review → /ship
 ```
 
-### Autonomous (requires ralph-wiggum plugin)
+### Autonomous
 ```
 /loop <description>            Plan, implement each task, review, commit (all local)
 /loop --plan <path>            Iterate tasks from an existing plan
 /loop --issue 42               Enhance if needed, plan, implement, review
 ```
 
-Cancel anytime: `/ralph-wiggum:cancel-ralph`
+Cancel: Ctrl+C (re-run with `--plan` to resume)
 
 ---
 

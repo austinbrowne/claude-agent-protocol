@@ -188,7 +188,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - Modify dependency lock files without approval
 - **Skip fresh-eyes review before committing** - even if context was summarized, run it
 - Ignore edge cases (null, empty, boundaries)
-- **Use conversation history to determine execution mode** - always re-check your tool list at Step 0 of each skill invocation. If `TeamCreate` tool is available NOW, use team mode — regardless of what you did earlier
+- **Carry over earlier execution mode decisions without re-checking** - each skill's Step 0 MUST check your tool list fresh. Conversation history is NEVER a valid signal. If `TeamCreate` is available NOW, use team mode. If not, use subagent mode. Re-evaluate EVERY invocation independently
 - **Replace AskUserQuestion gates with plain text** - skills and workflow commands define mandatory `AskUserQuestion` interaction points. ALWAYS use the AskUserQuestion tool with the exact options defined in the skill file. NEVER substitute with a prose question like "what would you like to do next?"
 - **Override HUMAN IN LOOP without `/loop`** — only `/loop` may bypass AskUserQuestion gates, and only because the user explicitly opted in
 

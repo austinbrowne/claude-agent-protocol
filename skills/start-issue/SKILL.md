@@ -49,13 +49,15 @@ Display relevant past solutions alongside issue context.
 
 Check for blockers (label `status: blocked`, dependency issues still open). Warn if missing acceptance criteria.
 
-### 4. Assign Issue and Create Branch
+### 4. Assign Issue, Update Status, and Create Branch
 
 ```bash
-gh issue edit NNN --add-assignee @me
+gh issue edit NNN --add-assignee @me --remove-label "ready_for_dev" --add-label "status: in-progress"
 git checkout -b issue-NNN-brief-description
 git push -u origin issue-NNN-brief-description
 ```
+
+**Label transition:** `ready_for_dev` → `status: in-progress`. This marks the issue as actively being worked on.
 
 **Branch naming:** `issue-NNN-brief-description` (kebab-case from title).
 

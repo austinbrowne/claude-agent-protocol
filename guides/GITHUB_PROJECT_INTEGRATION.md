@@ -83,7 +83,8 @@ gh label create "priority: medium" --description "Medium priority" --color "fbca
 gh label create "priority: low" --description "Low priority" --color "0e8a16"
 
 # Status labels (workflow state)
-gh label create "status: ready" --description "Ready for development" --color "0e8a16"
+gh label create "needs_refinement" --description "Needs exploration and planning before implementation" --color "d93f0b"
+gh label create "ready_for_dev" --description "Ready for development" --color "0e8a16"
 gh label create "status: blocked" --description "Blocked by dependency" --color "d93f0b"
 gh label create "status: in-progress" --description "Currently being worked on" --color "fbca04"
 gh label create "status: review" --description "In code review" --color "0075ca"
@@ -540,6 +541,22 @@ When working on an issue:
    # Close when done
    gh issue close 123 --comment "All acceptance criteria met. Tests passing. Security review completed."
    ```
+
+---
+
+## Automated Lifecycle Transitions
+
+Issue status labels are managed automatically by the workflow skills. No manual label management is required.
+
+| Transition | Skill | Command |
+|-----------|-------|---------|
+| Created → `needs_refinement` | `/file-issue`, `/file-issues` | `gh issue create --label "needs_refinement"` |
+| `needs_refinement` → `ready_for_dev` | `/enhance-issue`, `/triage-issues` | `gh issue edit NNN --remove-label "needs_refinement" --add-label "ready_for_dev"` |
+| `ready_for_dev` → `status: in-progress` | `/start-issue` (Step 4) | `gh issue edit NNN --remove-label "ready_for_dev" --add-label "status: in-progress"` |
+| `status: in-progress` → `status: review` | `/commit-and-pr` (Step 5) | `gh issue edit NNN --remove-label "status: in-progress" --add-label "status: review"` |
+| `status: review` → closed | `/finalize` (Step 8) | `gh issue close NNN --comment "..."` |
+
+**Full lifecycle:** `needs_refinement` → `ready_for_dev` → `status: in-progress` → `status: review` → closed
 
 ---
 

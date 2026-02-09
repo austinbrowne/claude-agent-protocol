@@ -12,7 +12,7 @@ severity: high
 
 When running skills with `[TEAM MODE]` / `[SUBAGENT MODE]` dual paths, the agent may carry forward an earlier execution mode decision from conversation history instead of re-checking tool availability at Step 0.
 
-**Example:** Agent ran `/fresh-eyes-review` in subagent mode earlier in the conversation (TeammateTool wasn't available or wasn't used). Later, TeammateTool becomes available, but the agent "remembers" using subagent mode and continues with that — skipping team mode entirely.
+**Example:** Agent ran `/fresh-eyes-review` in subagent mode earlier in the conversation (`TeamCreate` tool wasn't available or wasn't used). Later, `TeamCreate` tool becomes available, but the agent "remembers" using subagent mode and continues with that — skipping team mode entirely.
 
 ## Root Cause
 

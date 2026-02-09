@@ -25,8 +25,8 @@ Analyze a plan's implementation tasks for parallelizability, form an implementat
 ## Prerequisites
 
 - Plan file exists with status `approved` or `ready_for_review`
-- Agent Teams is available (TeammateTool in tool list)
-- If TeammateTool is NOT available, inform user and suggest standard `/implement` → `start-issue` instead
+- Agent Teams is available (`TeamCreate` tool in tool list)
+- If `TeamCreate` tool is NOT available, inform user and suggest standard `/implement` → `start-issue` instead
 
 ---
 
@@ -210,7 +210,7 @@ Next step: Run /review for fresh-eyes review of all changes.
 - **Branch strategy:** All teammates work on the same branch. Swarmability assessment ensures minimal file overlap.
 - **Fresh-eyes review happens AFTER:** Individual teammates do their own validation, but the holistic code review happens at the `/review` step on the combined diff.
 - **Token cost:** Each teammate is a full Claude Code instance. Cost scales with team size. This is worthwhile for plans with high parallelism.
-- **Requires Agent Teams:** This skill requires the TeammateTool. Without it, use standard `/implement` → `start-issue` for sequential execution.
+- **Requires Agent Teams:** This skill requires the `TeamCreate` tool. Without it, use standard `/implement` → `start-issue` for sequential execution.
 
 ---
 

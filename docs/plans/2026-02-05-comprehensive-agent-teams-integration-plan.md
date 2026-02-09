@@ -44,7 +44,7 @@ Claude Code now ships Agent Teams as an experimental feature that solves all fou
 ## Non-Goals
 - Full v5.0 rewrite of the entire protocol around teams
 - Upgrading simple single-agent skills (brainstorm, learn, commit-and-pr)
-- Building custom team orchestration infrastructure — we use Claude Code's built-in TeammateTool
+- Building custom team orchestration infrastructure — we use Claude Code's built-in `TeamCreate` tool
 - Optimizing token costs — teams are inherently more expensive; we accept this
 - Changing agent definition files (`agents/review/*.md`, `agents/research/*.md`) — their prompts stay the same
 - Automated merging or deployment — human in the loop at every gate
@@ -108,7 +108,7 @@ User has 10 open issues → /triage-issues
 ```
 User invokes skill/workflow
     │
-    ├─ Check: TeammateTool available in tool list?
+    ├─ Check: `TeamCreate` tool available in tool list?
     │   │
     │   ├─ YES → Team Mode
     │   │   ├─ Form team with named roles
@@ -126,7 +126,7 @@ User invokes skill/workflow
 Prompt-level detection — no code, no config files:
 
 ```
-Check if the TeammateTool is available in your tool list.
+Check if the `TeamCreate` tool is available in your tool list.
   → Available: use [TEAM MODE] instructions
   → Not available: use [SUBAGENT MODE] instructions (existing behavior)
 ```
@@ -264,7 +264,7 @@ User → /review → fresh-eyes-review on combined diff
 - EDIT: `skills/fresh-eyes-review/SKILL.md`
 
 **Changes:**
-1. Add Step 0: Detect Execution Mode (TeammateTool check)
+1. Add Step 0: Detect Execution Mode (`TeamCreate` tool check)
 2. Add `[TEAM MODE]` Phase 1: Spawn specialist teammates (5 core + conditional based on smart selection). Each gets diff + agent definition reference. Teammates message each other about overlapping findings. Broadcast CRITICAL findings immediately.
 3. Add `[TEAM MODE]` Phase 2: Lead acts as Supervisor — reads specialist findings from task list + messages, asks clarifying questions via direct messages, deduplicates and prioritizes.
 4. Add `[TEAM MODE]` Phase 3: Lead acts as Adversarial Validator — challenges findings by messaging specialists for evidence. Specialists respond or retract. Lead produces final verdict.
@@ -399,7 +399,7 @@ User → /review → fresh-eyes-review on combined diff
 ## Acceptance Criteria
 
 **Tier 1: Review & Research Teams**
-- [ ] `fresh-eyes-review` uses team mode when TeammateTool is available, subagent fallback when not
+- [ ] `fresh-eyes-review` uses team mode when `TeamCreate` tool is available, subagent fallback when not
 - [ ] `review-plan` uses team mode when available, subagent fallback when not
 - [ ] `deepen-plan` uses team mode when available, subagent fallback when not
 - [ ] Review report output format identical regardless of execution mode
@@ -435,7 +435,7 @@ User → /review → fresh-eyes-review on combined diff
 - Manual: Run `/review-plan` in team mode, verify specialist teammates form and lead performs adversarial validation
 - Manual: Run `/deepen-plan` in team mode, verify research-review cross-communication
 - Edge case: Empty diff → graceful handling in both modes
-- Edge case: TeammateTool available but team formation fails → fallback to subagent mode
+- Edge case: `TeamCreate` tool available but team formation fails → fallback to subagent mode
 
 **Tier 2 — Swarm Plan:**
 - Manual: Plan with 6 independent tasks → swarmability score ~100%, team mode recommended
@@ -487,7 +487,7 @@ User → /review → fresh-eyes-review on combined diff
 
 ### Alternative Flows
 
-- **Fallback (all tiers):** TeammateTool not available → subagent mode, behavior identical to v4.2
+- **Fallback (all tiers):** `TeamCreate` tool not available → subagent mode, behavior identical to v4.2
 - **Partial swarm:** User selects only 3 of 5 recommended issues → teammates spawn for 3 only
 - **Mid-swarm abort:** User wants to stop → lead sends shutdown to all teammates, preserves completed work
 - **CRITICAL finding in review team:** Teammate broadcasts CRITICAL → lead fast-tracks to adversarial validation
@@ -539,6 +539,6 @@ User → /review → fresh-eyes-review on combined diff
 ## Dependencies
 
 - **Claude Code Agent Teams** — experimental feature, must be enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
-- **TeammateTool availability** — detection is prompt-based, no code dependency
+- **`TeamCreate` tool availability** — detection is prompt-based, no code dependency
 - **`gh` CLI** — required for triage-issues (GitHub issue fetching). Already used by existing skills.
 - **No new external dependencies**

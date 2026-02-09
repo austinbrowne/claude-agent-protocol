@@ -32,7 +32,7 @@ AskUserQuestion:
 
 **Direct entry supported:** `/implement start-issue 123` or `/implement swarm-plan` skips the menu and goes directly to the selected skill.
 
-**Note:** Swarm plan requires Agent Teams to be enabled. Triage issues works with standard subagents (no Agent Teams required). If TeammateTool is not available for swarm plan, inform the user and suggest standard `start-issue` instead.
+**Note:** Swarm plan requires Agent Teams to be enabled. Triage issues works with standard subagents (no Agent Teams required). If `TeamCreate` tool is not available for swarm plan, inform the user and suggest standard `start-issue` instead.
 
 ---
 

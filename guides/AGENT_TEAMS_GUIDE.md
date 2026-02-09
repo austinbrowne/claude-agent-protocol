@@ -18,9 +18,11 @@ Step 0: Detect Execution Mode
 CRITICAL: Check your tool list RIGHT NOW. Do NOT use conversation history to decide.
 Each skill invocation re-evaluates independently.
 
-Check if the TeammateTool is available in your tool list.
+Check if the `TeamCreate` tool is available in your tool list.
   → Available: follow [TEAM MODE] instructions throughout this skill
   → Not available: follow [SUBAGENT MODE] instructions (existing Task tool behavior)
+
+Note: The Agent Teams tools are `TeamCreate`, `TeamDelete`, and `SendMessage`. Check for `TeamCreate` specifically — it is the definitive signal that Agent Teams is enabled.
 ```
 
 This is prompt-level detection. No config files, no environment variable checks. The agent inspects its own available tools **at invocation time**.

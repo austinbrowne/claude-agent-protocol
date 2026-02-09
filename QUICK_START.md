@@ -1,6 +1,6 @@
 # GODMODE Quick Start Guide
 
-## 6 Workflow Commands
+## 7 Workflow Commands
 
 Use these as entry points. Each workflow offers sub-step selection and chains to the next workflow after completion.
 
@@ -12,6 +12,7 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 | `/review` | Code review | Fresh eyes review (full/lite), protocol compliance |
 | `/learn` | Knowledge capture | Save solved problems as reusable solution docs |
 | `/ship` | Ship | Commit/PR, finalize, refactor |
+| `/loop` | Autonomous loop | Plan, implement each task, review — all with Ralph Wiggum context rotation (requires ralph-wiggum plugin) |
 
 ---
 
@@ -36,6 +37,15 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 ```
 /review → /ship
 ```
+
+### Autonomous (requires ralph-wiggum plugin)
+```
+/loop <description>            Plan, implement each task, review, commit (all local)
+/loop --plan <path>            Iterate tasks from an existing plan
+/loop --issue 42               Enhance if needed, plan, implement, review
+```
+
+Cancel anytime: `/ralph-wiggum:cancel-ralph`
 
 ---
 
@@ -209,7 +219,7 @@ Use the recovery skill within `/implement`:
 | File | Purpose |
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
-| `commands/*.md` | **6 workflow commands** (explore, plan, implement, review, learn, ship) |
+| `commands/*.md` | **7 workflow commands** (explore, plan, implement, review, learn, ship, loop) |
 | `skills/*/SKILL.md` | **24 reusable skill packages** |
 | `agents/review/*.md` | **17 review agents** |
 | `agents/research/*.md` | **4 research agents** |
@@ -235,6 +245,6 @@ Use the recovery skill within `/implement`:
 
 ---
 
-**Version:** 5.0.0-experimental
+**Version:** 5.1.0-experimental
 **Last Updated:** February 2026
 **Full docs:** See `README.md`

@@ -65,7 +65,7 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 
 # Workflow
 
-## 6 Workflow Commands
+## 7 Workflow Commands
 
 Use workflow commands as entry points. Each workflow offers sub-step selection via `AskUserQuestion` and chains to the next workflow after completion.
 
@@ -77,6 +77,7 @@ Use workflow commands as entry points. Each workflow offers sub-step selection v
 | `/review` | Code review — fresh eyes review (full/lite), protocol compliance |
 | `/learn` | Knowledge capture — save solved problems as reusable solution docs |
 | `/ship` | Ship — commit/PR, finalize, refactor |
+| `/loop` | Autonomous loop — iterates plan tasks with Ralph Wiggum context rotation (requires ralph-wiggum plugin) |
 
 ### Quick Workflows
 
@@ -91,6 +92,11 @@ Use workflow commands as entry points. Each workflow offers sub-step selection v
 
 **Just review:**
 `/review` → `/ship`
+
+**Autonomous (requires ralph-wiggum plugin):**
+`/loop <description>` — plan, implement each task, review, commit (all local)
+`/loop --plan docs/plans/my-plan.md` — iterate through existing plan tasks
+`/loop --issue 42` — enhance if needed, plan, implement, review
 
 ### Individual Skills (Also User-Invocable)
 
@@ -119,7 +125,7 @@ For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
 
 | Directory | Purpose |
 |-----------|---------|
-| `commands/` | 6 workflow entry points |
+| `commands/` | 7 workflow entry points |
 | `skills/` | 24 reusable skill packages (also user-invocable) |
 | `agents/review/` | 17 review agent definitions |
 | `agents/research/` | 4 research agent definitions |
@@ -184,6 +190,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - Ignore edge cases (null, empty, boundaries)
 - **Use conversation history to determine execution mode** - always re-check your tool list at Step 0 of each skill invocation. If `TeamCreate` tool is available NOW, use team mode — regardless of what you did earlier
 - **Replace AskUserQuestion gates with plain text** - skills and workflow commands define mandatory `AskUserQuestion` interaction points. ALWAYS use the AskUserQuestion tool with the exact options defined in the skill file. NEVER substitute with a prose question like "what would you like to do next?"
+- **Override HUMAN IN LOOP without `/loop`** — only `/loop` may bypass AskUserQuestion gates, and only because the user explicitly opted in
 
 **Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When shipping, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/review` again.
 
@@ -195,7 +202,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Full protocol documentation |
 | `QUICK_START.md` | Entry points and command reference |
-| `commands/*.md` | 6 workflow commands |
+| `commands/*.md` | 7 workflow commands |
 | `skills/*/SKILL.md` | 24 reusable skill packages |
 | `agents/review/*.md` | 17 review agent definitions |
 | `agents/research/*.md` | 4 research agent definitions |

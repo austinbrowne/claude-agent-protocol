@@ -13,8 +13,8 @@
         "repo": "austinbrowne/claude-agent-protocol",
         "ref": "experimental-agent-teams"
       },
-      "description": "GODMODE v5.0-experimental — 6 workflow commands, 24 skill packages, 21 agents, Agent Teams integration for parallel reviews and implementation swarms, knowledge compounding.",
-      "version": "5.0.5-experimental",
+      "description": "GODMODE v5.1-experimental — 7 workflow commands, 24 skill packages, 21 agents, Agent Teams integration for parallel reviews and implementation swarms, autonomous loops with Ralph Wiggum, knowledge compounding.",
+      "version": "5.1.0-experimental",
       "keywords": [
         "workflow",
         "ai-coding",
@@ -24,7 +24,11 @@
         "orchestrator",
         "multi-agent",
         "knowledge-compounding",
-        "adversarial-validation"
+        "adversarial-validation",
+        "agent-teams",
+        "swarm",
+        "ralph-wiggum",
+        "autonomous-loop"
       ]
     }
   ]

@@ -12,7 +12,7 @@ argument-hint: "<description | --plan PATH | --issue N> [--max-iterations N]"
 Level 0: Thin Shell (this conversation — stays small, resists compaction)
   │  Reads ONLY loop-context.md per cycle (~500 tokens)
   │
-  ├── Spawn Worker (general-purpose Task, mode: dontAsk)
+  ├── Spawn Worker (general-purpose Task, mode: bypassPermissions)
   │   → reads plan, implements 1 task, tests, commits, checks [x], updates counts
   │   → returns one-line summary
   │
@@ -123,7 +123,7 @@ WHILE true:
      → (tasks_completed + tasks_blocked) >= tasks_total  → set status "review", break
      → iterations >= max_iterations  → set status "complete", break
 
-  2. Spawn Worker subagent (general-purpose, mode: dontAsk)
+  2. Spawn Worker subagent (general-purpose, mode: bypassPermissions)
      with the WORKER PROMPT below
 
   3. On error/timeout:
@@ -140,7 +140,7 @@ WHILE true:
 
 ### Worker Prompt
 
-Each worker is a `general-purpose` Task subagent spawned with `mode: dontAsk`. The prompt:
+Each worker is a `general-purpose` Task subagent spawned with `mode: bypassPermissions`. The prompt:
 
 ```
 You are implementing ONE task from a development plan. You have ZERO memory
@@ -186,7 +186,7 @@ of previous work — read files for ALL context.
 When Level 0 sees `status: review`:
 
 1. Read `start_commit` from loop-context.md
-2. Spawn a `general-purpose` Task subagent (mode: dontAsk) with instructions:
+2. Spawn a `general-purpose` Task subagent (mode: bypassPermissions) with instructions:
    - Generate diff: `git diff {start_commit}..HEAD`
    - Run lite fresh-eyes-review: Security + Edge Case reviewers (sequential)
    - Auto-fix CRITICAL and HIGH findings

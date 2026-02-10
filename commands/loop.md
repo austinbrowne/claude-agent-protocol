@@ -224,35 +224,68 @@ IF review_round >= review_max_rounds AND NOT review_clean:
 
 ### Review Worker Prompt
 
-Each review worker is a `general-purpose` Task subagent spawned with `mode: bypassPermissions`. The prompt:
+Each review worker is a `general-purpose` Task subagent spawned with `mode: bypassPermissions`. It acts as team lead, spawning review agents as parallel teammates via Agent Teams.
 
 ```
-You are running a FULL fresh-eyes code review. You have ZERO memory of previous
-work — read files for ALL context.
+You are running a FULL fresh-eyes code review using Agent Teams for parallel
+execution. You have ZERO memory of previous work — read files for ALL context.
+You are the TEAM LEAD — you coordinate specialists, consolidate, and validate.
 
-## Instructions
+## Phase 1: Setup
 
 1. Read `.claude/loop-context.md` for start_commit
-2. Generate the diff: run `git diff {start_commit}..HEAD`
+2. Generate the diff: run `git diff {start_commit}..HEAD` and save to /tmp/review-diff.txt
 3. Generate the file list: run `git diff --name-only {start_commit}..HEAD`
-4. Read `guides/FRESH_EYES_REVIEW.md` for the full review methodology
-5. Run the SMART SELECTION algorithm from that guide:
-   a. ALWAYS run Core Agents (5): Security, Code Quality, Edge Case, Supervisor, Adversarial Validator
-   b. For each Conditional Agent (9), check trigger patterns against the diff content and file list
-   c. Only activate conditional agents whose triggers match
-6. For EACH selected agent, spawn it as a Task subagent with:
-   - The diff content
-   - The file list
-   - The agent's definition from agents/review/*.md
-   - Instructions to output findings in this format:
-     [SEVERITY] FINDING_ID: description (file:line)
+4. Read `guides/FRESH_EYES_REVIEW.md` for the smart selection algorithm
+5. Run SMART SELECTION: check trigger patterns against diff content and file list
+   - Core agents (always): Security, Code Quality, Edge Case
+   - Conditional agents (only if triggered): Performance, API Contract, Concurrency,
+     Error Handling, Data Validation, Dependency, Testing Adequacy, Config & Secrets,
+     Documentation
+
+## Phase 2: Spawn Review Team (Parallel)
+
+1. Create a team with TeamCreate
+2. For EACH selected specialist, spawn a teammate (general-purpose Task, mode: bypassPermissions)
+   with this prompt template:
+
+   You are a {specialist type} reviewer with ZERO context about this project.
+   Read your review process from {agent definition file path from agents/review/*.md}.
+   Review the code changes by running: git diff {start_commit}..HEAD
+
+   Instructions:
+   - Output findings in this exact format, one per line:
+     [{SEVERITY}] {ID}: {description} ({file}:{line})
      Where SEVERITY is CRITICAL, HIGH, MEDIUM, or LOW
-7. After ALL agents complete, run the Supervisor agent to:
-   - Consolidate findings from all agents
-   - Remove duplicates and false positives
-   - Prioritize by severity
-8. Then run the Adversarial Validator to challenge findings
-9. Output the FINAL consolidated findings in this exact format:
+   - Include specific file:line references for every finding
+   - If you find a CRITICAL issue, mention it prominently at the top
+   - Do NOT fix any code. Review ONLY.
+   - Do NOT modify any files or commit anything.
+
+3. Create one task per specialist in the shared task list
+4. Assign tasks to teammates. Wait for all to complete.
+
+## Phase 3: Consolidation (You Are Supervisor)
+
+After all specialists complete and send their findings:
+1. Collect all findings from teammate messages
+2. Remove duplicate findings (same file:line, same issue)
+3. For ambiguous findings, message the specialist: "What evidence supports this?"
+4. Remove false positives based on specialist responses
+5. Prioritize by severity AND real-world impact
+
+## Phase 4: Adversarial Validation (You Are Validator)
+
+1. Challenge each CRITICAL and HIGH finding: Is this exploitable or theoretical?
+2. Message specialists for evidence if claims are unsupported
+3. Classify: VERIFIED | UNVERIFIED | DISPROVED
+4. Drop DISPROVED findings from the final list
+
+## Phase 5: Cleanup and Output
+
+1. Shut down all specialist teammates (SendMessage type: shutdown_request)
+2. Delete the team (TeamDelete)
+3. Output the FINAL consolidated findings in this exact format:
 
 REVIEW_FINDINGS:
 - [CRITICAL] ID: description (file:line)
@@ -268,11 +301,12 @@ CLEAN
 
 ## Rules
 - Do NOT fix any code. Review ONLY.
-- Do NOT modify any files.
+- Do NOT modify any files (except /tmp/ for the diff).
 - Do NOT commit anything.
 - Read the FULL diff — do not skip files or truncate.
 - Every finding MUST have a specific file and line reference.
 - Be thorough. This is the last line of defense before merge.
+- ALWAYS clean up the team before returning results.
 ```
 
 ### Fix Worker Prompt

@@ -20,7 +20,12 @@ Level 0: Thin Shell (this conversation — stays small, resists compaction)
   │
   ├── ...repeat until done or max_iterations...
   │
-  ├── Spawn Review worker (lite: Security + Edge Case + Supervisor)
+  ├── REVIEW CYCLE (max 3 rounds):
+  │   ├── Spawn Review worker → full fresh-eyes-review (smart selection)
+  │   │   → outputs structured findings with severity
+  │   ├── If no CRITICAL/HIGH findings → done
+  │   ├── Spawn Fix worker → fixes all CRITICAL+HIGH findings, commits
+  │   └── Loop back to Review worker (re-review from scratch)
   │
   └── Print completion summary
 ```
@@ -100,7 +105,9 @@ tasks_total: 0
 tasks_completed: 0
 tasks_blocked: 0
 max_iterations: 50
-review_done: false
+review_round: 0
+review_max_rounds: 3
+review_clean: false
 status: running
 started_at: "<ISO timestamp>"
 start_commit: "<current HEAD sha>"
@@ -183,15 +190,128 @@ of previous work — read files for ALL context.
 
 ## Step 4: Review Phase
 
-When Level 0 sees `status: review`:
+**Multi-round review loop.** Level 0 orchestrates review → fix → re-review cycles until the code is clean or max rounds reached. Each round uses a FULL fresh-eyes-review with smart agent selection — not lite.
 
-1. Read `start_commit` from loop-context.md
-2. Spawn a `general-purpose` Task subagent (mode: bypassPermissions) with instructions:
-   - Generate diff: `git diff {start_commit}..HEAD`
-   - Run lite fresh-eyes-review: Security + Edge Case reviewers (sequential)
-   - Auto-fix CRITICAL and HIGH findings
-   - Commit fixes if any
-3. Update loop-context.md: `review_done: true`, `status: complete`
+```
+WHILE review_round < review_max_rounds:
+  1. Read .claude/loop-context.md
+     → review_clean == true  → break (already clean)
+
+  2. Spawn REVIEW WORKER (general-purpose, mode: bypassPermissions)
+     with the REVIEW WORKER PROMPT below
+     → Returns: structured findings or "CLEAN"
+
+  3. Parse review result:
+     → "CLEAN" or no CRITICAL/HIGH findings:
+        Update loop-context.md: review_clean: true, status: complete
+        Break
+
+     → Has CRITICAL or HIGH findings:
+        Print: "Review round {round}: {N} findings to fix"
+
+  4. Spawn FIX WORKER (general-purpose, mode: bypassPermissions)
+     with the FIX WORKER PROMPT below (includes the findings)
+     → Returns: summary of fixes applied
+
+  5. Update loop-context.md: increment review_round
+     Print: "Review round {round} fixes committed. Re-reviewing..."
+     Continue loop
+
+IF review_round >= review_max_rounds AND NOT review_clean:
+  Print: "Review reached max rounds ({review_max_rounds}). Some findings may remain."
+  Update loop-context.md: status: complete
+```
+
+### Review Worker Prompt
+
+Each review worker is a `general-purpose` Task subagent spawned with `mode: bypassPermissions`. The prompt:
+
+```
+You are running a FULL fresh-eyes code review. You have ZERO memory of previous
+work — read files for ALL context.
+
+## Instructions
+
+1. Read `.claude/loop-context.md` for start_commit
+2. Generate the diff: run `git diff {start_commit}..HEAD`
+3. Generate the file list: run `git diff --name-only {start_commit}..HEAD`
+4. Read `guides/FRESH_EYES_REVIEW.md` for the full review methodology
+5. Run the SMART SELECTION algorithm from that guide:
+   a. ALWAYS run Core Agents (5): Security, Code Quality, Edge Case, Supervisor, Adversarial Validator
+   b. For each Conditional Agent (9), check trigger patterns against the diff content and file list
+   c. Only activate conditional agents whose triggers match
+6. For EACH selected agent, spawn it as a Task subagent with:
+   - The diff content
+   - The file list
+   - The agent's definition from agents/review/*.md
+   - Instructions to output findings in this format:
+     [SEVERITY] FINDING_ID: description (file:line)
+     Where SEVERITY is CRITICAL, HIGH, MEDIUM, or LOW
+7. After ALL agents complete, run the Supervisor agent to:
+   - Consolidate findings from all agents
+   - Remove duplicates and false positives
+   - Prioritize by severity
+8. Then run the Adversarial Validator to challenge findings
+9. Output the FINAL consolidated findings in this exact format:
+
+REVIEW_FINDINGS:
+- [CRITICAL] ID: description (file:line)
+- [HIGH] ID: description (file:line)
+- [MEDIUM] ID: description (file:line)
+- [LOW] ID: description (file:line)
+CRITICAL_COUNT: N
+HIGH_COUNT: N
+TOTAL_FINDINGS: N
+
+If there are NO findings at any severity, output exactly:
+CLEAN
+
+## Rules
+- Do NOT fix any code. Review ONLY.
+- Do NOT modify any files.
+- Do NOT commit anything.
+- Read the FULL diff — do not skip files or truncate.
+- Every finding MUST have a specific file and line reference.
+- Be thorough. This is the last line of defense before merge.
+```
+
+### Fix Worker Prompt
+
+Each fix worker is a `general-purpose` Task subagent spawned with `mode: bypassPermissions`. The prompt includes the findings from the review worker:
+
+```
+You are fixing code review findings. You have ZERO memory of previous work —
+read files for ALL context.
+
+## Findings to Fix
+
+{paste CRITICAL and HIGH findings from review worker output}
+
+## Instructions
+
+1. Read `.claude/loop-context.md` for context
+2. Read CLAUDE.md for project conventions
+3. For EACH finding listed above (CRITICAL first, then HIGH):
+   a. Read the referenced file
+   b. Understand the issue
+   c. Implement the fix following existing codebase patterns
+   d. Write/update tests if the fix changes behavior
+4. Run tests for all affected code. If tests fail, fix them (up to 3 attempts).
+5. Stage all changed files and commit:
+   git add <specific files changed>
+   git commit -m "fix: address review findings — {brief summary}"
+6. Output a summary: "FIXED: {N} findings addressed" with a one-line description of each fix.
+
+## Rules
+- Fix ALL CRITICAL findings. Fix ALL HIGH findings.
+- Do NOT fix MEDIUM or LOW findings (defer to human review).
+- Do NOT push to remote. Local commits only.
+- Do NOT create PRs.
+- Do NOT modify .claude/ directory except loop-context.md.
+- Do NOT modify commands/*.md or agents/*.md.
+- Read files BEFORE editing. Follow existing codebase patterns.
+- If a finding is a false positive, skip it and note: "SKIPPED: {ID} — false positive: {reason}"
+```
 
 ---
 
@@ -203,8 +323,8 @@ Read loop-context.md and output:
 Loop Complete
 ━━━━━━━━━━━━
 Tasks: {completed}/{total} completed, {blocked} blocked
+Review: {review_round} round(s) — {review_clean ? "All clear" : "Max rounds reached, some findings may remain"}
 Commits: (git log --oneline {start_commit}..HEAD)
-Review: {review_done ? "Lite review passed" : "Skipped"}
 
 {if blocked > 0}
 Blocked tasks (manual attention needed):
@@ -212,7 +332,11 @@ Blocked tasks (manual attention needed):
   ...
 {/if}
 
-Next: /review for full fresh-eyes review, then /ship to commit and PR.
+{if review_clean}
+Ready to ship. Run /ship to commit and create PR.
+{else}
+Run /review for manual follow-up, then /ship.
+{/if}
 ```
 
 Set `status: complete` in loop-context.md.
@@ -236,12 +360,12 @@ Set `status: complete` in loop-context.md.
 - Issue enhancement (if `needs_refinement`)
 - Task implementation (one per iteration)
 - Test running and fixing
-- Lite code review (Security + Edge Case + Supervisor)
+- Full fresh-eyes-review with smart agent selection (up to 14 agents)
+- Multi-round review-fix cycles (up to 3 rounds)
 - Auto-fix of CRITICAL and HIGH findings
 - Local git commits
 
 **NOT autonomous (still requires human):**
 - `git push` / PR creation
 - Merging
-- Full 14-agent review (user runs `/review` after loop)
 - Deleting files or branches

@@ -245,6 +245,6 @@ Use the recovery skill within `/implement`:
 
 ---
 
-**Version:** 5.1.0-experimental
+**Version:** 5.1.3-experimental
 **Last Updated:** February 2026
 **Full docs:** See `README.md`

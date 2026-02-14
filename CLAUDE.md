@@ -191,6 +191,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - **Carry over earlier execution mode decisions without re-checking** - each skill's Step 0 MUST check your tool list fresh. Conversation history is NEVER a valid signal. If `TeamCreate` is available NOW, use team mode. If not, use subagent mode. Re-evaluate EVERY invocation independently
 - **Replace AskUserQuestion gates with plain text** - skills and workflow commands define mandatory `AskUserQuestion` interaction points. ALWAYS use the AskUserQuestion tool with the exact options defined in the skill file. NEVER substitute with a prose question like "what would you like to do next?"
 - **Override HUMAN IN LOOP without `/loop`** — only `/loop` may bypass AskUserQuestion gates, and only because the user explicitly opted in
+- **Use EnterPlanMode when executing workflow commands or skills** — the protocol has its own planning layer (`/plan`, `generate-plan`, plan files). Claude Code's native plan mode is redundant and wastes a turn. When a user invokes a workflow command (e.g. `/implement`, `/review`, `/ship`) or any skill, execute it directly — NEVER call EnterPlanMode first
 
 **Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When shipping, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/review` again.
 

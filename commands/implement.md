@@ -7,6 +7,8 @@ description: "Implementation — start issues, triage issues, swarm plan, genera
 
 **Workflow command.** Hub for all implementation activities: starting work on issues, triaging issue backlogs, parallel swarm execution, generating tests, running validation, security review, and recovery from failures.
 
+> **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
+
 ---
 
 ## Step 1: Select Implementation Activity

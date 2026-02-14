@@ -7,6 +7,8 @@ description: "Reconnaissance & ideation — explore the codebase and brainstorm 
 
 **Workflow command.** Entry point for understanding a codebase before planning or implementing.
 
+> **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
+
 ---
 
 ## Step 1: Determine Exploration Scope

@@ -7,6 +7,8 @@ description: "Planning & requirements — plan generation, deepening, review, is
 
 **Workflow command.** Hub for all planning activities: plan creation, plan enrichment, plan review, issue creation, and architecture decision records.
 
+> **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning via `generate-plan`, not Claude Code's native plan mode.
+
 ---
 
 ## Step 1: Select Planning Activity

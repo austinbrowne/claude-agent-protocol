@@ -7,6 +7,8 @@ description: "Code review — fresh eyes multi-agent review and protocol complia
 
 **Workflow command.** Hub for code review activities: comprehensive multi-agent review and protocol compliance checking.
 
+> **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
+
 ---
 
 ## Step 1: Select Review Scope

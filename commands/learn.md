@@ -7,6 +7,8 @@ description: "Knowledge capture — save solved problems as searchable, reusable
 
 **Workflow command.** Captures solved problems, gotchas, and insights as searchable solution documents in `docs/solutions/`.
 
+> **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
+
 ---
 
 ## Auto-Trigger Detection

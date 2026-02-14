@@ -7,6 +7,8 @@ description: "Ship — commit, PR creation, refactoring, and finalization"
 
 **Workflow command.** Hub for shipping activities: committing code, creating PRs, refactoring, and final documentation.
 
+> **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
+
 ---
 
 ## Step 1: Select Shipping Activity

@@ -8,6 +8,8 @@ argument-hint: "<description | --plan PATH | --issue N> [--max-iterations N]"
 
 **Workflow command.** Autonomous plan-and-implement loop using Task subagents for context rotation. Each worker gets fresh context and reads files for state. No external plugin dependencies.
 
+> **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
+
 ```
 Level 0: Thin Shell (this conversation — stays small, resists compaction)
   │  Reads ONLY loop-context.md per cycle (~500 tokens)

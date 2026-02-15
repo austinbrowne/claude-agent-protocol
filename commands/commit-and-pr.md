@@ -117,7 +117,7 @@ Ready to commit? (yes/no): _____
 **Extract context:**
 - Current branch name (issue-123-oauth-provider)
 - Issue number from branch (123)
-- Issue title via `gh issue view 123 --json title`
+- Issue title via platform CLI (see `~/.claude/platforms/` for syntax)
 - Changes summary from git diff
 
 **Generate conventional commit message:**
@@ -242,7 +242,7 @@ Your choice [1]: _____
 
 **Extract information:**
 - Issue number from branch or commit message
-- Issue details via `gh issue view 123 --json title,body,labels`
+- Issue details via platform CLI (see `~/.claude/platforms/` for syntax)
 - Changes summary from commit
 - Test results from validation
 - Security review status
@@ -300,8 +300,11 @@ Status: SECURITY_APPROVED
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
-### Step 8: Create PR using gh CLI
+### Step 8: Create PR/MR using platform CLI
 
+**Detect platform if not already done** (see `~/.claude/platforms/detect.md`).
+
+**GitHub:**
 ```bash
 gh pr create \
   --title "feat: OAuth provider integration (Closes #123)" \
@@ -312,10 +315,18 @@ EOF
   --base experimental
 ```
 
-**Capture PR URL and number:**
+**GitLab:**
 ```bash
-# gh pr create returns PR URL
+glab mr create \
+  --title "feat: OAuth provider integration (Closes #123)" \
+  --description "$(cat <<'EOF'
+[MR body from Step 7]
+EOF
+)" \
+  --target-branch experimental
 ```
+
+**Capture URL and number** (both CLIs return the URL on creation).
 
 ### Step 9: Report success and next steps
 
@@ -324,15 +335,14 @@ EOF
 
 Commit: abc1234 - feat: add OAuth provider integration
 Branch: issue-123-oauth-provider
-PR: #150 - https://github.com/org/repo/pull/150
+PR/MR: #150 - [platform URL]
 Base branch: experimental
 
 Next steps:
-1. Review PR on GitHub: https://github.com/org/repo/pull/150
+1. Review PR/MR on your platform: [URL from CLI output]
 2. Wait for approval (or self-merge if authorized)
-3. After merge, issue #123 will auto-close
-4. Pick next issue: `gh issue list`
-   Or start next issue: `/start-issue [number]`
+3. After merge, issue #123 will auto-close (via "Closes #123")
+4. Pick next issue or start next: `/start-issue [number]`
 ```
 
 ---
@@ -341,7 +351,7 @@ Next steps:
 
 **Created:**
 - Git commit with conventional commit message
-- PR on GitHub targeting specified base branch
+- PR/MR on platform targeting specified base branch
 
 **Reported:**
 - Commit hash
@@ -352,7 +362,7 @@ Next steps:
 **Status:** `PR_CREATED`
 
 **Suggested next steps:**
-- "Review PR on GitHub and merge when approved"
+- "Review PR/MR on your platform and merge when approved"
 - "Pick next issue: `/start-issue [number]`"
 
 ---
@@ -399,7 +409,7 @@ Your choice: 2
 ✅ Success!
 
 Commit: abc1234
-PR: #150 - https://github.com/org/repo/pull/150
+PR: #150 - [platform PR/MR URL]
 
 Review and merge when ready.
 ```
@@ -415,7 +425,7 @@ Claude: [Immediately commits and creates PR]
 Commit: abc1234
 PR: #150
 
-Review: https://github.com/org/repo/pull/150
+Review: [platform PR/MR URL]
 ```
 
 **Example 3: Custom commit message**

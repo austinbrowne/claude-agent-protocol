@@ -47,7 +47,7 @@ If you prefer not to use the installer:
 
 ```bash
 # Copy files to ~/.claude/
-cp -r commands checklists guides templates ~/.claude/
+cp -r commands checklists guides templates platforms ~/.claude/
 cp AI_CODING_AGENT_GODMODE.md PRD_TEMPLATE.md QUICK_START.md ~/.claude/
 
 # Optionally copy CLAUDE.md (or merge with your existing one)
@@ -71,12 +71,14 @@ cp CLAUDE.md ~/.claude/
 ### 📝 Templates
 - **TEST_STRATEGY.md** - Comprehensive test strategy matrix (unit, integration, E2E, security, performance)
 - **ADR_TEMPLATE.md** - Architecture Decision Records (prevent "why did we do this?" 6 months later)
-- **GITHUB_ISSUE_TEMPLATE.md** - Standard issue structure for AI-assisted development
+- **ISSUE_TEMPLATE.md** - Standard issue structure for AI-assisted development
 
 ### 📚 Guides
 - **CONTEXT_OPTIMIZATION.md** - Reduce token usage by 30-50%
 - **MULTI_AGENT_PATTERNS.md** - Coordinate multiple agents for complex tasks
+- **PROJECT_INTEGRATION.md** - Platform project integration (GitHub/GitLab)
 - **GITHUB_PROJECT_INTEGRATION.md** - GitHub Projects workflow with gh CLI
+- **GITLAB_PROJECT_INTEGRATION.md** - GitLab Boards workflow with glab CLI
 
 ### ⚙️ Commands & Workflows
 - **FRESH_EYES_REVIEW.md** - Multi-agent unbiased code review process
@@ -102,18 +104,25 @@ cp CLAUDE.md ~/.claude/
 ├── templates/
 │   ├── TEST_STRATEGY.md               # Test strategy matrix
 │   ├── ADR_TEMPLATE.md                # Architecture decisions
-│   └── GITHUB_ISSUE_TEMPLATE.md       # GitHub issue structure
+│   └── ISSUE_TEMPLATE.md             # Issue structure
+│
+├── platforms/                          # Platform CLI references
+│   ├── detect.md                      # Auto-detect GitHub/GitLab
+│   ├── github.md                      # GitHub CLI (gh) reference
+│   └── gitlab.md                      # GitLab CLI (glab) reference
 │
 ├── guides/
 │   ├── CONTEXT_OPTIMIZATION.md        # Reduce token usage
 │   ├── MULTI_AGENT_PATTERNS.md        # Multi-agent coordination
-│   └── GITHUB_PROJECT_INTEGRATION.md  # GitHub Projects workflow
+│   ├── PROJECT_INTEGRATION.md         # Platform integration router
+│   ├── GITHUB_PROJECT_INTEGRATION.md  # GitHub Projects workflow
+│   └── GITLAB_PROJECT_INTEGRATION.md  # GitLab Boards workflow
 │
 ├── commands/                           # 13 modular slash commands
 │   ├── explore.md                     # Codebase exploration
 │   ├── generate-prd.md                # PRD generation
 │   ├── create-adr.md                  # Architecture Decision Records
-│   ├── create-issues.md               # GitHub issue generation
+│   ├── create-issues.md               # Issue generation
 │   ├── start-issue.md                 # Begin issue implementation
 │   ├── generate-tests.md              # Test generation
 │   ├── security-review.md             # Security checklist review
@@ -142,7 +151,7 @@ cp CLAUDE.md ~/.claude/
 - **ADR Template**: Loaded for architectural decisions
 - **Context Optimization**: Loaded when starting complex tasks
 - **Multi-Agent Patterns**: Loaded for coordinating specialized agents (includes Fresh Eyes Review pattern)
-- **GitHub Project Integration**: Loaded when creating issues from PRD (Phase 0, Step 6)
+- **Project Integration**: Loaded when creating issues from PRD (Phase 0, Step 6) - supports GitHub and GitLab
 
 **Why this structure?**
 - Research shows LLMs have limited "attention budget" - every token depletes attention
@@ -164,10 +173,10 @@ This ensures agents pay full attention to critical safety rules while accessing 
 - `/explore` - Codebase exploration and context gathering
 - `/generate-prd` - Create PRD from exploration or description
 - `/create-adr` - Document architectural decisions
-- `/create-issues` - Generate GitHub issues from approved PRD
+- `/create-issues` - Generate issues from approved PRD
 
 **Phase 1: Execution (7 commands)**
-- `/start-issue` - Begin work on a GitHub issue
+- `/start-issue` - Begin work on an issue
 - `/generate-tests` - Generate comprehensive tests
 - `/security-review` - Run security checklist review
 - `/run-validation` - Run tests + coverage + lint + security scan
@@ -340,7 +349,7 @@ Phase 2: Finalize
 4. Deploy
 ```
 
-### For GitHub Projects Workflow
+### For Project Board Workflow (GitHub / GitLab)
 
 **Two entry points:**
 
@@ -351,7 +360,7 @@ Phase 0: Explore & Plan
 2. Generate Full PRD
 3. Save PRD to docs/prds/YYYY-MM-DD-feature-name.md
 4. Human review & approval
-5. Create GitHub issues (/create-issues docs/prds/...)
+5. Create issues (/create-issues docs/prds/...)
    a. Create first issue, note issue number (e.g., #123)
    b. Rename PRD to docs/prds/123-YYYY-MM-DD-feature-name.md
    c. Update issue to reference renamed PRD
@@ -367,7 +376,7 @@ If Fork B: Exit (pick up later via Entry Point B)
 ```
 Starting Point: 10 issues waiting in backlog
 
-1. List ready issues (gh project item-list)
+1. List ready issues (platform CLI)
 2. Pick an issue ("Let's work on issue #45")
 3. Load issue context (description, acceptance criteria, technical requirements, PRD reference)
 4. Verify dependencies and readiness
@@ -375,9 +384,9 @@ Starting Point: 10 issues waiting in backlog
 6. Jump directly to Phase 1 implementation
 7. Reference PRD if needed for broader context (file path in issue)
 8. Commit changes to branch
-9. Ask: "Create Pull Request?"
-10. If yes: Create PR (auto-links to issue)
-11. User reviews & merges PR on GitHub
+9. Ask: "Create PR/MR?"
+10. If yes: Create PR/MR (auto-links to issue)
+11. User reviews & merges on platform
 12. Issue auto-closes on merge
 13. Pick next issue from backlog
 14. Repeat
@@ -429,7 +438,7 @@ Benefits:
 - File uploads
 - Database queries with user input
 
-### Use GitHub Projects workflow when:
+### Use project board workflow when:
 - Multi-phase PRD with multiple work units
 - Want persistent issue tracking between sessions
 - Working with team (issues can be assigned to different developers/agents)

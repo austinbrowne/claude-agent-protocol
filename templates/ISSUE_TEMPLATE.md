@@ -1,4 +1,4 @@
-# GitHub Issue Template
+# Issue Template
 
 This template is used by `/create-issues` to generate well-structured issues for AI-assisted development.
 
@@ -89,7 +89,7 @@ So that [benefit/value]
 
 ## Claude Code Assignment
 **Option 1 - Immediate:** Tag @claude in issue comments to assign
-**Option 2 - Manual:** Pick from GitHub Project board and reference issue number in Claude Code session
+**Option 2 - Manual:** Pick from project board and reference issue number in Claude Code session
 
 ## Definition of Done
 - [ ] Code implemented following existing patterns

@@ -67,20 +67,29 @@ echo "Removing guides..."
 rm -f "$CLAUDE_DIR/guides/CONTEXT_OPTIMIZATION.md"
 rm -f "$CLAUDE_DIR/guides/MULTI_AGENT_PATTERNS.md"
 rm -f "$CLAUDE_DIR/guides/GITHUB_PROJECT_INTEGRATION.md"
+rm -f "$CLAUDE_DIR/guides/GITLAB_PROJECT_INTEGRATION.md"
+rm -f "$CLAUDE_DIR/guides/PROJECT_INTEGRATION.md"
 rm -f "$CLAUDE_DIR/guides/FRESH_EYES_REVIEW.md"
 rm -f "$CLAUDE_DIR/guides/FAILURE_RECOVERY.md"
 
 echo "Removing templates..."
 rm -f "$CLAUDE_DIR/templates/TEST_STRATEGY.md"
 rm -f "$CLAUDE_DIR/templates/ADR_TEMPLATE.md"
+rm -f "$CLAUDE_DIR/templates/ISSUE_TEMPLATE.md"
 rm -f "$CLAUDE_DIR/templates/GITHUB_ISSUE_TEMPLATE.md"
 rm -f "$CLAUDE_DIR/templates/RECOVERY_REPORT.md"
+
+echo "Removing platform files..."
+rm -f "$CLAUDE_DIR/platforms/detect.md"
+rm -f "$CLAUDE_DIR/platforms/github.md"
+rm -f "$CLAUDE_DIR/platforms/gitlab.md"
 
 # Clean up empty directories (but don't remove ~/.claude itself)
 rmdir "$CLAUDE_DIR/commands" 2>/dev/null || true
 rmdir "$CLAUDE_DIR/checklists" 2>/dev/null || true
 rmdir "$CLAUDE_DIR/guides" 2>/dev/null || true
 rmdir "$CLAUDE_DIR/templates" 2>/dev/null || true
+rmdir "$CLAUDE_DIR/platforms" 2>/dev/null || true
 
 echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"

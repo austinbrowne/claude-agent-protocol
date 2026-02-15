@@ -1,26 +1,28 @@
 ---
-description: Begin work on a GitHub issue (Entry Point B workflow)
+description: Begin work on an issue (Entry Point B workflow)
 ---
 
 # /start-issue
 
-**Description:** Begin work on a GitHub issue (Entry Point B workflow)
+**Description:** Begin work on an issue (Entry Point B workflow)
 
 **When to use:**
-- Have GitHub issues ready and want to start implementation
+- Have issues ready and want to start implementation
 - Picking issue from backlog to work on
 - Following Entry Point B in GODMODE (existing issue → implementation)
 - GODMODE Phase 1 Step 1
 
 **Prerequisites:**
-- **GitHub issue exists** (created via `/create-issues` or manually)
+- **Issue exists** (created via `/create-issues` or manually)
 - Issue is ready (not blocked, has acceptance criteria)
-- GitHub CLI (`gh`) installed and authenticated
+- **Platform CLI installed and authenticated** (see `~/.claude/platforms/detect.md`)
 - Git repository initialized
 
-**Note:** This command requires an existing GitHub issue. If you don't have one yet, either:
+**Platform detection:** If not already detected this session, run platform detection first (see `~/.claude/platforms/detect.md`). Use the platform-specific CLI syntax from `~/.claude/platforms/github.md` or `~/.claude/platforms/gitlab.md`.
+
+**Note:** This command requires an existing issue. If you don't have one yet, either:
 - Run `/create-issues` to generate issues from a PRD
-- Create an issue manually on GitHub first
+- Create an issue manually on your platform
 - Or use Entry Point A workflow (explore → generate-prd → create-issues → start-issue)
 
 ---
@@ -37,7 +39,7 @@ User types `/start-issue 123` where 123 is the issue number.
 
 ## Arguments
 
-- `[issue_number]` - GitHub issue number to start (e.g., `123`)
+- `[issue_number]` - Issue number to start (e.g., `123`)
 - `--pipeline` - Run full workflow: start → implement → test → validate → fresh-eyes → commit/PR
 
 ---
@@ -51,9 +53,11 @@ User types `/start-issue 123` where 123 is the issue number.
 - Example: `/start-issue 123`
 
 **If interactive mode (no arguments):**
-- List available issues from repository:
-  ```bash
-  gh issue list --state open --limit 20
+- List available issues from repository using platform CLI:
+  ```
+  [PLATFORM] List open issues (limit 20)
+  GitHub: gh issue list --state open --limit 20
+  GitLab: glab issue list --per-page 20
   ```
 - Display to user:
   ```
@@ -67,10 +71,12 @@ User types `/start-issue 123` where 123 is the issue number.
   Select issue number: _____
   ```
 
-### Step 2: Load issue details via gh CLI
+### Step 2: Load issue details via platform CLI
 
-```bash
-gh issue view 123 --json title,body,labels,assignees,state
+```
+[PLATFORM] View issue details
+GitHub: gh issue view 123 --json title,body,labels,assignees,state
+GitLab: glab issue view 123
 ```
 
 **Extract:**
@@ -116,8 +122,10 @@ Please update the issue before starting implementation.
 
 ### Step 4: Assign issue to @me (if not already assigned)
 
-```bash
-gh issue edit 123 --add-assignee @me
+```
+[PLATFORM] Assign issue to self
+GitHub: gh issue edit 123 --add-assignee @me
+GitLab: glab issue update 123 --assignee @me
 ```
 
 ### Step 5: Create feature branch
@@ -147,8 +155,10 @@ git push -u origin issue-123-oauth-provider-integration
 
 ### Step 7: Update issue with start comment
 
-```bash
-gh issue comment 123 --body "🚧 Starting implementation on branch \`issue-123-oauth-provider-integration\`"
+```
+[PLATFORM] Comment on issue
+GitHub: gh issue comment 123 --body "🚧 Starting implementation on branch `issue-123-oauth-provider-integration`"
+GitLab: glab issue note 123 --message "🚧 Starting implementation on branch `issue-123-oauth-provider-integration`"
 ```
 
 ### Step 8: Display issue context and workflow to user
@@ -268,7 +278,7 @@ Show PRD summary? (yes/no) _____
 
 - See: `~/.claude/QUICK_START.md` Entry Point B for issue-first workflow
 - See: `~/.claude/AI_CODING_AGENT_GODMODE.md` Phase 1 Step 1 for starting issues
-- See: `~/.claude/guides/GITHUB_PROJECT_INTEGRATION.md` for GitHub workflow
+- See: `~/.claude/guides/PROJECT_INTEGRATION.md` for platform-specific project workflow
 
 ---
 
@@ -423,6 +433,6 @@ Starting Step 1: Reading PRD...
 - **PRD context**: Optionally loads PRD summary if referenced in issue
 - **Security flags**: Highlights security-sensitive issues with warning
 - **Entry Point B**: This command implements Entry Point B workflow from QUICK_START.md
-- **Comment on issue**: Adds GitHub comment marking start of implementation
+- **Comment on issue**: Adds comment marking start of implementation
 - **Branch protection**: Working on feature branch, not main
 - **Pipeline mode**: `--pipeline` runs full workflow automatically with mandatory checkpoints

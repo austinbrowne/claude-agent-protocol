@@ -290,8 +290,9 @@ EOF
 # Push partial save to remote (preserves learnings)
 git push origin issue-4-feature-name
 
-# Update issue with findings
-gh issue comment 4 --body "Implementation attempt failed. See recovery report in [commit hash]. Returning to Phase 0 to revise approach."
+# Update issue with findings (use platform CLI - see ~/.claude/platforms/)
+# GitHub: gh issue comment 4 --body "message"
+# GitLab: glab issue note 4 --message "message"
 
 # Return to main branch
 git checkout main
@@ -938,8 +939,9 @@ git commit -m "discovery: API rate limit prevents real-time sync (100 req/min in
 # Create recovery report
 # Document: What we learned, options, recommendation
 
-# Update issue
-gh issue comment 45 --body "Implementation abandoned due to API limitation. See recovery report. Recommend near-real-time (5-min polling) instead."
+# Update issue (use platform CLI - see ~/.claude/platforms/)
+# GitHub: gh issue comment 45 --body "message"
+# GitLab: glab issue note 45 --message "message"
 
 # Return to main
 git checkout main

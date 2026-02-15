@@ -293,6 +293,10 @@ git reset --hard origin/main
 
 **5. Update issue:**
 ```bash
+# Comment on issue, remove assignment, add label
+# Use platform-specific CLI syntax (see ~/.claude/platforms/)
+
+# GitHub:
 gh issue comment 123 --body "⚠️ Implementation abandoned due to fundamental security issues.
 
 See recovery report: docs/recovery/2025-12-01-oauth-implementation.md
@@ -302,12 +306,21 @@ Useful artifacts saved in commit abc1234.
 Next steps:
 - Revise PRD with ORM requirement
 - Create new implementation issue"
-
-# Remove assignment
 gh issue edit 123 --remove-assignee @me
-
-# Add label
 gh issue edit 123 --add-label "needs-replanning"
+
+# GitLab:
+glab issue note 123 --message "⚠️ Implementation abandoned due to fundamental security issues.
+
+See recovery report: docs/recovery/2025-12-01-oauth-implementation.md
+
+Useful artifacts saved in commit abc1234.
+
+Next steps:
+- Revise PRD with ORM requirement
+- Create new implementation issue"
+glab issue update 123 --unassign @me
+glab issue update 123 --label "needs-replanning"
 ```
 
 **After abandon:**

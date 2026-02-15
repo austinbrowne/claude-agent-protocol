@@ -1,10 +1,10 @@
 ---
-description: Generate GitHub issues from approved PRD
+description: Generate issues from approved PRD
 ---
 
 # /create-issues
 
-**Description:** Generate GitHub issues from approved PRD
+**Description:** Generate issues from approved PRD
 
 **When to use:**
 - After PRD has been reviewed and approved
@@ -14,8 +14,8 @@ description: Generate GitHub issues from approved PRD
 
 **Prerequisites:**
 - Approved PRD file exists in `docs/prds/YYYY-MM-DD-feature-name.md`
-- GitHub CLI (`gh`) installed and authenticated
-- GitHub repository initialized
+- **Platform CLI installed and authenticated** (see `~/.claude/platforms/detect.md`)
+- Git repository initialized
 
 ---
 
@@ -87,7 +87,7 @@ User types `/create-issues docs/prds/YYYY-MM-DD-feature-name.md --immediate` or 
 **For Full PRD:**
 - Parse each Phase (Phase 1, Phase 2, etc.)
 - Extract deliverables and acceptance criteria for each phase
-- Each phase → One GitHub issue
+- Each phase → One issue
 
 **For Lite PRD:**
 - Single issue with all acceptance criteria
@@ -104,23 +104,33 @@ Acceptance Criteria:
 - [ ] Tests written and passing
 - [ ] Security review completed (if SECURITY_SENSITIVE)
 
-[Use GITHUB_ISSUE_TEMPLATE.md structure]
+[Use ISSUE_TEMPLATE.md structure]
 ```
 
-### Step 4: Generate GitHub issues using gh CLI
+### Step 4: Generate issues using platform CLI
+
+**Detect platform if not already done** (see `~/.claude/platforms/detect.md`).
 
 **Load issue template:**
-- Read `~/.claude/templates/GITHUB_ISSUE_TEMPLATE.md`
+- Read `~/.claude/templates/ISSUE_TEMPLATE.md`
 
 **For each phase/task, create issue:**
 
+**GitHub:**
 ```bash
-# Create issue from template
 gh issue create \
   --title "Phase N: [Phase name]" \
   --body-file /tmp/issue-body.md \
   --label "type: feature,priority: high" \
   --project "Project Name"
+```
+
+**GitLab:**
+```bash
+glab issue create \
+  --title "Phase N: [Phase name]" \
+  --description "$(cat /tmp/issue-body.md)" \
+  --label "type::feature,priority::high"
 ```
 
 **Auto-detect labels from PRD:**
@@ -133,7 +143,7 @@ gh issue create \
   - `breaking-change` if noted in PRD
 
 **If --immediate mode:**
-- Add `--assignee @me` to gh issue create command
+- Add `--assignee @me` to issue create command
 
 **If --backlog mode:**
 - No assignee, just create issue
@@ -158,6 +168,8 @@ mv docs/prds/2025-12-01-oauth-auth.md \
 ### Step 6: Update first issue to reference renamed PRD
 
 **Update issue #123 description:**
+
+**GitHub:**
 ```bash
 gh issue edit 123 --add-body "
 
@@ -165,6 +177,13 @@ gh issue edit 123 --add-body "
 
 **Source PRD:** \`docs/prds/123-2025-12-01-oauth-auth.md\`
 "
+```
+
+**GitLab:**
+```bash
+glab issue note 123 --message "## PRD Reference
+
+**Source PRD:** \`docs/prds/123-2025-12-01-oauth-auth.md\`"
 ```
 
 ### Step 7: Commit PRD to git and push to remote
@@ -215,7 +234,7 @@ Assigned to: @me
 
 Next steps:
 - Start first issue: `/start-issue 123`
-- Or list all issues: `gh issue list`
+- Or list all issues (use platform CLI)
 ```
 
 ---
@@ -223,7 +242,7 @@ Next steps:
 ## Output
 
 **Created:**
-- N GitHub issues (one per phase/task)
+- N issues (one per phase/task)
 - Renamed PRD file with issue number prefix
 - Updated first issue with PRD reference
 - Git commit with PRD
@@ -238,14 +257,14 @@ Next steps:
 
 **Suggested next steps:**
 - If `--immediate`: "Run `/start-issue <number>` to begin implementation"
-- If `--backlog`: "Issues parked in backlog. View with `gh issue list`"
+- If `--backlog`: "Issues parked in backlog. View with platform issue list command"
 
 ---
 
 ## References
 
-- See: `~/.claude/templates/GITHUB_ISSUE_TEMPLATE.md` for issue structure
-- See: `~/.claude/guides/GITHUB_PROJECT_INTEGRATION.md` for GitHub workflow
+- See: `~/.claude/templates/ISSUE_TEMPLATE.md` for issue structure
+- See: `~/.claude/guides/PROJECT_INTEGRATION.md` for platform-specific project workflow
 - See: `~/.claude/QUICK_START.md` Entry Point A for PRD → Issue workflow
 - See: `~/.claude/AI_CODING_AGENT_GODMODE.md` Phase 0 Step 5 for issue creation
 
@@ -317,7 +336,7 @@ Pushed to: origin/main
 Issues parked in backlog (not assigned).
 
 Next steps:
-- View backlog: `gh issue list`
+- View backlog (use platform CLI to list issues)
 - Start when ready: `/start-issue 126`
 ```
 
@@ -352,11 +371,11 @@ Next steps:
   - Allows easy lookup: "What was the PRD for issue #123?" → Look for `123-*.md`
 - **Git commit is mandatory**: Ensures PRD is available to team and in future sessions
 - **Issue labels auto-detected**: Based on PRD metadata (priority, security flags, etc.)
-- **Issue template used**: All issues follow GITHUB_ISSUE_TEMPLATE.md structure
-- **Phases → Issues**: Each implementation phase becomes one GitHub issue
+- **Issue template used**: All issues follow ISSUE_TEMPLATE.md structure
+- **Phases → Issues**: Each implementation phase becomes one issue
 - **Lite PRD → Single issue**: Lite PRDs generate one issue with all criteria
 - **Assignee behavior**:
   - `--immediate`: Issues assigned to @me (ready to work)
   - `--backlog`: No assignee (park for later)
-- **Project association**: Issues can be associated with GitHub Project if configured
+- **Project association**: Issues can be associated with project board if configured (see platform guide)
 - **Related issues**: If phases have dependencies, issues linked with "Depends on" / "Blocks"

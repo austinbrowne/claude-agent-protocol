@@ -174,6 +174,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 | `AI_CODING_AGENT_GODMODE.md` | Full protocol documentation |
 | `QUICK_START.md` | Entry points and command reference |
 | `commands/*.md` | 13 modular slash commands |
+| `platforms/*.md` | Platform detection and CLI references (GitHub/GitLab) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
 | `guides/FRESH_EYES_REVIEW.md` | Multi-agent review process |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |

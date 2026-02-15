@@ -95,18 +95,13 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 - Complete PRD, create issues (optional), then execute
 
 ### Entry Point B: Pick Existing Issue from Backlog (Start at Phase 1)
-**Use when:** Picking up a pre-planned issue from GitHub Projects backlog
+**Use when:** Picking up a pre-planned issue from project backlog
 
 **Required actions:**
 
-1. **Load the issue:**
-   ```bash
-   # View issue details
-   gh issue view ISSUE_NUMBER
-
-   # Or list ready issues
-   gh project item-list PROJECT_NUM --owner OWNER
-   ```
+1. **Detect platform and load the issue:**
+   - Run platform detection if not done (see `platforms/detect.md`)
+   - Use platform CLI to view issue details (see `platforms/github.md` or `platforms/gitlab.md` for syntax)
 
 2. **Extract context from issue:**
    - **Description**: Understand what needs to be built and why
@@ -134,7 +129,7 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 ```
 User: "Let's work on issue #45"
 
-AI: [Loads issue via gh issue view 45]
+AI: [Loads issue via platform CLI]
 
 AI: "I'll implement issue #45: Implement password hashing
 
@@ -225,14 +220,14 @@ mkdir -p docs/prds
   - `docs/prds/2025-11-29-api-rate-limiting.md`
   - `docs/prds/2025-11-29-password-reset-flow.md`
 
-**After GitHub issue creation (Step 6):**
+**After issue creation (Step 6):**
 - Rename PRD to prepend issue number: `NNN-YYYY-MM-DD-feature-name.md`
 - Example: Issue #123 created → Rename to `docs/prds/123-2025-11-29-user-authentication.md`
 - Update issue to reference renamed file
 
 **Why save PRD:**
 - Reference during implementation (Phase 1)
-- Link from GitHub issues
+- Link from issues
 - Historical record of decisions
 - Context for future developers
 - Issue number creates direct link between PRD and implementation
@@ -260,18 +255,18 @@ Create ADR if:
 
 ---
 
-### Step 6: Create GitHub Issues (Optional)
+### Step 6: Create Issues (Optional)
 
 ⚠️ **DECISION POINT: Immediate Execution or Backlog Mode?**
 
-**If using GitHub Projects workflow:**
+**If using project board workflow:**
 
 1. **Generate issues from approved PRD:**
    - Use: `/create-issues docs/prds/2025-11-29-feature-name.md`
-   - See: `guides/GITHUB_PROJECT_INTEGRATION.md` for full workflow
+   - See: `guides/PROJECT_INTEGRATION.md` for platform-specific workflow
 
 2. **Create first issue and rename PRD:**
-   - Create first GitHub issue with `gh issue create`
+   - Create first issue with platform CLI (see `platforms/` for syntax)
    - Note the issue number returned (e.g., #123)
    - Rename PRD file to prepend issue number:
      ```bash
@@ -311,7 +306,7 @@ Create ADR if:
 
    **FORK B: Backlog Mode**
    - Create issues without assignee
-   - Add to GitHub Project "Ready" column
+   - Add to project board "Ready" column
    - Exit GODMODE workflow
    - Issues remain in backlog for later pickup (via @claude tag or manual selection)
 
@@ -321,10 +316,10 @@ Create ADR if:
    - `area:` - frontend | backend | infrastructure | security | testing
    - `flag:` (if applicable) - security-sensitive | performance-critical | breaking-change
 
-**If NOT using GitHub Projects:** Skip to Phase 1 directly.
+**If NOT using project boards:** Skip to Phase 1 directly.
 
-**See:** `guides/GITHUB_PROJECT_INTEGRATION.md` for:
-- GitHub CLI commands (`gh issue create`, `gh project item-list`)
+**See:** `guides/PROJECT_INTEGRATION.md` for platform-specific:
+- CLI commands for issue/project management
 - Standard label system setup
 - Project board workflow
 - Assigning issues to Claude Code
@@ -342,13 +337,9 @@ Create ADR if:
 - Restate phase goals (from PRD or from issue context)
 - Ensure git checkpoint exists (can rollback if needed)
 
-**If working from GitHub issue:**
+**If working from an issue:**
 
-1. **Assign issue to user:**
-   ```bash
-   # Assign to yourself (the prompter)
-   gh issue edit ISSUE_NUM --add-assignee @me
-   ```
+1. **Assign issue to yourself** using platform CLI (see `platforms/` for syntax)
 
 2. **Create issue-specific branch:**
    ```bash
@@ -360,10 +351,7 @@ Create ADR if:
    git push -u origin issue-ISSUE_NUM-feature-name
    ```
 
-3. **Update issue status** (if using GitHub Projects):
-   ```bash
-   gh issue comment ISSUE_NUM --body "🚧 Starting implementation on branch \`issue-ISSUE_NUM-feature-name\`"
-   ```
+3. **Update issue status** with a comment using platform CLI (see `platforms/` for syntax)
 
 **Branch naming convention:**
 - Format: `issue-NNN-brief-description`
@@ -578,7 +566,7 @@ Next: Awaiting approval for Phase [N+1]
 
 ⚠️ **CHECKPOINT: Implementation Complete**
 
-**If working from GitHub issue:**
+**If working from an issue:**
 
 1. **Commit all changes:**
    ```bash
@@ -617,7 +605,7 @@ Next: Awaiting approval for Phase [N+1]
 
    Ready to create Pull Request?
    - PR will link to issue #ISSUE_NUM (auto-closes on merge)
-   - Reviewable on GitHub before merging
+   - Reviewable on platform before merging
    - Can be merged when approved
 
    Proceed with PR creation? (yes/no)
@@ -633,59 +621,29 @@ Next: Awaiting approval for Phase [N+1]
    Target branch: _____
    ```
 
-4. **Create PR with specified base branch:**
-   ```bash
-   # Replace BASE_BRANCH with user's choice (main, experimental, etc.)
-   gh pr create \
-     --title "feat: [Brief description] (Closes #ISSUE_NUM)" \
-     --body "$(cat <<'EOF'
-   ## Summary
-   [Brief description of what was implemented]
-
-   ## Changes
-   - [Key change 1]
-   - [Key change 2]
-   - [Key change 3]
-
-   ## Testing
-   - ✅ Unit tests: [N] tests, [X]% coverage
-   - ✅ Integration tests: [Status]
-   - ✅ Edge cases: Null, empty, boundaries, errors
-   - ✅ Security review: [Completed | Not applicable]
-
-   ## Acceptance Criteria
-   - [x] [Criterion 1]
-   - [x] [Criterion 2]
-   - [x] [Criterion 3]
-
-   ## PRD Reference
-   Source: `docs/prds/ISSUE_NUM-YYYY-MM-DD-feature-name.md`
-
-   Closes #ISSUE_NUM
-
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
-   EOF
-   )" \
-     --base BASE_BRANCH
-   ```
+4. **Create PR/MR with specified base branch** using platform CLI (see `platforms/` for syntax):
+   - Title: `"feat: [Brief description] (Closes #ISSUE_NUM)"`
+   - Body should include: Summary, Changes, Testing, Acceptance Criteria, PRD Reference
+   - Include `Closes #ISSUE_NUM` for auto-close on merge
+   - Target the user's chosen base branch
 
    **Common base branches:**
-   - `--base main` - For production-ready changes
-   - `--base experimental` - For testing/development changes
-   - `--base develop` - If using GitFlow workflow
+   - `main` - For production-ready changes
+   - `experimental` - For testing/development changes
+   - `develop` - If using GitFlow workflow
 
-5. **Report PR creation:**
+5. **Report PR/MR creation:**
    ```
-   ✅ Pull Request created: https://github.com/owner/repo/pull/XXX
+   ✅ PR/MR created: [URL from CLI output]
 
    Next steps:
-   1. Review PR on GitHub
+   1. Review on your platform
    2. Approve and merge when ready
    3. Issue #ISSUE_NUM will auto-close on merge
    4. Branch issue-ISSUE_NUM-feature-name can be deleted after merge
    ```
 
-**If NOT using GitHub issues:**
+**If NOT using issues:**
 - Commit changes with standard commit message
 - Push to feature branch
 - Create PR manually or skip to Phase 2 for direct merge

@@ -26,6 +26,7 @@ mkdir -p "$CLAUDE_DIR/commands"
 mkdir -p "$CLAUDE_DIR/checklists"
 mkdir -p "$CLAUDE_DIR/guides"
 mkdir -p "$CLAUDE_DIR/templates"
+mkdir -p "$CLAUDE_DIR/platforms"
 
 # Symlink core protocol files
 echo "Installing core protocol files..."
@@ -65,6 +66,14 @@ for f in "$REPO_DIR/templates/"*.md; do
   fi
 done
 
+# Symlink platforms
+echo "Installing platform files..."
+for f in "$REPO_DIR/platforms/"*.md; do
+  if [ -f "$f" ]; then
+    ln -sf "$f" "$CLAUDE_DIR/platforms/"
+  fi
+done
+
 # Handle CLAUDE.md specially - don't overwrite existing
 echo ""
 if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
@@ -91,8 +100,8 @@ echo "Available slash commands:"
 echo "  /explore          - Codebase exploration"
 echo "  /generate-prd     - Create PRD (Lite or Full)"
 echo "  /create-adr       - Document architecture decisions"
-echo "  /create-issues    - Generate GitHub issues from PRD"
-echo "  /start-issue      - Begin work on GitHub issue"
+echo "  /create-issues    - Generate issues from PRD"
+echo "  /start-issue      - Begin work on an issue"
 echo "  /generate-tests   - Generate comprehensive tests"
 echo "  /security-review  - Run OWASP security checklist"
 echo "  /run-validation   - Tests + coverage + lint + security"

@@ -12,7 +12,7 @@
 3. Claude generates PRD
 4. Claude saves PRD to docs/prds/YYYY-MM-DD-feature-name.md
 5. You approve PRD
-6. [OPTIONAL] Create GitHub issues (/create-issues)
+6. [OPTIONAL] Create issues (/create-issues)
    a. Creates first issue #123
    b. Renames PRD: docs/prds/123-YYYY-MM-DD-feature-name.md
    c. Updates issue to reference renamed PRD
@@ -44,26 +44,28 @@
 **Start here when:** 10 issues waiting in backlog, pick one to implement
 
 ```bash
-# List ready issues
-gh project item-list PROJECT_NUM --owner OWNER
+# List ready issues (use platform CLI - see platforms/ for syntax)
+# GitHub: gh project item-list PROJECT_NUM --owner OWNER
+# GitLab: glab issue list --label "status::ready"
 
 # Pick one
 "Let's work on issue #45"
 
 # Claude:
-1. Loads issue context (including PRD reference)
-2. Checks dependencies
-3. Restates the task
-4. Assigns issue to you
-5. Creates branch: issue-45-feature-name
-6. Jumps to Phase 1 implementation
-7. References PRD if needed for broader context
-8. Commits changes to branch
-9. Asks: "Create Pull Request?"
-10. If yes: Creates PR (auto-links to issue)
-11. You review & merge PR on GitHub
-12. Issue auto-closes on merge
-13. Pick next issue
+1. Detects platform (GitHub/GitLab) from git remote
+2. Loads issue context (including PRD reference)
+3. Checks dependencies
+4. Restates the task
+5. Assigns issue to you
+6. Creates branch: issue-45-feature-name
+7. Jumps to Phase 1 implementation
+8. References PRD if needed for broader context
+9. Commits changes to branch
+10. Asks: "Create PR/MR?"
+11. If yes: Creates PR/MR (auto-links to issue)
+12. You review & merge on your platform
+13. Issue auto-closes on merge
+14. Pick next issue
 ```
 
 **Git branching workflow:**
@@ -83,21 +85,22 @@ gh project item-list PROJECT_NUM --owner OWNER
 
 ## Common Commands
 
-### List Projects
+### List Projects / Ready Issues
+
+**GitHub:**
 ```bash
 gh project list --owner OWNER
-# Output: 3  Claude Agent Protocol  open  PVT_kwHOBGF6h84BJbD_
-```
-
-### List Ready Issues
-```bash
 gh project item-list 3 --owner OWNER
-```
-
-### View Issue
-```bash
 gh issue view 45
 ```
+
+**GitLab:**
+```bash
+glab issue list --label "status::ready"
+glab issue view 45
+```
+
+See `~/.claude/platforms/` for full CLI reference.
 
 ### Check PRD Files
 ```bash
@@ -112,6 +115,8 @@ mkdir -p docs/prds
 ```
 
 ### Create Issue
+
+**GitHub:**
 ```bash
 gh issue create \
   --title "Implement feature" \
@@ -120,10 +125,18 @@ gh issue create \
   --project "Claude Agent Protocol"
 ```
 
-### Close Issue
+**GitLab:**
 ```bash
-gh issue close 45 --comment "✅ Complete! All tests passing."
+glab issue create \
+  --title "Implement feature" \
+  --description "$(cat issue.md)" \
+  --label "type::feature,priority::high"
 ```
+
+### Close Issue
+
+**GitHub:** `gh issue close 45 --comment "✅ Complete!"`
+**GitLab:** `glab issue close 45`
 
 ---
 
@@ -151,7 +164,7 @@ gh issue close 45 --comment "✅ Complete! All tests passing."
 | `/explore` | Codebase exploration | `/explore authentication patterns` |
 | `/generate-prd` | Create PRD | `/generate-prd --full "OAuth support"` |
 | `/create-adr` | Document architecture decision | `/create-adr "Use PostgreSQL"` |
-| `/create-issues` | Generate GitHub issues from PRD | `/create-issues docs/prds/2025-12-01-oauth.md --immediate` |
+| `/create-issues` | Generate issues from PRD | `/create-issues docs/prds/2025-12-01-oauth.md --immediate` |
 
 ### Phase 1: Execution (7 commands)
 
@@ -253,24 +266,27 @@ cat ~/.claude/commands/generate-prd.md
 
 ---
 
-## GitHub Projects Setup
+## Platform Setup
 
-**One-time setup:**
+**Platform is auto-detected** from your git remote URL. See `~/.claude/platforms/detect.md`.
+
+### GitHub Setup
 ```bash
-# 1. Install gh CLI (already done if you're reading this!)
 brew install gh
-
-# 2. Authenticate
 gh auth login
 gh auth refresh -s project --hostname github.com
-
-# 3. Create project (or use existing)
 gh project create --owner OWNER --title "My Dev Board"
-
-# 4. Find your project number
 gh project list --owner OWNER
-# Note the number in first column
 ```
+
+### GitLab Setup
+```bash
+brew install glab  # or see https://gitlab.com/gitlab-org/cli/-/releases
+glab auth login
+# For self-hosted: glab auth login --hostname gitlab.example.com
+```
+
+See `~/.claude/guides/PROJECT_INTEGRATION.md` for full setup guides.
 
 ---
 
@@ -301,12 +317,12 @@ Single Session:
 → Work through all issues sequentially
 ```
 
-### Workflow 3: No GitHub Projects (Direct Execution)
+### Workflow 3: No Project Board (Direct Execution)
 ```
 Single Session:
 → Entry Point A (Phase 0)
 → Generate PRD
-→ Skip GitHub issues
+→ Skip issue creation
 → Phase 1: Implement directly from PRD
 ```
 
@@ -391,12 +407,13 @@ Single Session:
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures (rollback, abandon) |
 | `guides/FRESH_EYES_REVIEW.md` | Mandatory code review process |
-| `guides/GITHUB_PROJECT_INTEGRATION.md` | Full gh CLI guide |
+| `guides/PROJECT_INTEGRATION.md` | Platform project integration (GitHub/GitLab) |
 | `guides/CONTEXT_OPTIMIZATION.md` | Token reduction |
 | `guides/MULTI_AGENT_PATTERNS.md` | Multi-agent workflows |
 | `templates/TEST_STRATEGY.md` | Testing guidance |
 | `templates/ADR_TEMPLATE.md` | Architecture decisions |
-| `templates/GITHUB_ISSUE_TEMPLATE.md` | Issue structure |
+| `templates/ISSUE_TEMPLATE.md` | Issue structure |
+| `platforms/*.md` | Platform CLI references (GitHub, GitLab) |
 | `templates/RECOVERY_REPORT.md` | Document implementation failures |
 
 ---

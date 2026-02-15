@@ -100,7 +100,7 @@ Receives the plan AND all 4 reviewer outputs.
 
 **If no path:**
 - Check conversation for most recent plan reference
-- If not found, list available plans: `ls docs/plans/*.md`
+- If not found, list available plans: `Glob docs/plans/*.md` — read YAML frontmatter and filter out `status: complete` plans. Only show active (non-complete) plans.
 - Ask user to select
 
 **Read the full plan content** for use in all reviewer prompts.

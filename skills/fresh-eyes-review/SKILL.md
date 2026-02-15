@@ -359,13 +359,41 @@ AskUserQuestion:
 
 ### Fix Flow
 
+**Why subagents:** Fix application can trigger context compaction when the main agent reads, edits, and validates each finding sequentially. Delegating to subagents keeps the main context lean — it only tracks dispatch and results.
+
 **If "Fix all findings" or "Fix CRITICAL/HIGH only":**
-1. Lead fixes each finding sequentially on the current branch
-   - Apply each fix directly (small, well-scoped edits)
-   - No parallel agents needed — review findings are small, same-branch fixes
-2. Run validation: `lint, type-check, all tests pass`
-3. Re-stage changes: `git add` the fixed files
-4. Present fix summary:
+
+1. **Group findings by file.** Collect all findings to fix and group them by target file path. Each group becomes one subagent task.
+
+2. **Dispatch one subagent per file** using the Task tool. Launch all subagents in a single message (parallel execution). Each subagent receives:
+   - The list of findings for its file (ID, severity, line, description, suggested fix)
+   - The file path to edit
+   - Instructions to read the file, apply all fixes, and report what it changed
+
+   **Subagent prompt template:**
+   ```
+   You are a code fix agent. Apply the following review findings to the specified file.
+
+   File: {file_path}
+
+   Findings to fix:
+   {findings_list — each with ID, severity, line, description, suggested fix}
+
+   Instructions:
+   1. Read the file
+   2. Apply each fix — make minimal, precise edits
+   3. Do NOT refactor surrounding code or make improvements beyond the findings
+   4. If two findings interact (e.g. overlapping lines), apply them in a way that satisfies both
+   5. Report back: for each finding ID, state FIXED or SKIPPED (with reason if skipped)
+   ```
+
+3. **Collect results.** After all subagents complete, collect their reports. Compile which findings were FIXED vs SKIPPED.
+
+4. **Run validation:** `lint, type-check, all tests pass`. The main agent runs validation once after all subagents finish — not per-file.
+
+5. **Re-stage changes:** `git add` the fixed files.
+
+6. **Present fix summary:**
 
 ```
 Fresh Eyes Review — Fixes Applied
@@ -381,7 +409,7 @@ Findings fixed: [N/N]
 Validation: ✅ All tests passing, lint clean
 ```
 
-5. Ask whether to re-run review on the fixed code:
+7. Ask whether to re-run review on the fixed code:
 
 ```
 AskUserQuestion:
@@ -397,8 +425,8 @@ AskUserQuestion:
 **If "Let me choose":**
 1. Ask: "Which findings should I fix? (list IDs, e.g. SEC-1, CQ-3, EC-2)"
 2. Wait for user response
-3. Fix selected findings sequentially
-4. Continue from step 2 above (validate, re-stage, summary)
+3. Group selected findings by file and dispatch subagents as above (steps 1-6)
+4. Continue from step 7 above (re-review gate)
 
 **If "Dismiss and proceed":**
 1. If CRITICAL/HIGH findings exist, confirm: "Are you sure? The following CRITICAL/HIGH findings will be unaddressed: [list]"

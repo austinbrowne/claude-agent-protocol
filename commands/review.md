@@ -55,6 +55,39 @@ AskUserQuestion:
 
 **CRITICAL: After EVERY skill completes, you MUST present the appropriate AskUserQuestion below. NEVER ask "what would you like to do next?" in plain text. NEVER skip this step. NEVER collapse it into the skill's output.**
 
+**Context-aware menu:** Check the fresh-eyes-review outcome before presenting options. The menu varies based on what happened inside the skill.
+
+**If fixes were already applied inside the skill (user fixed findings AND skipped or completed re-review):**
+```
+AskUserQuestion:
+  question: "Review complete — findings addressed. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Ship it (Recommended)"
+      description: "Move to /ship to commit and create PR"
+    - label: "Capture learnings"
+      description: "Move to /learn to capture knowledge from this session"
+    - label: "Re-run full review"
+      description: "Run another fresh-eyes-review pass on the current state"
+    - label: "Done"
+      description: "End workflow"
+```
+
+**If verdict was APPROVED (no findings):**
+```
+AskUserQuestion:
+  question: "Review complete — no issues found. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Ship it (Recommended)"
+      description: "Move to /ship to commit and create PR"
+    - label: "Capture learnings"
+      description: "Move to /learn to capture knowledge from this session"
+    - label: "Done"
+      description: "End workflow"
+```
+
+**If findings were dismissed or review-protocol was run:**
 ```
 AskUserQuestion:
   question: "Review complete. What would you like to do next?"
@@ -62,15 +95,17 @@ AskUserQuestion:
   options:
     - label: "Fix findings"
       description: "Address CRITICAL/HIGH findings, then re-run review"
-    - label: "Capture learnings"
-      description: "Move to /learn to capture knowledge from this session"
     - label: "Ship it"
       description: "Move to /ship to commit and create PR"
+    - label: "Capture learnings"
+      description: "Move to /learn to capture knowledge from this session"
     - label: "Done"
       description: "End workflow — address findings manually"
 ```
 
-**If "Fix findings":** Help fix issues, then re-run Fresh Eyes Review.
-**If "Capture learnings":** Load `commands/learn.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
-**If "Ship it":** Load `commands/ship.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
-**If "Done":** End workflow.
+**Routing:**
+- **"Fix findings":** Help fix issues, then re-run Fresh Eyes Review.
+- **"Capture learnings":** Load `commands/learn.md` and execute starting from Step 0. Do NOT skip any steps. Follow the command file exactly.
+- **"Ship it":** Load `commands/ship.md` and execute starting from Step 0. Do NOT skip any steps. Follow the command file exactly.
+- **"Re-run full review":** Return to Step 2 and execute fresh-eyes-review again.
+- **"Done":** End workflow.

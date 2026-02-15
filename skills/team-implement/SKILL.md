@@ -64,7 +64,7 @@ Check if the `TeamCreate` tool is available in your tool list.
 
 **If neither:**
 1. Check conversation for most recent plan or issue reference
-2. If not found, check for plans: `ls docs/plans/*.md`
+2. If not found, check for plans: `Glob docs/plans/*.md` — read YAML frontmatter and filter out `status: complete` plans. Only show active (non-complete) plans.
 3. Check for issues: `gh issue list --limit 10 --json number,title,labels --state open`
 4. Ask user to specify
 

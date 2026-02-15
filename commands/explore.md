@@ -56,5 +56,5 @@ AskUserQuestion:
 ```
 
 **If "Brainstorm approaches":** Load and follow `skills/brainstorm/SKILL.md`.
-**If "Start planning":** Load and follow `commands/plan.md`.
+**If "Start planning":** Load and follow `commands/plan.md`. Plan's Step 0 will detect no plans exist and route directly to "Generate plan".
 **If "Done":** End workflow.

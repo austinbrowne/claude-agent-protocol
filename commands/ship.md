@@ -11,6 +11,19 @@ description: "Ship — commit, PR creation, refactoring, and finalization"
 
 ---
 
+## Step 0: State Detection
+
+Before presenting the menu, detect what exists:
+
+1. **Run `git diff --stat HEAD` and `git diff --staged --stat`** — are there code changes to ship?
+2. **Check conversation context** — was a Fresh Eyes Review already completed in this session?
+
+**If no changes exist:** Inform the user: "No code changes to ship. Run `/implement` first." End workflow.
+
+**If changes exist:** Proceed to Step 1.
+
+---
+
 ## Step 1: Select Shipping Activity
 
 ```
@@ -41,19 +54,38 @@ AskUserQuestion:
 
 ## Step 3: Next Steps
 
+Build the next-step menu based on what just happened:
+
+**After "Refactor first"** (refactored code needs review before shipping):
+```
+AskUserQuestion:
+  question: "Refactoring complete. Refactored code should be reviewed before shipping."
+  header: "Next step"
+  options:
+    - label: "Review code"
+      description: "Move to /review to review the refactored code"
+    - label: "Commit and create PR"
+      description: "Ship directly (will auto-trigger Fresh Eyes review)"
+    - label: "Done"
+      description: "End workflow"
+```
+
+**After "Commit and create PR" or "Finalize project":**
 ```
 AskUserQuestion:
   question: "Shipping step complete. What would you like to do next?"
   header: "Next step"
   options:
-    - label: "Another shipping step"
-      description: "Run another shipping activity (finalize, refactor)"
     - label: "Capture learnings"
       description: "Move to /learn to capture knowledge from this session"
+    - label: "Another shipping step"
+      description: "Run another shipping activity (finalize, refactor)"
     - label: "Done"
       description: "End workflow"
 ```
 
-**If "Another shipping step":** Return to Step 1.
+**If "Review code":** Load and follow `commands/review.md`.
+**If "Commit and create PR":** Load and follow `skills/commit-and-pr/SKILL.md`.
+**If "Another shipping step":** Return to Step 0 (re-detect state, then Step 1).
 **If "Capture learnings":** Load and follow `commands/learn.md`.
 **If "Done":** End workflow.

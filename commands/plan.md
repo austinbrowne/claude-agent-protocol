@@ -11,15 +11,39 @@ description: "Planning & requirements — plan generation, deepening, review, is
 
 ---
 
+## Step 0: State Detection
+
+Before presenting the menu, detect what exists:
+
+1. **Glob `docs/plans/*.md`** — do any plan files exist?
+2. If a plan was just generated in this conversation, note its path as the "active plan"
+
+Use these signals to build the menu in Step 1. **Only show options whose preconditions are met.**
+
+---
+
 ## Step 1: Select Planning Activity
 
+**If NO plans exist** (first time, or plans directory empty):
+```
+AskUserQuestion:
+  question: "No existing plans found. Let's create one."
+  header: "Plan"
+  options:
+    - label: "Generate plan"
+      description: "Create a plan (Minimal, Standard, or Comprehensive) with integrated research"
+    - label: "Create ADR"
+      description: "Document an architecture decision record"
+```
+
+**If plans exist:**
 ```
 AskUserQuestion:
   question: "Which planning step would you like to run?"
   header: "Plan"
   options:
     - label: "Generate plan"
-      description: "Create a plan (Minimal, Standard, or Comprehensive) with integrated research"
+      description: "Create a new plan (Minimal, Standard, or Comprehensive) with integrated research"
     - label: "Deepen existing plan"
       description: "Enrich a plan with parallel research and review agents"
     - label: "Review plan"

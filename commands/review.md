@@ -11,6 +11,19 @@ description: "Code review — fresh eyes multi-agent review and protocol complia
 
 ---
 
+## Step 0: State Detection
+
+Before presenting the menu, detect what exists:
+
+1. **Run `git diff --stat HEAD` and `git diff --staged --stat`** — are there code changes to review?
+2. **Run `git log --oneline -5`** — are there recent commits that could be reviewed?
+
+**If no changes AND no recent commits:** Inform the user: "No code changes detected. Run `/implement` first, or specify a commit range to review." End workflow.
+
+**If changes exist:** Proceed to Step 1.
+
+---
+
 ## Step 1: Select Review Scope
 
 ```
@@ -19,7 +32,7 @@ AskUserQuestion:
   header: "Review"
   options:
     - label: "Fresh eyes review (full)"
-      description: "13-agent smart selection review with adversarial validation"
+      description: "14-agent smart selection review with adversarial validation"
     - label: "Fresh eyes review (lite)"
       description: "Quick 3-agent review (Security + Edge Case + Supervisor)"
     - label: "Review protocol compliance"

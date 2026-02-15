@@ -13,6 +13,19 @@ Fetch open GitHub issues, categorize by readiness, and run parallel subagents to
 
 ---
 
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has mandatory AskUserQuestion gates. You MUST hit them. NEVER skip them. NEVER replace them with plain text questions.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Handling Sparse Issues** | Step 3 | Plan all / Custom / Skip / Cancel | Subagents launched without consent — UNACCEPTABLE |
+| **Plan Review** | Step 4 | Approve all / Revise some / Cancel | Plans accepted without review — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
+
+---
+
 ## When to Apply
 
 - Multiple open GitHub issues need triage before implementation

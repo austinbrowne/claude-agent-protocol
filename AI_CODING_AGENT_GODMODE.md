@@ -1,10 +1,10 @@
 # AI Coding Agent Standard Operating Protocol (SOP)
 
-**Version:** 4.2
+**Version:** 5.3.0-experimental
 **Last Updated:** February 2026
 **Purpose:** Safe, effective AI-assisted software development
 
-**NEW in v4.2:** 6 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`), 22 reusable skill packages, flat `godmode:` namespace, and natural workflow chaining via `AskUserQuestion`.
+**Current:** 7 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`, `/loop`), 26 reusable skill packages, flat `godmode:` namespace, natural workflow chaining via `AskUserQuestion`, Agent Teams integration, per-project review configuration, and autonomous development loops.
 
 ---
 
@@ -12,20 +12,21 @@
 
 This is the **comprehensive reference document** for the GODMODE protocol.
 
-**For guided workflows, use the 6 workflow commands:**
+**For guided workflows, use the 7 workflow commands:**
 - `/explore` — Reconnaissance & ideation: codebase exploration + brainstorming
 - `/plan` — Planning & requirements: plan generation, deepen, review, issues, ADR
-- `/implement` — Implementation: start issue, tests, validation, security, recovery
+- `/implement` — Implementation: start issue, swarm plan, triage, tests, validation, security, recovery
 - `/review` — Code review: fresh eyes (full/lite), protocol compliance
 - `/learn` — Knowledge capture: save solved problems as reusable docs
 - `/ship` — Ship: commit/PR, finalize, refactor
+- `/loop` — Autonomous loop: iterates plan tasks with context rotation
 
 **For quick access:**
-- Critical safety rules → `~/.claude/CLAUDE.md` (auto-loaded with highest priority)
-- Workflow commands → `~/.claude/commands/*.md` (6 workflows)
-- Reusable skills → `~/.claude/skills/*/SKILL.md` (22 skill packages)
-- Agent definitions → `~/.claude/agents/review/*.md` (17 review agents) + `~/.claude/agents/research/*.md` (4 research agents)
-- Quick reference → `~/.claude/QUICK_START.md`
+- Critical safety rules → `CLAUDE.md` (auto-loaded with highest priority)
+- Workflow commands → `commands/*.md` (7 workflows)
+- Reusable skills → `skills/*/SKILL.md` (26 skill packages)
+- Agent definitions → `agents/review/*.md` (17 review agents) + `agents/research/*.md` (4 research agents)
+- Quick reference → `QUICK_START.md`
 
 **Use this document when:**
 - Learning the full protocol for the first time
@@ -929,8 +930,8 @@ After completing a feature or fixing a tricky bug:
 - `templates/ADR_TEMPLATE.md` - Architecture decisions
 - `agents/review/*.md` - 17 review agent definitions
 - `agents/research/*.md` - 4 research agent definitions
-- `skills/*/SKILL.md` - 22 reusable skill packages
-- `commands/*.md` - 6 workflow commands
+- `skills/*/SKILL.md` - 26 reusable skill packages
+- `commands/*.md` - 7 workflow commands
 - `guides/CONTEXT_OPTIMIZATION.md` - Advanced context techniques
 - `guides/MULTI_AGENT_PATTERNS.md` - Complex coordination
 - `guides/FRESH_EYES_REVIEW.md` - Smart selection review process
@@ -939,4 +940,4 @@ After completing a feature or fixing a tricky bug:
 
 ---
 
-*Last Updated: February 2026 | Version: 4.2 | Next Review: Quarterly*
+*Last Updated: February 2026 | Version: 5.3.0-experimental | Next Review: Quarterly*

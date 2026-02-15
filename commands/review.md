@@ -51,7 +51,9 @@ AskUserQuestion:
 
 ---
 
-## Step 3: Next Steps
+## Step 3: Next Steps — MANDATORY GATE
+
+**CRITICAL: After EVERY skill completes, you MUST present the appropriate AskUserQuestion below. NEVER ask "what would you like to do next?" in plain text. NEVER skip this step. NEVER collapse it into the skill's output.**
 
 ```
 AskUserQuestion:

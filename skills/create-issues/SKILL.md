@@ -48,6 +48,8 @@ gh issue create \
 
 ### 3. Rename Plan with First Issue Number
 
+**Before renaming:** Read the plan file's YAML frontmatter `status:` field. Only proceed with the rename if the current status is `approved` (forward transitions only — do not rename `in_progress` or `complete` plans). If the frontmatter exists but has no `status:` field, proceed with the rename.
+
 **Current:** `docs/plans/YYYY-MM-DD-type-feature-name-plan.md`
 **New:** `docs/plans/NNN-YYYY-MM-DD-type-feature-name-plan.md`
 

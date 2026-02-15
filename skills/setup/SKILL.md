@@ -2,7 +2,9 @@
 name: setup
 version: "1.0"
 description: Per-project review configuration — auto-detects stack, selects review agents, writes godmode.local.md
-referenced_by: []
+referenced_by:
+  - skills/fresh-eyes-review/SKILL.md
+  - skills/review-plan/SKILL.md
 ---
 
 # Project Setup Skill

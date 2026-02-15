@@ -244,7 +244,7 @@ AskUserQuestion:
 1. Ask: "Which findings would you like me to address? (list numbers, or 'all')"
 2. Wait for user response
 3. Update the plan with ONLY the specified changes
-4. Update the plan's YAML frontmatter `status:` field to `approved`. Only update if current status is `ready_for_review` (forward transitions only — do not regress `in_progress` or `complete`). If the frontmatter exists but has no `status:` field, add `status: approved`.
+4. Update the plan's YAML frontmatter `status:` field to `approved`. Only update if current status is `ready_for_review` or `DEEPENED_READY_FOR_REVIEW` (forward transitions only — do not regress `in_progress` or `complete`). If the frontmatter exists but has no `status:` field, add `status: approved`.
 5. Present updated plan for acceptance
 6. Offer to re-run review on updated plan
 
@@ -264,7 +264,7 @@ AskUserQuestion:
 **If "Dismiss findings and proceed":**
 1. Confirm: "Are you sure? The following CRITICAL/HIGH findings will be unaddressed: [list]"
 2. If confirmed, mark plan as `APPROVED_WITH_EXCEPTIONS` and note dismissed findings
-3. Update the plan's YAML frontmatter `status:` field to `approved` (even with exceptions, the plan is approved for implementation). Only update if current status is `ready_for_review` (forward transitions only). If the frontmatter exists but has no `status:` field, add `status: approved`.
+3. Update the plan's YAML frontmatter `status:` field to `approved` (even with exceptions, the plan is approved for implementation). Only update if current status is `ready_for_review` or `DEEPENED_READY_FOR_REVIEW` (forward transitions only). If the frontmatter exists but has no `status:` field, add `status: approved`.
 4. Proceed to next workflow step
 
 **If "Discuss findings":**

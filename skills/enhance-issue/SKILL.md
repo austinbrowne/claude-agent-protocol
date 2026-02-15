@@ -2,11 +2,27 @@
 name: enhance-issue
 version: "1.0"
 description: Refine needs_refinement issues with exploration, planning, and enriched details — then mark ready_for_dev
+referenced_by:
+  - skills/triage-issues/SKILL.md
+  - skills/start-issue/SKILL.md
 ---
 
 # Enhance Issue Skill
 
 Takes a sparse `needs_refinement` issue, explores the codebase, runs through planning, enriches the issue with full details, and marks it `ready_for_dev`.
+
+---
+
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has mandatory AskUserQuestion gates. You MUST hit them. NEVER skip them. NEVER replace them with plain text questions.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Issue Selection** | Step 1 | Dynamically generated from issue list | Wrong issue enhanced — UNACCEPTABLE |
+| **Next Steps** | Step 7 | Enhance another / Start implementing / Done | User loses control of workflow — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
 
 ---
 
@@ -71,7 +87,7 @@ Present findings to the user before proceeding.
 
 ### 4. Run Planning Workflow
 
-Chain into `/workflows:plan` with the issue as context:
+Chain into `/plan` with the issue as context:
 
 - **For bugs:** Generate a Minimal plan covering the fix approach, affected areas, and testing strategy
 - **For features:** Generate a Minimal, Standard, or Comprehensive plan depending on scope
@@ -119,7 +135,7 @@ AskUserQuestion:
     - label: "Enhance another issue"
       description: "Pick another needs_refinement issue to refine"
     - label: "Start implementing this issue"
-      description: "Move to /workflows:implement with issue #NNN"
+      description: "Move to /implement with issue #NNN"
     - label: "Done"
       description: "End workflow"
 ```
@@ -135,7 +151,7 @@ AskUserQuestion:
 - **Preserve user's original description.** Don't overwrite what they wrote — enrich around it.
 - **Root cause is a hypothesis.** Mark it clearly as such until implementation confirms it.
 - **Planning depth scales with issue complexity.** Small bugs get Minimal plan. Large features may get Comprehensive plan + deepen.
-- **The user controls planning depth** via `/workflows:plan` sub-step selection. Don't force full planning on a trivial bug.
+- **The user controls planning depth** via `/plan` sub-step selection. Don't force full planning on a trivial bug.
 
 ---
 
@@ -146,4 +162,4 @@ AskUserQuestion:
 - **Planning**: `commands/plan.md` (full workflow with sub-step selection)
 - **Templates**: `templates/BUG_ISSUE_TEMPLATE.md`, `templates/GITHUB_ISSUE_TEMPLATE.md`
 - **Output**: Enriched GitHub issue with `ready_for_dev` label
-- **Next step**: `/workflows:implement` or another `/enhance-issue`
+- **Next step**: `/implement` or another `/enhance-issue`

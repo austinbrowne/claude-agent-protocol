@@ -11,6 +11,17 @@ description: "Reconnaissance & ideation — explore the codebase and brainstorm 
 
 ---
 
+## Step 0: State Detection
+
+Before presenting the menu, detect what exists:
+
+1. **Check if `CODEBASE_MAP.md` exists** — has the codebase already been explored?
+2. **Glob `docs/brainstorms/*.md`** — do any brainstorm docs exist?
+
+Use these signals to inform Step 1. If a codebase map already exists, note it in the exploration step (update rather than create from scratch).
+
+---
+
 ## Step 1: Determine Exploration Scope
 
 ```
@@ -40,7 +51,9 @@ Execute the multi-agent exploration process:
 
 ---
 
-## Step 3: Next Steps
+## Step 3: Next Steps — MANDATORY GATE
+
+**CRITICAL: After EVERY skill completes, you MUST present the appropriate AskUserQuestion below. NEVER ask "what would you like to do next?" in plain text. NEVER skip this step. NEVER collapse it into the skill's output.**
 
 ```
 AskUserQuestion:

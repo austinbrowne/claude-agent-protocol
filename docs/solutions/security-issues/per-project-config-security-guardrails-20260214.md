@@ -13,7 +13,7 @@ resolution_type: workflow_improvement
 severity: high
 tags: [config, prompt-injection, gitignore, per-project, godmode-local, security, agent-prompts, validation]
 related_solutions:
-  - docs/solutions/workflow-issues/askuserquestion-gate-enforcement-20260205.md
+  - docs/solutions/askuserquestion-gate-enforcement.md
 ---
 
 # Troubleshooting: Per-Project Config Files Need Layered Security Guardrails

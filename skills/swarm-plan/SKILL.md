@@ -13,6 +13,18 @@ Analyze a plan's implementation tasks for parallelizability, form an implementat
 
 ---
 
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has a mandatory AskUserQuestion gate. You MUST hit it. NEVER skip it. NEVER replace it with a plain text question.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Swarm Mode** | Step 3 | Team mode / Standard sequential / Adjust groupings | Team spawned without consent — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
+
+---
+
 ## When to Apply
 
 - After a plan is approved and ready for implementation

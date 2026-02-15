@@ -11,6 +11,19 @@ File a single GitHub issue quickly. Accepts a description as an argument, asks f
 
 ---
 
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has mandatory AskUserQuestion gates. You MUST hit them. NEVER skip them. NEVER replace them with plain text questions.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Issue Type** | Step 2 | Bug / Feature | Wrong template used — UNACCEPTABLE |
+| **Confirm Before Creating** | Step 4 | Looks good / Add more details | Issue created without consent — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
+
+---
+
 ## When to Apply
 
 - Filing a single bug or feature request
@@ -98,7 +111,7 @@ Fill only: Title, Description. Leave Acceptance Criteria, Technical Requirements
 
 Print the created issue number and URL.
 
-Suggest next steps: `/enhance-issue #NNN` to add details, or `/workflows:implement` to start working on it.
+Suggest next steps: `/enhance-issue #NNN` to add details, or `/implement` to start working on it.
 
 ---
 
@@ -106,4 +119,4 @@ Suggest next steps: `/enhance-issue #NNN` to add details, or `/workflows:impleme
 
 - **Templates**: `templates/BUG_ISSUE_TEMPLATE.md`, `templates/GITHUB_ISSUE_TEMPLATE.md`
 - **Output**: Single GitHub issue with `needs_refinement` label
-- **Next step**: `/enhance-issue` to refine, or `/workflows:implement` to start working
+- **Next step**: `/enhance-issue` to refine, or `/implement` to start working

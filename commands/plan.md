@@ -16,7 +16,8 @@ description: "Planning & requirements — plan generation, deepening, review, is
 Before presenting the menu, detect what exists:
 
 1. **Glob `docs/plans/*.md`** — do any plan files exist?
-2. If a plan was just generated in this conversation, note its path as the "active plan"
+2. **Filter by status** — read the YAML frontmatter of each plan file. Only plans with `status:` other than `complete` count as active. Completed plans are historical records, not actionable. If ALL plans are `complete`, treat this as "no active plans."
+3. If a plan was just generated in this conversation, note its path as the "active plan"
 
 Use these signals to build the menu in Step 1. **Only show options whose preconditions are met.**
 
@@ -24,10 +25,10 @@ Use these signals to build the menu in Step 1. **Only show options whose precond
 
 ## Step 1: Select Planning Activity
 
-**If NO plans exist** (first time, or plans directory empty):
+**If NO active plans exist** (first time, all complete, or plans directory empty):
 ```
 AskUserQuestion:
-  question: "No existing plans found. Let's create one."
+  question: "No active plans found. Let's create one."
   header: "Plan"
   options:
     - label: "Generate plan"
@@ -36,7 +37,7 @@ AskUserQuestion:
       description: "Document an architecture decision record"
 ```
 
-**If plans exist:**
+**If active plans exist** (any plan with status other than `complete`):
 ```
 AskUserQuestion:
   question: "Which planning step would you like to run?"

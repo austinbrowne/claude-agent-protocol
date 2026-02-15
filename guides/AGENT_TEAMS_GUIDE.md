@@ -52,7 +52,7 @@ This is prompt-level detection. No config files, no environment variable checks.
 | `fresh-eyes-review` | Team | Specialists can cross-validate, Lead can interrogate |
 | `review-plan` | Team | Reviewers can debate trade-offs, Lead challenges live |
 | `deepen-plan` | Team | Research findings inform review focus in real-time |
-| `swarm-plan` | Team | Teammates coordinate on shared implementation |
+| `team-implement` | Team | Analyst broadcasts findings to implementers in real-time; Lead coordinates file ownership |
 | `triage-issues` | Subagent | Fire-and-forget planning per issue, no inter-agent discussion needed |
 | `generate-plan` | Subagent | Fire-and-forget research, no inter-agent discussion needed |
 | `explore` | Subagent | Fire-and-forget research |
@@ -157,26 +157,30 @@ Instructions:
 
 ---
 
-### Pattern C: Implementation Swarm
+### Pattern C: Plan Implementation Swarm
 
-**Used by:** `swarm-plan`
+**Used by:** `team-implement` (plan input with high swarmability)
 
 **Structure:**
 ```
-Lead (you) = Coordinator + Monitor
-Teammates = Implementers (one per independent task group)
+Lead (you) = Coordinator + Monitor (see agents/team/lead.md)
+Teammates = Implementers (one per independent task group, see agents/team/implementer.md)
+Optional: Analyst (for mixed-independence plans, see agents/team/analyst.md)
 ```
 
+**When to use:** Plan has 3+ implementation tasks with high independence (70%+ swarmability score). Each implementer owns different files and can work in parallel.
+
 **Lead responsibilities:**
-- Analyze plan tasks for independence (swarmability assessment)
+- Run swarmability assessment on plan tasks
 - Present assessment to user for approval
-- Spawn implementation teammates, each assigned a task group
+- Spawn Implementer teammates, each assigned a task group with exclusive file ownership
+- Optionally spawn Analyst for mixed-independence plans (40-69% swarmability)
 - Monitor progress via shared task list
-- Handle blockers — reassign work if a teammate gets stuck
+- Handle blockers and file conflicts
 - Track completion, present summary when all done
 
 **Implementer teammate responsibilities:**
-- Execute assigned task following the FULL protocol pipeline:
+- Execute assigned task following the FULL protocol pipeline (see `agents/team/implementer.md`):
   1. Load task context + plan reference
   2. Search `docs/solutions/` for relevant past learnings
   3. Create living plan for their task (`.todos/{task-id}-plan.md`)
@@ -184,54 +188,77 @@ Teammates = Implementers (one per independent task group)
   5. Generate tests
   6. Run validation (lint, type-check, tests pass)
 - Message Lead about blockers
-- Message other teammates about minor file conflicts
+- Coordinate with other Implementers about file ownership conflicts
+- Adjust approach based on Analyst broadcasts (if Analyst is present)
 - Mark task complete when done
 
 **CRITICAL:** Teammates must follow the protocol. They are not shortcutting — each one executes the same quality pipeline a single agent would. The value is parallelism, not cutting corners.
 
-**Spawn prompt template for implementer teammates:**
+**Spawn prompts:** See `skills/team-implement/SKILL.md` Step 4 for full spawn prompt templates referencing the role definitions.
+
+---
+
+### Pattern D: Issue Implementation Team
+
+**Used by:** `team-implement` (issue input, MEDIUM/LARGE complexity)
+
+**Structure:**
 ```
-You are implementing a task from an approved plan. Follow the FULL protocol pipeline.
-
-Your assigned task:
-[task description from plan]
-
-Affected files:
-[file list]
-
-Plan reference:
-[plan file path]
-
-Protocol pipeline (follow ALL steps):
-1. Search docs/solutions/ for past learnings relevant to this task
-2. Create a living plan at .todos/[task-id]-plan.md
-3. Implement the code changes
-4. Generate tests (happy path + edge cases + error conditions)
-5. Run validation: lint, type-check, all tests pass
-
-Rules:
-- Do NOT modify files outside your assigned list unless absolutely necessary
-- If you need to modify a shared file, message the Lead first
-- If you discover a blocker, message the Lead immediately
-- When done, mark your task as complete and message the Lead with a summary
-
-Project context:
-- Read CLAUDE.md for project conventions
-- Check docs/solutions/ for past learnings before writing code
-- Follow existing patterns in the codebase
+Lead (you) = Coordinator + Monitor (see agents/team/lead.md)
+Analyst = Real-time research support (see agents/team/analyst.md)
+Implementer(s) = Code + tests + validation (see agents/team/implementer.md)
 ```
+
+**When to use:** Single complex issue (MEDIUM/LARGE: 3+ files, multiple acceptance criteria, some unknowns). The Analyst researches the codebase and past learnings in parallel while the Implementer codes — mid-task information exchange that subagents cannot provide.
+
+**Lead responsibilities:**
+- Assess issue complexity
+- Spawn Analyst + Implementer(s) with clear file ownership
+- Monitor progress and relay critical Analyst findings
+- Resolve conflicts between Analyst recommendations and Implementer direction
+
+**Analyst responsibilities (see `agents/team/analyst.md`):**
+- Search `docs/solutions/` for past learnings relevant to the issue
+- Explore codebase areas being modified — identify patterns, utilities, conventions
+- Broadcast findings to Implementers as discovered (not after completion)
+- Respond to on-demand research requests from Implementers
+- Cross-reference implementation direction against issue requirements
+
+**Implementer responsibilities (see `agents/team/implementer.md`):**
+- Implement the issue within assigned file boundaries
+- Follow the full protocol pipeline (learnings, living plan, code, tests, validation)
+- Adjust approach based on Analyst broadcasts
+- Message Lead about blockers
+
+**Key insight:** The Analyst provides the communication advantage that justifies teams over subagents. A fire-and-forget research subagent returns results after the implementer has already committed to an approach. An Analyst teammate broadcasts "there's an existing utility for this" while the implementer is still coding.
+
+**Spawn prompts:** See `skills/team-implement/SKILL.md` Step 4 for full spawn prompt templates referencing the role definitions.
 
 ---
 
 ### Note: Issue Triage (not an Agent Teams pattern)
 
-`triage-issues` uses subagents only — no Agent Teams required. Each planning subagent works on a separate issue independently (no inter-agent communication needed). After triage, each issue is implemented separately via `/implement` → `start-issue` or `swarm-plan` per issue. See `skills/triage-issues/SKILL.md` for details.
+`triage-issues` uses subagents only — no Agent Teams required. Each planning subagent works on a separate issue independently (no inter-agent communication needed). After triage, each issue is implemented separately via `/implement` → `start-issue` or `team-implement` per issue. See `skills/triage-issues/SKILL.md` for details.
+
+---
+
+## Team Role Definitions
+
+Implementation teams use formally defined agent roles in `agents/team/`. Each role file follows the same pattern as review and research agents (frontmatter, philosophy, process, output format, examples).
+
+| Role | File | Purpose |
+|------|------|---------|
+| **Lead** | `agents/team/lead.md` | Coordination, monitoring, conflict resolution, task assignment, result synthesis |
+| **Implementer** | `agents/team/implementer.md` | Code + tests + validation within file ownership boundaries |
+| **Analyst** | `agents/team/analyst.md` | Parallel research support: codebase patterns, past learnings, real-time broadcasts |
+
+Skills compose these roles into spawn prompts. The role files define the agent's philosophy, responsibilities, communication protocol, and anti-patterns. This ensures consistent behavior across different skills that use teams.
 
 ---
 
 ## Swarmability Assessment Algorithm
 
-Used by `swarm-plan` to determine whether a plan's implementation tasks can be parallelized.
+Used by `team-implement` to determine whether a plan's implementation tasks can be parallelized.
 
 ### Step 1: Extract Tasks
 
@@ -309,7 +336,7 @@ This keeps the branch model simple: one branch, one combined diff for review at 
 
 ### Per-Issue Implementation
 
-When implementing individual issues (after triage), each issue gets its own branch via the standard `start-issue` or `swarm-plan` flow: `feat/issue-{number}-{slug}`. Each issue is implemented and reviewed independently — one branch, one PR per issue.
+When implementing individual issues (after triage), each issue gets its own branch via the standard `start-issue` or `team-implement` flow: `feat/issue-{number}-{slug}`. Each issue is implemented and reviewed independently — one branch, one PR per issue.
 
 ---
 
@@ -404,4 +431,4 @@ From the official Agent Teams documentation:
 ---
 
 **Last Updated:** February 2026
-**Referenced by:** `skills/fresh-eyes-review/SKILL.md`, `skills/review-plan/SKILL.md`, `skills/deepen-plan/SKILL.md`, `skills/swarm-plan/SKILL.md`, `skills/triage-issues/SKILL.md`
+**Referenced by:** `skills/fresh-eyes-review/SKILL.md`, `skills/review-plan/SKILL.md`, `skills/deepen-plan/SKILL.md`, `skills/team-implement/SKILL.md`, `skills/triage-issues/SKILL.md`

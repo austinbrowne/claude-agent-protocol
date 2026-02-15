@@ -1,39 +1,63 @@
 ---
 name: workflows:implement
-description: "Implementation — start issues, triage issues, swarm plan, generate tests, run validation, security review, and recovery"
+description: "Implementation — start issues, team implementation, triage issues, generate tests, run validation, security review, and recovery"
 ---
 
 # /implement — Implementation
 
-**Workflow command.** Hub for all implementation activities: starting work on issues, triaging issue backlogs, parallel swarm execution, generating tests, running validation, security review, and recovery from failures.
+**Workflow command.** Hub for all implementation activities: starting work on issues, team-based parallel implementation, triaging issue backlogs, generating tests, running validation, security review, and recovery from failures.
 
 > **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
 
 ---
 
-## Step 0: State Detection
+## Step 0: State Detection and Assessment
 
-Before presenting the menu, detect what exists:
+Before presenting the menu, detect what exists and assess the best approach:
 
-1. **Glob `docs/plans/*.md`** — do any plan files exist? Note the most recent one.
-2. **Run `gh issue list --limit 5 --json number,title,state 2>/dev/null`** — are there open issues?
+### 0a. Gather Signals
+
+1. **Glob `docs/plans/*.md`** — do any plan files exist? Note the most recent one with status `approved` or `ready_for_review`.
+2. **Run `gh issue list --limit 5 --json number,title,state,labels,body 2>/dev/null`** — are there open issues? Note complexity signals (body length, labels).
 3. **Run `git diff --stat HEAD`** — are there uncommitted code changes?
 4. **Check if `TeamCreate` tool is available** — is Agent Teams enabled?
 
-Use these signals to build the menu in Step 1. **Only show options whose preconditions are met.**
+### 0b. Assess Recommendation
 
-**Direct entry supported:** `/implement start-issue 123` or `/implement swarm-plan` skips state detection and goes directly to the selected skill.
+Based on the signals, determine the recommended implementation path:
+
+**If an approved plan exists AND TeamCreate is available:**
+- Quick-scan the plan's implementation steps for task count and file overlap
+- If 3+ independent tasks → recommend "Team implementation"
+- If <3 tasks or highly coupled → recommend "Start issue"
+
+**If open issues exist AND TeamCreate is available:**
+- Check the most recent/relevant issue's complexity signals:
+  - Body length, acceptance criteria count, estimated files, labels
+  - SMALL (1-2 files, clear criteria) → recommend "Start issue"
+  - MEDIUM/LARGE (3+ files, multiple criteria) → recommend "Team implementation"
+
+**If TeamCreate is NOT available:**
+- Never show "Team implementation" option
+- Recommend "Start issue" if issues exist
+
+**If no plan and no issues:**
+- Recommend "Triage issues"
+
+Store the recommendation for Step 1.
+
+**Direct entry supported:** `/implement start-issue 123` or `/implement team-implement` skips state detection and goes directly to the selected skill.
 
 ---
 
 ## Step 1: Select Implementation Activity
 
-Build the AskUserQuestion dynamically based on Step 0 findings. Include only options whose preconditions are satisfied:
+Build the AskUserQuestion dynamically based on Step 0 findings. **Place the recommended option first with "(Recommended)" suffix.** Include only options whose preconditions are satisfied:
 
 | Option | Precondition | Always show? |
 |--------|-------------|--------------|
 | Start issue | GitHub issues exist | Only if issues found |
-| Swarm plan | Plan exists AND TeamCreate available | Only if both met |
+| Team implementation | (Plan exists OR issues exist) AND TeamCreate available | Only if preconditions met |
 | Triage issues | Always available | Yes |
 | Generate tests | Code changes exist | Only if changes found |
 
@@ -42,16 +66,17 @@ AskUserQuestion:
   question: "Which implementation step would you like to run?"
   header: "Implement"
   options:
+    # Place the recommended option FIRST with "(Recommended)" in the label.
     # Include only options whose preconditions are met from Step 0.
     # If Start issue precondition not met, omit it.
-    # If Swarm plan precondition not met, omit it.
+    # If Team implementation precondition not met, omit it.
     # If Generate tests precondition not met, omit it.
     # Always include Triage issues.
     # Descriptions below are for reference:
-    - label: "Start issue"
-      description: "Begin work on a GitHub issue with living plan and past learnings"
-    - label: "Swarm plan"
-      description: "Parallel implementation of plan tasks using Agent Teams"
+    - label: "Start issue (Recommended)"  # or without (Recommended) if not the top pick
+      description: "Begin work on a GitHub issue — single-agent with living plan and past learnings"
+    - label: "Team implementation"
+      description: "Parallel team-based implementation with defined roles (Lead, Analyst, Implementers)"
     - label: "Triage issues"
       description: "Batch-triage and plan open GitHub issues — get them ready_for_dev"
     - label: "Generate tests"
@@ -71,7 +96,7 @@ AskUserQuestion:
 **Based on selection:**
 
 - **"Start issue"** → Load and follow `skills/start-issue/SKILL.md`
-- **"Swarm plan"** → Load and follow `skills/swarm-plan/SKILL.md`
+- **"Team implementation"** → Load and follow `skills/team-implement/SKILL.md`
 - **"Triage issues"** → Load and follow `skills/triage-issues/SKILL.md`
 - **"Generate tests"** → Load and follow `skills/generate-tests/SKILL.md`
 - **"Run validation"** → Load and follow `skills/run-validation/SKILL.md`

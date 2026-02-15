@@ -106,7 +106,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly in
 
 **Issue skills:** `file-issues`, `file-issue`, `enhance-issue`
 
-**Execution skills:** `start-issue`, `swarm-plan`, `triage-issues`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor`
+**Execution skills:** `start-issue`, `team-implement`, `triage-issues`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor`
 
 **Review skills:** `fresh-eyes-review`, `review-protocol`, `document-review`
 
@@ -131,6 +131,7 @@ For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
 | `skills/` | 26 reusable skill packages (also user-invocable) |
 | `agents/review/` | 17 review agent definitions |
 | `agents/research/` | 4 research agent definitions |
+| `agents/team/` | 3 team role definitions (Lead, Implementer, Analyst) |
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
 | `docs/brainstorms/` | Brainstorm session records |
 | `.todos/` | File-based todo tracking (committed to git) |
@@ -209,6 +210,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 | `skills/*/SKILL.md` | 26 reusable skill packages |
 | `agents/review/*.md` | 17 review agent definitions |
 | `agents/research/*.md` | 4 research agent definitions |
+| `agents/team/*.md` | 3 team role definitions (Lead, Implementer, Analyst) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
 | `guides/AGENT_TEAMS_GUIDE.md` | Agent Teams formation patterns and best practices |

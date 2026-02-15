@@ -263,7 +263,7 @@ Not eligible (unchanged):
 
 Next step: Run /implement for each issue.
   - For simple issues: /implement → start-issue
-  - For complex issues: /implement → swarm-plan (decomposes into parallel tasks)
+  - For complex issues: /implement → team-implement (decomposes into parallel tasks)
   - Each issue in its own Claude Code tab for parallel execution
 ```
 
@@ -271,11 +271,11 @@ Next step: Run /implement for each issue.
 
 ## Notes
 
-- **Triage only — no implementation.** This skill gets issues ready for dev. Implementation happens separately via `/implement` → `start-issue` or `swarm-plan`, one issue at a time.
+- **Triage only — no implementation.** This skill gets issues ready for dev. Implementation happens separately via `/implement` → `start-issue` or `team-implement`, one issue at a time.
 - **Subagents only — no Agent Teams required.** Each planner works on a separate issue independently. No inter-agent communication needed. Simple, cheap, effective.
 - **Planning work persists.** Even if the user cancels, GitHub issues are already updated with enriched content and `ready_for_dev` labels. That work isn't lost.
 - **Batch size:** Recommend max ~5 subagents at a time. For larger backlogs, run multiple batches.
-- **Implementation strategy:** After triage, the user runs `/implement` for each issue — either sequentially or in parallel Claude Code tabs. Complex issues benefit from `swarm-plan` which decomposes tasks and parallelizes with Agent Teams. Simple issues go through `start-issue`.
+- **Implementation strategy:** After triage, the user runs `/implement` for each issue — either sequentially or in parallel Claude Code tabs. Complex issues benefit from `team-implement` which decomposes tasks and parallelizes with Agent Teams. Simple issues go through `start-issue`.
 - **Pairs with existing skills:** This is essentially batch `enhance-issue`. Where `enhance-issue` handles one issue, `triage-issues` handles many in parallel.
 
 ---
@@ -286,4 +286,4 @@ Next step: Run /implement for each issue.
 - **Planning**: Parallel subagents (Task tool) — streamlined version of `skills/enhance-issue/SKILL.md`
 - **Output**: All selected issues are `ready_for_dev` on GitHub
 - **Consumed by**: `/implement` workflow command
-- **Followed by**: `/implement` → `start-issue` or `swarm-plan` per issue
+- **Followed by**: `/implement` → `start-issue` or `team-implement` per issue

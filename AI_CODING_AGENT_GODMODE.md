@@ -15,7 +15,7 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 **For guided workflows, use the 7 workflow commands:**
 - `/explore` — Reconnaissance & ideation: codebase exploration + brainstorming
 - `/plan` — Planning & requirements: plan generation, deepen, review, issues, ADR
-- `/implement` — Implementation: start issue, swarm plan, triage, tests, validation, security, recovery
+- `/implement` — Implementation: start issue, team implementation, triage, tests, validation, security, recovery
 - `/review` — Code review: fresh eyes (full/lite), protocol compliance
 - `/learn` — Knowledge capture: save solved problems as reusable docs
 - `/ship` — Ship: commit/PR, finalize, refactor
@@ -25,7 +25,7 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 - Critical safety rules → `CLAUDE.md` (auto-loaded with highest priority)
 - Workflow commands → `commands/*.md` (7 workflows)
 - Reusable skills → `skills/*/SKILL.md` (26 skill packages)
-- Agent definitions → `agents/review/*.md` (17 review agents) + `agents/research/*.md` (4 research agents)
+- Agent definitions → `agents/review/*.md` (17 review agents) + `agents/research/*.md` (4 research agents) + `agents/team/*.md` (3 team roles)
 - Quick reference → `QUICK_START.md`
 
 **Use this document when:**

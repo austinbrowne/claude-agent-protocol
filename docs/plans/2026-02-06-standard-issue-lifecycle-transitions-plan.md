@@ -1,7 +1,7 @@
 ---
 title: Complete GitHub Issue Lifecycle Transitions
 tier: standard
-status: READY_FOR_REVIEW
+status: complete
 date: 2026-02-06
 risk_flags: []
 ---

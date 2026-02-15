@@ -8,7 +8,7 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 |---------|---------|-----------|
 | `/explore` | Reconnaissance & ideation | Codebase exploration, brainstorming |
 | `/plan` | Planning & requirements | Generate plan, deepen plan, review plan, create issues, ADR |
-| `/implement` | Implementation | Start issue, swarm plan, swarm issues, generate tests, validation, security review, recovery |
+| `/implement` | Implementation | Start issue, team implementation, triage issues, generate tests, validation, security review, recovery |
 | `/review` | Code review | Fresh eyes review (full/lite), protocol compliance |
 | `/learn` | Knowledge capture | Save solved problems as reusable solution docs |
 | `/ship` | Ship | Commit/PR, finalize, refactor |
@@ -109,7 +109,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 | Skill | Purpose |
 |-------|---------|
 | `start-issue` | Begin work with living plan and past learnings |
-| `swarm-plan` | Parallel implementation of plan tasks using Agent Teams |
+| `team-implement` | Team-based implementation with defined roles (Lead, Analyst, Implementers) |
 | `triage-issues` | Batch-triage and plan open GitHub issues — get them ready_for_dev |
 | `generate-tests` | Generate comprehensive test suites |
 | `run-validation` | Tests + coverage + lint + security checks |
@@ -229,6 +229,7 @@ Use the recovery skill within `/implement`:
 | `skills/*/SKILL.md` | **26 reusable skill packages** |
 | `agents/review/*.md` | **17 review agents** |
 | `agents/research/*.md` | **4 research agents** |
+| `agents/team/*.md` | **3 team role definitions** (Lead, Implementer, Analyst) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | Security checklist (OWASP Top 10) |
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
@@ -251,6 +252,6 @@ Use the recovery skill within `/implement`:
 
 ---
 
-**Version:** 5.3.0-experimental
+**Version:** 5.4.0-experimental
 **Last Updated:** February 2026
 **Full docs:** See `README.md`

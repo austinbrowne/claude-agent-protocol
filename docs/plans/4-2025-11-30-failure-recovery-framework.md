@@ -1,3 +1,9 @@
+---
+title: "Failure Recovery Framework"
+date: 2025-11-30
+status: complete
+---
+
 # Product Requirements Document: Failure Recovery Framework
 
 ## Document Info

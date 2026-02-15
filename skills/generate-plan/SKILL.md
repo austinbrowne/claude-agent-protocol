@@ -185,7 +185,7 @@ AskUserQuestion:
 
 **Status:** `READY_FOR_REVIEW`
 
-**Plan status lifecycle:** After saving the plan file, ensure its YAML frontmatter contains `status: ready_for_review`. If the frontmatter does not already have a `status` field, add one. This status is used by downstream skills (review-plan, start-issue, swarm-plan) to track plan progression through the lifecycle: `ready_for_review` → `approved` → `in_progress` → `complete`.
+**Plan status lifecycle:** After saving the plan file, ensure its YAML frontmatter contains `status: ready_for_review`. If the frontmatter does not already have a `status` field, add one. This status is used by downstream skills (review-plan, start-issue, team-implement) to track plan progression through the lifecycle: `ready_for_review` → `approved` → `in_progress` → `complete`.
 
 ---
 

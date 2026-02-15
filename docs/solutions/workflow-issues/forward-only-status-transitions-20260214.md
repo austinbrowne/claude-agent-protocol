@@ -20,7 +20,7 @@ related_solutions: []
 Plan status lifecycle (`ready_for_review` → `approved` → `in_progress` → `complete`) had no guard against backward transitions. Each skill blindly set its target status without checking the current value, allowing accidental regression.
 
 ## Environment
-- Module: Skills (generate-plan, review-plan, start-issue, swarm-plan, finalize, loop)
+- Module: Skills (generate-plan, review-plan, start-issue, team-implement, finalize, loop)
 - Affected Component: Plan YAML frontmatter `status:` field
 - Date: 2026-02-14
 
@@ -47,7 +47,7 @@ If the current status is at or past the target, do not overwrite.
 Each skill checks its position in the lifecycle:
 - `generate-plan` → always sets `ready_for_review` (starting state, no guard needed)
 - `review-plan` → only sets `approved` if current is `ready_for_review`
-- `start-issue`, `swarm-plan`, `loop` → only set `in_progress` if current is `approved` or `ready_for_review`
+- `start-issue`, `team-implement`, `loop` → only set `in_progress` if current is `approved` or `ready_for_review`
 - `finalize` → only sets `complete` if current is `in_progress`
 
 ## Why This Works

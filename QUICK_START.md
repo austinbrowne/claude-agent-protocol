@@ -122,6 +122,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 |-------|---------|
 | `fresh-eyes-review` | 14-agent smart selection review with adversarial validation (Agent Teams mode available) |
 | `review-protocol` | Protocol compliance check and status report |
+| `document-review` | Document quality review for plans, brainstorms, ADRs (clarity, completeness, specificity, YAGNI) |
 
 ### Shipping Skills
 | Skill | Purpose |
@@ -133,6 +134,11 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 | Skill | Purpose |
 |-------|---------|
 | `learn` | Capture solved problems as searchable solution docs |
+
+### Configuration Skills
+| Skill | Purpose |
+|-------|---------|
+| `setup` | Per-project review configuration — auto-detects stack, selects review agents, writes godmode.local.md |
 
 ---
 
@@ -220,7 +226,7 @@ Use the recovery skill within `/implement`:
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
 | `commands/*.md` | **7 workflow commands** (explore, plan, implement, review, learn, ship, loop) |
-| `skills/*/SKILL.md` | **24 reusable skill packages** |
+| `skills/*/SKILL.md` | **26 reusable skill packages** |
 | `agents/review/*.md` | **17 review agents** |
 | `agents/research/*.md` | **4 research agents** |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | Security checklist (OWASP Top 10) |
@@ -245,6 +251,6 @@ Use the recovery skill within `/implement`:
 
 ---
 
-**Version:** 5.1.3-experimental
+**Version:** 5.2.0-experimental
 **Last Updated:** February 2026
 **Full docs:** See `README.md`

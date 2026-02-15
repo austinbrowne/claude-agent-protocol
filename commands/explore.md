@@ -55,6 +55,27 @@ AskUserQuestion:
       description: "End workflow — exploration findings available in conversation"
 ```
 
-**If "Brainstorm approaches":** Load and follow `skills/brainstorm/SKILL.md`.
-**If "Start planning":** Load and follow `commands/plan.md`. Plan's Step 0 will detect no plans exist and route directly to "Generate plan".
+**If "Brainstorm approaches":** Load and follow `skills/brainstorm/SKILL.md`. After brainstorm completes, present the post-brainstorm menu below.
+**If "Start planning":** Load `commands/plan.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
+**If "Done":** End workflow.
+
+---
+
+### After Brainstorm Completes
+
+```
+AskUserQuestion:
+  question: "Brainstorm complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Review brainstorm"
+      description: "Run structured quality review on the brainstorm output"
+    - label: "Start planning"
+      description: "Move to /plan to create a plan from brainstorm insights"
+    - label: "Done"
+      description: "End workflow — brainstorm findings available in conversation"
+```
+
+**If "Review brainstorm":** Load and follow `skills/document-review/SKILL.md`. After document-review completes, re-present the "After Brainstorm Completes" AskUserQuestion above.
+**If "Start planning":** Load `commands/plan.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
 **If "Done":** End workflow.

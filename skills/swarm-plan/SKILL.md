@@ -118,6 +118,8 @@ AskUserQuestion:
 
 ### Step 4: Spawn Implementation Team
 
+**Plan status update:** Before spawning any teammates, read the plan file's YAML frontmatter `status:` field. Only update to `in_progress` if the current status is `approved` or `ready_for_review` (forward transitions only — do not regress `in_progress` or `complete`). If the frontmatter exists but has no `status:` field, add `status: in_progress`. This signals that parallel implementation has begun.
+
 1. Create a shared task list with all task groups:
    - Independent groups: unblocked, ready for claiming
    - Serialized tasks: blocked by their dependencies

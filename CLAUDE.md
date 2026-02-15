@@ -108,11 +108,13 @@ Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly in
 
 **Execution skills:** `start-issue`, `swarm-plan`, `triage-issues`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor`
 
-**Review skills:** `fresh-eyes-review`, `review-protocol`
+**Review skills:** `fresh-eyes-review`, `review-protocol`, `document-review`
 
 **Shipping skills:** `commit-and-pr`, `finalize`
 
 **Knowledge skills:** `learn`, `todos`
+
+**Configuration skills:** `setup`
 
 ---
 
@@ -126,7 +128,7 @@ For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
 | Directory | Purpose |
 |-----------|---------|
 | `commands/` | 7 workflow entry points |
-| `skills/` | 24 reusable skill packages (also user-invocable) |
+| `skills/` | 26 reusable skill packages (also user-invocable) |
 | `agents/review/` | 17 review agent definitions |
 | `agents/research/` | 4 research agent definitions |
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
@@ -204,7 +206,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 | `AI_CODING_AGENT_GODMODE.md` | Full protocol documentation |
 | `QUICK_START.md` | Entry points and command reference |
 | `commands/*.md` | 7 workflow commands |
-| `skills/*/SKILL.md` | 24 reusable skill packages |
+| `skills/*/SKILL.md` | 26 reusable skill packages |
 | `agents/review/*.md` | 17 review agent definitions |
 | `agents/research/*.md` | 4 research agent definitions |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |

@@ -61,7 +61,9 @@ Execute: unit tests, integration tests, linter, type check, build.
 
 Separate commit for documentation changes.
 
-### 8. Close Issue with Completion Summary
+### 8. Close Issue and Update Plan Status
+
+**Plan status update:** Search the issue body for a path matching `docs/plans/YYYY-MM-DD-*.md` (bare path or markdown link), or check the living plan at `.todos/` for a plan reference. If the referenced plan file does not exist, log a warning and continue without blocking. If the plan file exists, read its YAML frontmatter `status:` field. Only update to `complete` if the current status is `in_progress` (forward transitions only — do not regress `complete` plans that were already finalized). If the frontmatter exists but has no `status:` field, add `status: complete`. This marks the plan lifecycle as finished.
 
 **If working on a GitHub issue (issue number available from branch name or commit messages):**
 

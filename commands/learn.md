@@ -69,5 +69,5 @@ AskUserQuestion:
       description: "End workflow — solution saved to docs/solutions/"
 ```
 
-**If "Ship it":** Load and follow `commands/ship.md`.
+**If "Ship it":** Load `commands/ship.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
 **If "Done":** End workflow.

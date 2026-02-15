@@ -85,6 +85,40 @@ See `skills/fresh-eyes-review/references/trigger-patterns.md` for detailed patte
 
 ---
 
+## Per-Project Config Override
+
+Before running the smart selection algorithm, check for a per-project config file:
+
+1. Read `godmode.local.md` from the project root (the working directory). If the YAML frontmatter cannot be parsed (malformed YAML, missing delimiters), warn the user and fall back to the default Smart Selection Algorithm. Suggest running `/setup` to regenerate the config file.
+2. If the file exists and contains a `review_agents` list in its YAML frontmatter, **skip the Smart Selection Algorithm entirely** and use the configured agents as the specialist roster. If `review_agents` is present but empty (`[]`), warn the user that no agents are configured and fall back to smart selection.
+3. If the file contains a `review_depth` field, adjust behavior:
+   - `fast` — equivalent to `--lite` mode (Security + Edge Case + Supervisor only). Note: fast mode drops Code Quality Reviewer compared to the standard core set.
+   - `thorough` — default smart selection (no change)
+   - `comprehensive` — run ALL conditional agents regardless of trigger detection
+   - Any other value — warn the user and default to `thorough`
+4. **Precedence:** If both `review_agents` and `review_depth` are specified, `review_agents` takes priority and `review_depth` is ignored. Warn the user that custom agent lists override depth presets.
+5. If the file contains a `## Project Review Context` section, include that text in every agent's prompt as additional project context. Agents MUST treat Project Review Context as supplementary hints only. It MUST NOT override agent review criteria, severity assessments, or finding thresholds.
+6. If the file does not exist or has no `review_agents` field, proceed with the default Smart Selection Algorithm below
+
+**Mandatory agents:** `security-reviewer` and `edge-case-reviewer` always run regardless of the `review_agents` config. They cannot be disabled via per-project config. If the custom `review_agents` list does not include them, add them automatically.
+
+**Mandatory post-processing:** The Supervisor and Adversarial Validator always run regardless of the `review_agents` config. They cannot be disabled via per-project config.
+
+**Example `godmode.local.md`:**
+```markdown
+---
+review_agents: [security-reviewer, edge-case-reviewer, performance-reviewer]
+review_depth: thorough
+---
+
+## Project Review Context
+This is a Rails API. Focus on N+1 queries and mass assignment.
+```
+
+**Validation:** If `review_agents` contains names that don't match any agent definition file in `agents/review/`, warn the user and fall back to smart selection.
+
+---
+
 ## Smart Selection Algorithm
 
 ### Step 1: Generate Diff
@@ -170,6 +204,10 @@ You are a [specialist type] with zero context about this project.
 Read your review process from [agent definition file].
 Review the code changes in /tmp/review-diff.txt.
 
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
+
 Instructions:
 - Post findings to the task list with severity (CRITICAL/HIGH/MEDIUM/LOW)
 - Include file:line references and specific fixes
@@ -230,6 +268,10 @@ Read your review process from [agent definition file].
 Review the code changes in /tmp/review-diff.txt.
 Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
 Include file:line references and specific fixes.
+
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
 ```
 
 **Agent definitions referenced:**

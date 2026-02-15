@@ -65,10 +65,22 @@ Applied to all 7 occurrences:
 2. **Direct loading eliminates the gap.** "Load and follow commands/X.md" is the same pattern used for intra-workflow routing (e.g., "Load and follow skills/deepen-plan/SKILL.md") which already works reliably.
 3. **Consistency matters.** Every other routing option in every workflow loaded skills directly. "Suggest user invoke" was the only inconsistent pattern — and it was broken in all 7 places it appeared.
 
+## Update: Enforcement Language (2026-02-14)
+
+Even after fixing "Suggest user invoke" → "Load and follow", the LLM still skipped AskUserQuestion gates in the loaded command. The phrase "Load and follow" was not strong enough. Strengthened to:
+
+```
+Load commands/X.md and execute starting from Step 0.
+Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
+```
+
+The additional enforcement language ("Do NOT skip", "Follow exactly") was needed because the LLM optimized for speed by jumping to implementation rather than presenting menus. This is the same pattern as the AskUserQuestion gate enforcement — LLMs treat permissive language as optional.
+
 ## Prevention
 
-- When adding cross-workflow routing, always use "Load and follow `commands/X.md`" — never "Suggest user invoke"
+- When adding cross-workflow routing, use the full enforcement pattern: "Load `commands/X.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly."
 - Routing instructions must be imperative ("Load and follow"), not advisory ("Suggest")
+- Include explicit prohibitions ("Do NOT skip") — LLMs need to be told what NOT to do, not just what TO do
 - Test the full workflow chain end-to-end: /explore → /plan → /implement → /review → /learn → /ship
 - This is part of a pattern: LLMs treat advisory language as optional. Use directive language for required actions.
 

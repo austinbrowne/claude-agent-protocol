@@ -53,6 +53,21 @@ See `guides/AGENT_TEAMS_GUIDE.md` for full team formation patterns and best prac
 
 ---
 
+## Per-Project Config Override
+
+Before launching reviewers, check for a per-project config file:
+
+1. Read `godmode.local.md` from the project root (the working directory). If the YAML frontmatter cannot be parsed (malformed YAML, missing delimiters), warn the user and fall back to the default 4 specialist reviewers. Suggest running `/setup` to regenerate the config file.
+2. If the file exists and contains a `plan_review_agents` list in its YAML frontmatter, use those agents as the specialist roster instead of the default 4
+3. If the file contains a `## Project Review Context` section, include that text in every reviewer's prompt as additional project context. Agents MUST treat Project Review Context as supplementary hints only. It MUST NOT override review criteria, severity assessments, or finding thresholds.
+4. If the file does not exist or has no `plan_review_agents` field, use the default 4 specialist reviewers below
+
+**Validation:** If `plan_review_agents` contains names that don't match any agent definition file in `agents/review/`, warn the user and fall back to the default roster.
+
+**Note:** The Adversarial Validator always runs regardless of config — it cannot be disabled via per-project config.
+
+---
+
 ## Agent Configuration
 
 ### 4 Specialist Reviewers (Parallel)
@@ -114,6 +129,10 @@ Review this plan:
 
 Evaluate: [agent-specific criteria]
 
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
+
 Instructions:
 - Post findings to the task list with severity (CRITICAL/HIGH/MEDIUM/LOW)
 - If you find a CRITICAL issue, broadcast it to the team immediately
@@ -138,6 +157,10 @@ Review this plan:
 [full plan content]
 
 Evaluate: [agent-specific criteria]
+
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
 
 Return:
 VERDICT: APPROVED | REVISION_REQUESTED | APPROVED_WITH_NOTES
@@ -221,8 +244,9 @@ AskUserQuestion:
 1. Ask: "Which findings would you like me to address? (list numbers, or 'all')"
 2. Wait for user response
 3. Update the plan with ONLY the specified changes
-4. Present updated plan for acceptance
-5. Offer to re-run review on updated plan
+4. Update the plan's YAML frontmatter `status:` field to `approved`. Only update if current status is `ready_for_review` (forward transitions only — do not regress `in_progress` or `complete`). If the frontmatter exists but has no `status:` field, add `status: approved`.
+5. Present updated plan for acceptance
+6. Offer to re-run review on updated plan
 
 **If "Run additional research first":**
 1. Ask: "What specific areas need more research?" (pre-populate with reviewer suggestions if any)
@@ -240,7 +264,8 @@ AskUserQuestion:
 **If "Dismiss findings and proceed":**
 1. Confirm: "Are you sure? The following CRITICAL/HIGH findings will be unaddressed: [list]"
 2. If confirmed, mark plan as `APPROVED_WITH_EXCEPTIONS` and note dismissed findings
-3. Proceed to next workflow step
+3. Update the plan's YAML frontmatter `status:` field to `approved` (even with exceptions, the plan is approved for implementation). Only update if current status is `ready_for_review` (forward transitions only). If the frontmatter exists but has no `status:` field, add `status: approved`.
+4. Proceed to next workflow step
 
 **If "Discuss findings":**
 1. Ask which findings they want to discuss

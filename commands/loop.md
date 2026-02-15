@@ -84,17 +84,20 @@ If `.claude/loop-context.md` exists with `status: running`:
 2. Spawn `general-purpose` Task subagent to generate plan (Standard tier, `skills/generate-plan/SKILL.md` methodology). Auto-accept — user opted into autonomous mode.
 3. Verify generated plan has at least one `[ ]` checkbox task. If not, halt with error.
 4. Count `[ ]` tasks, update loop-context.md: set `plan_path`, `tasks_total`, `status: running`
+5. Read the plan file's YAML frontmatter `status:` field. Only update to `in_progress` if the current status is `approved` or `ready_for_review` (forward transitions only). If the frontmatter exists but has no `status:` field, add `status: in_progress`.
 
 **Plan mode:**
 1. Verify plan file exists. If not, halt with error.
 2. Count `[ ]` tasks. If zero: "Nothing to do — plan already complete" or "All tasks blocked."
 3. Create `.claude/loop-context.md` with `plan_path`, task counts, `status: running`
+4. Read the plan file's YAML frontmatter `status:` field. Only update to `in_progress` if the current status is `approved` or `ready_for_review` (forward transitions only). If the frontmatter exists but has no `status:` field, add `status: in_progress`.
 
 **Issue mode:**
 1. Fetch issue: `gh issue view N --json title,body,labels`. If fails, halt with error.
 2. If `needs_refinement` label: spawn subagent to enhance issue, re-fetch
 3. Spawn subagent to generate plan from issue body
 4. Verify plan has `[ ]` tasks, create loop-context.md
+5. Read the plan file's YAML frontmatter `status:` field. Only update to `in_progress` if the current status is `approved` or `ready_for_review` (forward transitions only). If the frontmatter exists but has no `status:` field, add `status: in_progress`.
 
 ### loop-context.md Format
 

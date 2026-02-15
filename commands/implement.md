@@ -114,7 +114,7 @@ AskUserQuestion:
 ```
 
 **If "Generate tests":** Load and follow `skills/generate-tests/SKILL.md`.
-**If "Review code":** Load and follow `commands/review.md`.
+**If "Review code":** Load `commands/review.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
 **If "Another implementation step":** Return to Step 0 (re-detect state, then Step 1).
 **If "Recovery":** Load and follow `skills/recovery/SKILL.md`.
 **If "Done":** End workflow.

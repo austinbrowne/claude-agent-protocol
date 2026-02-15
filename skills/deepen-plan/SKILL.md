@@ -64,6 +64,10 @@ Read your research process from [agent definition file].
 Research target:
 [plan content / assigned sections]
 
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
+
 Instructions:
 - As you discover relevant findings, broadcast them to the team immediately
 - Don't wait until you're done — share findings as you go
@@ -112,6 +116,10 @@ Plan to review:
 
 Research findings so far (from research teammates):
 [accumulated findings broadcast by research teammates]
+
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
 
 Instructions:
 - Review the plan against your domain criteria

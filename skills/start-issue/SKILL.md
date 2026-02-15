@@ -61,6 +61,8 @@ git push -u origin issue-NNN-brief-description
 
 **Branch naming:** `issue-NNN-brief-description` (kebab-case from title).
 
+**Plan status update:** Search the issue body for a path matching `docs/plans/YYYY-MM-DD-*.md` (bare path or markdown link). If multiple matches, use the first. If the matched path is a directory (no `.md` extension), skip. If the referenced plan file does not exist, log a warning ("Plan file {path} not found, skipping status update") and continue without blocking. If the plan file exists, read its YAML frontmatter `status:` field. Only update to `in_progress` if the current status is `approved` or `ready_for_review` (forward transitions only — do not regress `in_progress` or `complete`). If the frontmatter exists but has no `status:` field, add `status: in_progress`.
+
 ### 5. Create Living Plan
 
 **File:** `.todos/{issue_id}-plan.md`

@@ -69,6 +69,6 @@ AskUserQuestion:
 ```
 
 **If "Fix findings":** Help fix issues, then re-run Fresh Eyes Review.
-**If "Capture learnings":** Load and follow `commands/learn.md`.
-**If "Ship it":** Load and follow `commands/ship.md`.
+**If "Capture learnings":** Load `commands/learn.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
+**If "Ship it":** Load `commands/ship.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
 **If "Done":** End workflow.

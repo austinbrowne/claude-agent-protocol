@@ -84,8 +84,8 @@ AskUserQuestion:
       description: "End workflow"
 ```
 
-**If "Review code":** Load and follow `commands/review.md`.
+**If "Review code":** Load `commands/review.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
 **If "Commit and create PR":** Load and follow `skills/commit-and-pr/SKILL.md`.
 **If "Another shipping step":** Return to Step 0 (re-detect state, then Step 1).
-**If "Capture learnings":** Load and follow `commands/learn.md`.
+**If "Capture learnings":** Load `commands/learn.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
 **If "Done":** End workflow.

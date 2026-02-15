@@ -61,6 +61,10 @@ Explore the [target] in this codebase. Identify:
 4. Dependencies and relationships
 5. Potential areas of concern
 
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
+
 Provide a structured summary suitable for planning new work.
 ```
 
@@ -69,6 +73,10 @@ Provide a structured summary suitable for planning new work.
 Search docs/solutions/ for past solutions relevant to [target].
 Use multi-pass Grep strategy: tags → category → keywords → full-text.
 Return relevant findings with applicability assessment.
+
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
 ```
 
 **Thoroughness level for Codebase Research Agent:**
@@ -176,6 +184,8 @@ AskUserQuestion:
 - `docs/plans/2026-02-04-comprehensive-api-redesign-plan.md`
 
 **Status:** `READY_FOR_REVIEW`
+
+**Plan status lifecycle:** After saving the plan file, ensure its YAML frontmatter contains `status: ready_for_review`. If the frontmatter does not already have a `status` field, add one. This status is used by downstream skills (review-plan, start-issue, swarm-plan) to track plan progression through the lifecycle: `ready_for_review` → `approved` → `in_progress` → `complete`.
 
 ---
 

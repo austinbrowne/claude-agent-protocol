@@ -75,6 +75,8 @@ AskUserQuestion:
   question: "Plan generated. What would you like to do next?"
   header: "Next step"
   options:
+    - label: "Review document quality"
+      description: "Run structured quality review on the generated plan"
     - label: "Deepen this plan"
       description: "Enrich with parallel research and review agents"
     - label: "Review this plan"
@@ -132,10 +134,11 @@ AskUserQuestion:
 ```
 
 **Routing:**
+- **"Review document quality"** → Load and follow `skills/document-review/SKILL.md`. After document-review completes, re-present the "After Generate plan" AskUserQuestion above.
 - **"Deepen this plan"** → Load `skills/deepen-plan/SKILL.md`
 - **"Review this plan"** → Load `skills/review-plan/SKILL.md`
 - **"Create GitHub issues"** → Load `skills/create-issues/SKILL.md`
-- **"Start implementing"** → Load and follow `commands/implement.md`
+- **"Start implementing"** → Load `commands/implement.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
 - **"Revise the plan"** → Return to Step 1 with "Generate plan" pre-selected
 - **"Create another plan"** → Return to Step 1
 - **"Done"** → End workflow

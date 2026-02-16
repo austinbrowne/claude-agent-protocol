@@ -100,8 +100,13 @@ The planning workflow handles sub-step selection internally.
 
 After planning is complete, update the GitHub issue with enriched content:
 
+Use `--body` with a heredoc — do NOT write to `/tmp`:
+
 ```bash
-gh issue edit NNN --body-file /tmp/enhanced-issue-body.md
+gh issue edit NNN --body "$(cat <<'EOF'
+[enhanced issue content]
+EOF
+)"
 ```
 
 **For bugs**, fill in all TBD sections:

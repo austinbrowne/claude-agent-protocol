@@ -32,11 +32,14 @@ Methodology for generating GitHub issues from an approved plan, with auto-linkin
 
 **Load issue template:** `templates/GITHUB_ISSUE_TEMPLATE.md`
 
-**For each phase/task:**
+**For each phase/task — use `--body` with a heredoc, do NOT write to `/tmp`:**
 ```bash
 gh issue create \
   --title "Phase N: [Phase name]" \
-  --body-file /tmp/issue-body.md \
+  --body "$(cat <<'EOF'
+[filled issue template content]
+EOF
+)" \
   --label "type: feature,priority: high"
 ```
 

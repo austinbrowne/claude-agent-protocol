@@ -84,23 +84,29 @@ AskUserQuestion:
 
 ### 4. Create GitHub Issue
 
-**For bugs** — load `templates/BUG_ISSUE_TEMPLATE.md` and fill sparsely:
+**For bugs** — load `templates/BUG_ISSUE_TEMPLATE.md` and fill sparsely. Use `--body` with a heredoc — do NOT write to `/tmp`:
 
 ```bash
 gh issue create \
   --title "[Bug title]" \
-  --body-file /tmp/issue-body.md \
+  --body "$(cat <<'EOF'
+[filled bug template content]
+EOF
+)" \
   --label "type: bug,needs_refinement"
 ```
 
 Fill only: Title, Bug Description, Steps to Reproduce (if provided), Expected/Actual (if provided), Severity. Leave all other sections as TBD or template defaults.
 
-**For features** — load `templates/GITHUB_ISSUE_TEMPLATE.md` and fill sparsely:
+**For features** — load `templates/GITHUB_ISSUE_TEMPLATE.md` and fill sparsely. Use `--body` with a heredoc — do NOT write to `/tmp`:
 
 ```bash
 gh issue create \
   --title "[Feature title]" \
-  --body-file /tmp/issue-body.md \
+  --body "$(cat <<'EOF'
+[filled feature template content]
+EOF
+)" \
   --label "type: feature,needs_refinement"
 ```
 

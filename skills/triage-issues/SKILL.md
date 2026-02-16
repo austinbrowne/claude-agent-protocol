@@ -172,7 +172,10 @@ Your job (follow ALL steps in order):
    - Technical approach summary
    - Testing notes and edge cases
    - Swap labels: remove needs_refinement, add ready_for_dev
-   Command: gh issue edit {number} --body-file /tmp/enhanced-{number}.md
+   Command: gh issue edit {number} --body "$(cat <<'EOF'
+[enhanced issue content]
+EOF
+)" (use heredoc — do NOT write to /tmp)
    Command: gh issue edit {number} --remove-label "needs_refinement" --add-label "ready_for_dev"
 
 Return your plan summary:

@@ -17,7 +17,7 @@ AskUserQuestion:
   header: "Implement"
   options:
     - label: "Start issue"
-      description: "Begin work on a GitHub issue with living plan and past learnings"
+      description: "Begin work on an issue with living plan and past learnings"
     - label: "Generate tests"
       description: "Generate comprehensive test suites for your code"
     - label: "Run validation"

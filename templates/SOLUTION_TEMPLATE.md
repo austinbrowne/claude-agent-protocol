@@ -29,7 +29,7 @@ Use this template when running `/learn` to capture solved problems as searchable
 | `language` | string | Language (e.g., "typescript", "python", "ruby") |
 | `framework` | string | Framework (e.g., "express", "django", "rails") |
 | `framework_version` | string | Framework version in X.Y.Z format |
-| `issue_ref` | string | GitHub issue reference (e.g., "#145") |
+| `issue_ref` | string | Issue reference (e.g., "#145") |
 | `related_solutions` | array | Paths to related solution docs |
 
 ### Enum Values

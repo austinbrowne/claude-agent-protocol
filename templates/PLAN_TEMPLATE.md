@@ -256,6 +256,6 @@ breaking_change: true | false
 - `docs/plans/2026-02-04-standard-user-auth-plan.md`
 - `docs/plans/2026-02-04-comprehensive-api-redesign-plan.md`
 
-**After GitHub issue creation:**
+**After issue creation:**
 - Rename to prepend issue number: `NNN-YYYY-MM-DD-type-name-plan.md`
 - Example: `docs/plans/123-2026-02-04-standard-user-auth-plan.md`

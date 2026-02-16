@@ -123,6 +123,7 @@ For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
 | `skills/` | 22 reusable skill packages (also user-invocable) |
 | `agents/review/` | 17 review agent definitions |
 | `agents/research/` | 4 research agent definitions |
+| `platforms/` | Platform detection and CLI references (GitHub/GitLab) |
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
 | `docs/brainstorms/` | Brainstorm session records |
 | `.todos/` | File-based todo tracking (committed to git) |
@@ -198,6 +199,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 | `agents/review/*.md` | 17 review agent definitions |
 | `agents/research/*.md` | 4 research agent definitions |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
+| `platforms/*.md` | Platform detection and CLI references (GitHub/GitLab) |
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
 | `templates/*.md` | 10 reusable templates |

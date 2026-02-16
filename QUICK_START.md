@@ -47,7 +47,7 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 1. /explore                    # Understand the codebase
 2. /plan                       # Generate plan → select "Generate plan"
 3. /plan                       # Review plan → select "Review plan"
-4. /plan                       # Create issues → select "Create GitHub issues"
+4. /plan                       # Create issues → select "Create issues"
 5. /implement                  # Start issue → select "Start issue"
 6. [Implement code]
 7. /implement                  # Generate tests → select "Generate tests"
@@ -61,14 +61,17 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 
 ```bash
 # List ready issues
+# GitHub:
 gh project item-list PROJECT_NUM --owner OWNER
+# GitLab:
+glab issue list --per-page 20
 
 # Pick one
 /implement                     # Select "Start issue" → enter issue number
 # [Implement code]
 /implement                     # Run validation
 /review                        # Fresh eyes review
-/ship                          # Commit and create PR
+/ship                          # Commit and create PR/MR
 ```
 
 ---
@@ -86,13 +89,13 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 | `deepen-plan` | Enrich plan with massive parallel research (10-20+ agents) |
 | `review-plan` | Multi-agent plan review with adversarial validation |
 | `create-adr` | Document architecture decisions |
-| `create-issues` | Generate GitHub issues from approved plan |
+| `create-issues` | Generate issues from approved plan |
 
 ### Issue Skills
 | Skill | Purpose |
 |-------|---------|
 | `file-issues` | Rapid-fire issue filing with sparse templates |
-| `file-issue` | File a single GitHub issue from a description |
+| `file-issue` | File a single issue from a description |
 | `enhance-issue` | Refine sparse issues with exploration and planning |
 
 ### Execution Skills
@@ -114,7 +117,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 ### Shipping Skills
 | Skill | Purpose |
 |-------|---------|
-| `commit-and-pr` | Commit and create PR with mandatory review gate |
+| `commit-and-pr` | Commit and create PR/MR with mandatory review gate |
 | `finalize` | Final documentation updates and validation |
 
 ### Knowledge Skills
@@ -124,9 +127,12 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 
 ---
 
-## GitHub Projects Setup
+## Platform Setup
 
-**One-time setup:**
+> Run `platforms/detect.md` once per session to auto-detect GitHub vs GitLab. See `platforms/github.md` or `platforms/gitlab.md` for full CLI references.
+
+### GitHub
+
 ```bash
 # 1. Install gh CLI
 brew install gh
@@ -142,25 +148,44 @@ gh project create --owner OWNER --title "My Dev Board"
 gh project list --owner OWNER
 ```
 
+### GitLab
+
+```bash
+# 1. Install glab CLI
+brew install glab
+
+# 2. Authenticate
+glab auth login
+
+# 3. For self-hosted instances
+glab auth login --hostname gitlab.example.com
+```
+
 ---
 
 ## Common Commands
 
 ```bash
-# List projects
-gh project list --owner OWNER
-
 # List ready issues
+# GitHub:
 gh project item-list 3 --owner OWNER
+# GitLab:
+glab issue list --per-page 20
 
 # View issue
+# GitHub:
 gh issue view 45
+# GitLab:
+glab issue view 45
 
 # List plans
 ls docs/plans/
 
 # Create issue manually
+# GitHub:
 gh issue create --title "..." --body-file issue.md --label "type: feature"
+# GitLab:
+glab issue create --title "..." --description "$(cat issue.md)" --label "type::feature"
 ```
 
 ---

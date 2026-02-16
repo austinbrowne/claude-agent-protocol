@@ -105,17 +105,24 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 - Complete plan, create issues (optional), then execute
 
 ### Entry Point B: Pick Existing Issue from Backlog (Start at Phase 1)
-**Use when:** Picking up a pre-planned issue from GitHub Projects backlog
+**Use when:** Picking up a pre-planned issue from backlog (GitHub Projects or GitLab Boards)
+
+> **Platform:** Commands below use GitHub (`gh`) syntax. For GitLab (`glab`) equivalents, see `platforms/gitlab.md`. Run `platforms/detect.md` once per session to determine your platform.
 
 **Required actions:**
 
 1. **Load the issue:**
    ```bash
-   # View issue details
+   # GitHub:
    gh issue view ISSUE_NUMBER
+   # GitLab:
+   glab issue view ISSUE_NUMBER
 
    # Or list ready issues
+   # GitHub:
    gh project item-list PROJECT_NUM --owner OWNER
+   # GitLab:
+   glab issue list --per-page 20
    ```
 
 2. **Extract context from issue:**
@@ -144,7 +151,7 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 ```
 User: "Let's work on issue #45"
 
-AI: [Loads issue via gh issue view 45]
+AI: [Loads issue via platform CLI (gh issue view / glab issue view)]
 
 AI: "I'll implement issue #45: Implement password hashing
 
@@ -249,14 +256,14 @@ mkdir -p docs/plans
   - `docs/plans/2026-02-04-standard-user-authentication-plan.md`
   - `docs/plans/2026-02-04-comprehensive-api-redesign-plan.md`
 
-**After GitHub issue creation (Step 6):**
+**After issue creation (Step 6):**
 - Rename plan to prepend issue number: `NNN-YYYY-MM-DD-type-feature-name-plan.md`
 - Example: Issue #123 created → Rename to `docs/plans/123-2026-02-04-standard-user-authentication-plan.md`
 - Update issue to reference renamed file
 
 **Why save plan:**
 - Reference during implementation (Phase 1)
-- Link from GitHub issues
+- Link from issues
 - Historical record of decisions
 - Context for future developers
 - Issue number creates direct link between plan and implementation
@@ -304,18 +311,24 @@ Create ADR if:
 
 ---
 
-### Step 6: Create GitHub Issues (Optional)
+### Step 6: Create Issues (Optional)
 
 ⚠️ **DECISION POINT: Immediate Execution or Backlog Mode?**
 
-**If using GitHub Projects workflow:**
+**If using issue tracking (GitHub Projects / GitLab Boards):**
 
 1. **Generate issues from approved plan:**
    - Use: `/create-issues docs/plans/2026-02-04-standard-feature-name-plan.md`
-   - See: `guides/GITHUB_PROJECT_INTEGRATION.md` for full workflow
+   - See: `guides/GITHUB_PROJECT_INTEGRATION.md` (GitHub) or `guides/GITLAB_PROJECT_INTEGRATION.md` (GitLab)
 
 2. **Create first issue and rename plan:**
-   - Create first GitHub issue with `gh issue create`
+   - Create first issue:
+     ```bash
+     # GitHub:
+     gh issue create --title "..." --body-file /tmp/issue-body.md --label "type: feature"
+     # GitLab:
+     glab issue create --title "..." --description "$(cat /tmp/issue-body.md)" --label "type::feature"
+     ```
    - Note the issue number returned (e.g., #123)
    - Rename plan file to prepend issue number:
      ```bash
@@ -334,7 +347,7 @@ Create ADR if:
    Generated plan for user authentication feature.
    Linked to issue #123.
 
-   🤖 Generated with Claude Code"
+   Generated with Claude Code"
 
    git push origin main  # or current branch
    ```
@@ -348,27 +361,29 @@ Create ADR if:
 4. **Choose execution mode:**
 
    **FORK A: Immediate Execution**
-   - Create issues with labels (see standard label system in guide)
+   - Create issues with labels (see standard label system in platform guide)
    - Assign to current session (`--assignee @me`)
    - Pick first issue and proceed to Phase 1
    - Work through issues sequentially in current session
 
    **FORK B: Backlog Mode**
    - Create issues without assignee
-   - Add to GitHub Project "Ready" column
+   - Add to project board "Ready" column (GitHub Projects / GitLab Boards)
    - Exit GODMODE workflow
    - Issues remain in backlog for later pickup (via @claude tag or manual selection)
 
-3. **Label each issue** using standard system:
+5. **Label each issue** using standard system:
    - `type:` - bug | feature | enhancement | docs | refactor | test | infrastructure
    - `priority:` - critical | high | medium | low
    - `area:` - frontend | backend | infrastructure | security | testing
    - `flag:` (if applicable) - security-sensitive | performance-critical | breaking-change
 
-**If NOT using GitHub Projects:** Skip to Phase 1 directly.
+   > **GitLab note:** Use scoped labels with `::` separator (e.g., `type::feature`, `priority::high`). GitLab enforces one label per scope.
 
-**See:** `guides/GITHUB_PROJECT_INTEGRATION.md` for:
-- GitHub CLI commands (`gh issue create`, `gh project item-list`)
+**If NOT using issue tracking:** Skip to Phase 1 directly.
+
+**See:** `guides/GITHUB_PROJECT_INTEGRATION.md` or `guides/GITLAB_PROJECT_INTEGRATION.md` for:
+- Platform CLI commands for issue/project management
 - Standard label system setup
 - Project board workflow
 - Assigning issues to Claude Code
@@ -388,12 +403,14 @@ Create ADR if:
 - **Search `docs/solutions/` for relevant past learnings** (use `/start-issue` which does this automatically)
 - Create living plan in `.todos/{issue_id}-plan.md` for progress tracking
 
-**If working from GitHub issue:**
+**If working from an issue:**
 
 1. **Assign issue to user:**
    ```bash
-   # Assign to yourself (the prompter)
+   # GitHub:
    gh issue edit ISSUE_NUM --add-assignee @me
+   # GitLab:
+   glab issue update ISSUE_NUM --assignee @me
    ```
 
 2. **Create issue-specific branch:**
@@ -406,9 +423,12 @@ Create ADR if:
    git push -u origin issue-ISSUE_NUM-feature-name
    ```
 
-3. **Update issue status** (if using GitHub Projects):
+3. **Update issue status** (if using project boards):
    ```bash
-   gh issue comment ISSUE_NUM --body "🚧 Starting implementation on branch \`issue-ISSUE_NUM-feature-name\`"
+   # GitHub:
+   gh issue comment ISSUE_NUM --body "Starting implementation on branch \`issue-ISSUE_NUM-feature-name\`"
+   # GitLab:
+   glab issue note ISSUE_NUM --message "Starting implementation on branch \`issue-ISSUE_NUM-feature-name\`"
    ```
 
 **Branch naming convention:**
@@ -624,7 +644,7 @@ Next: Awaiting approval for Phase [N+1]
 
 ⚠️ **CHECKPOINT: Implementation Complete**
 
-**If working from GitHub issue:**
+**If working from an issue:**
 
 1. **Commit all changes:**
    ```bash
@@ -661,9 +681,9 @@ Next: Awaiting approval for Phase [N+1]
    - Security: [Review status]
    - Edge cases: Covered
 
-   Ready to create Pull Request?
+   Ready to create Pull Request / Merge Request?
    - PR will link to issue #ISSUE_NUM (auto-closes on merge)
-   - Reviewable on GitHub before merging
+   - Reviewable on platform before merging
    - Can be merged when approved
 
    Proceed with PR creation? (yes/no)
@@ -679,9 +699,9 @@ Next: Awaiting approval for Phase [N+1]
    Target branch: _____
    ```
 
-4. **Create PR with specified base branch:**
+4. **Create PR/MR with specified base branch:**
    ```bash
-   # Replace BASE_BRANCH with user's choice (main, experimental, etc.)
+   # GitHub:
    gh pr create \
      --title "feat: [Brief description] (Closes #ISSUE_NUM)" \
      --body "$(cat <<'EOF'
@@ -694,10 +714,10 @@ Next: Awaiting approval for Phase [N+1]
    - [Key change 3]
 
    ## Testing
-   - ✅ Unit tests: [N] tests, [X]% coverage
-   - ✅ Integration tests: [Status]
-   - ✅ Edge cases: Null, empty, boundaries, errors
-   - ✅ Security review: [Completed | Not applicable]
+   - Unit tests: [N] tests, [X]% coverage
+   - Integration tests: [Status]
+   - Edge cases: Null, empty, boundaries, errors
+   - Security review: [Completed | Not applicable]
 
    ## Acceptance Criteria
    - [x] [Criterion 1]
@@ -709,29 +729,37 @@ Next: Awaiting approval for Phase [N+1]
 
    Closes #ISSUE_NUM
 
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   Generated with [Claude Code](https://claude.com/claude-code)
    EOF
    )" \
      --base BASE_BRANCH
+
+   # GitLab:
+   glab mr create \
+     --title "feat: [Brief description] (Closes #ISSUE_NUM)" \
+     --description "$(cat <<'EOF'
+   ...same body content...
+   EOF
+   )" \
+     --target-branch BASE_BRANCH
    ```
 
    **Common base branches:**
-   - `--base main` - For production-ready changes
-   - `--base experimental` - For testing/development changes
-   - `--base develop` - If using GitFlow workflow
+   - GitHub: `--base main` / GitLab: `--target-branch main`
+   - For testing/development: `experimental` or `develop`
 
-5. **Report PR creation:**
+5. **Report PR/MR creation:**
    ```
-   ✅ Pull Request created: https://github.com/owner/repo/pull/XXX
+   PR/MR created: [URL]
 
    Next steps:
-   1. Review PR on GitHub
+   1. Review PR/MR on platform
    2. Approve and merge when ready
    3. Issue #ISSUE_NUM will auto-close on merge
    4. Branch issue-ISSUE_NUM-feature-name can be deleted after merge
    ```
 
-**If NOT using GitHub issues:**
+**If NOT using issues:**
 - Commit changes with standard commit message
 - Push to feature branch
 - Create PR manually or skip to Phase 2 for direct merge

@@ -1,11 +1,11 @@
 ---
 name: workflows:ship
-description: "Ship — commit, PR creation, refactoring, and finalization"
+description: "Ship — commit, PR/MR creation, refactoring, and finalization"
 ---
 
 # /ship — Ship
 
-**Workflow command.** Hub for shipping activities: committing code, creating PRs, refactoring, and final documentation.
+**Workflow command.** Hub for shipping activities: committing code, creating PRs/MRs, refactoring, and final documentation.
 
 ---
 
@@ -16,8 +16,8 @@ AskUserQuestion:
   question: "What would you like to do?"
   header: "Ship"
   options:
-    - label: "Commit and create PR"
-      description: "Commit changes and create a pull request (requires Fresh Eyes review)"
+    - label: "Commit and create PR/MR"
+      description: "Commit changes and create a pull request/merge request (requires Fresh Eyes review)"
     - label: "Finalize project"
       description: "Final documentation updates, validation, and merge preparation"
     - label: "Refactor first"
@@ -30,7 +30,7 @@ AskUserQuestion:
 
 **Based on selection:**
 
-- **"Commit and create PR"** → Load and follow `skills/commit-and-pr/SKILL.md`
+- **"Commit and create PR/MR"** → Load and follow `skills/commit-and-pr/SKILL.md`
   - This skill enforces the Fresh Eyes Review gate — if not yet run, it will trigger automatically
 - **"Finalize project"** → Load and follow `skills/finalize/SKILL.md`
 - **"Refactor first"** → Load and follow `skills/refactor/SKILL.md`

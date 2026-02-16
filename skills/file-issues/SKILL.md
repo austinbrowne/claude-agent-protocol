@@ -1,12 +1,14 @@
 ---
 name: file-issues
-version: "1.0"
+version: "1.1"
 description: Rapid-fire issue filing — bugs and features with sparse templates and needs_refinement label
 ---
 
 # File Issues Skill
 
 Rapid-fire issue filing for capturing bugs and feature requests quickly. Uses sparse templates — details are added later via `/enhance-issue`.
+
+> **Platform:** Commands below use GitHub (`gh`) syntax. For GitLab (`glab`) equivalents, see `platforms/gitlab.md`. Run `platforms/detect.md` once per session to determine your platform.
 
 ---
 
@@ -68,26 +70,38 @@ AskUserQuestion:
 **If "Add more details":** Ask the user for additional context. Incorporate it, then present the updated summary and ask again.
 **If "Looks good":** Proceed to Step 4.
 
-### 4. Create GitHub Issue
+### 4. Create Issue
 
 **For bugs** — load `templates/BUG_ISSUE_TEMPLATE.md` and fill sparsely:
 
 ```bash
+# GitHub:
 gh issue create \
   --title "[Bug title]" \
   --body-file /tmp/issue-body.md \
   --label "type: bug,needs_refinement"
+# GitLab:
+glab issue create \
+  --title "[Bug title]" \
+  --description "$(cat /tmp/issue-body.md)" \
+  --label "type::bug,needs_refinement"
 ```
 
 Fill only: Title, Bug Description, Steps to Reproduce (if provided), Expected/Actual (if provided), Severity. Leave all other sections as TBD or template defaults.
 
-**For features** — load `templates/GITHUB_ISSUE_TEMPLATE.md` and fill sparsely:
+**For features** — load `templates/ISSUE_TEMPLATE.md` and fill sparsely:
 
 ```bash
+# GitHub:
 gh issue create \
   --title "[Feature title]" \
   --body-file /tmp/issue-body.md \
   --label "type: feature,needs_refinement"
+# GitLab:
+glab issue create \
+  --title "[Feature title]" \
+  --description "$(cat /tmp/issue-body.md)" \
+  --label "type::feature,needs_refinement"
 ```
 
 Fill only: Title, Description. Leave Acceptance Criteria, Technical Requirements, Testing Notes, and all other sections as template defaults.
@@ -138,6 +152,6 @@ All labeled needs_refinement. Run /enhance-issue to add details and mark ready_f
 
 ## Integration Points
 
-- **Templates**: `templates/BUG_ISSUE_TEMPLATE.md`, `templates/GITHUB_ISSUE_TEMPLATE.md`
-- **Output**: GitHub issues with `needs_refinement` label
+- **Templates**: `templates/BUG_ISSUE_TEMPLATE.md`, `templates/ISSUE_TEMPLATE.md`
+- **Output**: Issues with `needs_refinement` label
 - **Next step**: `/enhance-issue` to refine, or `/workflows:plan` for full planning

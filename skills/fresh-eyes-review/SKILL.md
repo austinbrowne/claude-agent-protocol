@@ -17,7 +17,7 @@ Zero-context multi-agent code review with smart agent selection.
 
 - After validation passes (tests/lint/security all green)
 - Need comprehensive, unbiased code review
-- Before committing and creating PR
+- Before committing and creating PR/MR
 - Prerequisites: code changes staged (`git add` completed)
 
 ---
@@ -188,8 +188,8 @@ Include file:line references and specific fixes.
 
 After review, offer tracking options:
 1. **File-based todos** (`.todos/` directory) — recommended for solo work
-2. **GitHub issues** — recommended for teams
-3. **Both** — file-based + GitHub issues
+2. **Platform issues** (GitHub/GitLab) — recommended for teams
+3. **Both** — file-based + platform issues
 4. **None** — just show findings
 
 For CRITICAL and HIGH findings, create tracking items automatically. For MEDIUM findings, ask user preference.
@@ -224,7 +224,7 @@ Skip: Adversarial Validator, all conditional agents.
 
 - **Input**: Staged git changes (diff)
 - **Output**: Verdict + findings with severity
-- **Tracking**: File-based todos (`.todos/`) or GitHub issues
+- **Tracking**: File-based todos (`.todos/`) or platform issues (GitHub/GitLab)
 - **Consumed by**: `/ship` (commit-and-pr) as mandatory gate
 - **Agent definitions**: `agents/review/*.md`
 - **Checklists**: `checklists/AI_CODE_SECURITY_REVIEW.md`, `checklists/AI_CODE_REVIEW.md`

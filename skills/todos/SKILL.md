@@ -27,7 +27,7 @@ All todo files live in `.todos/` at the project root. This directory is committe
 ```
 
 **Components:**
-- `{issue_id}` — GitHub issue number or task identifier
+- `{issue_id}` — Issue number or task identifier
 - `{status}` — `pending` | `ready` | `complete`
 - `{priority}` — `critical` | `high` | `medium` | `low`
 - `{description-slug}` — kebab-case brief description (3-6 words)
@@ -83,8 +83,8 @@ When creating findings, offer the user three modes:
 | Mode | Storage | Best For |
 |------|---------|----------|
 | **File-based** | `.todos/` directory | Solo work, offline access |
-| **GitHub issues** | `gh issue create` | Team collaboration |
-| **Both** | `.todos/` + GitHub issues | Full traceability |
+| **Platform issues** | `gh issue create` / `glab issue create` | Team collaboration |
+| **Both** | `.todos/` + platform issues | Full traceability |
 
 If a project's CLAUDE.md specifies a default tracking mode, use that without asking.
 

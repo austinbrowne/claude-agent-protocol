@@ -21,7 +21,7 @@ A Claude Code plugin for AI-assisted software development. 6 workflow commands, 
 
 **Requirements:**
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed
-- GitHub CLI (`gh`) for issue/PR workflows (optional)
+- GitHub CLI (`gh`) or GitLab CLI (`glab`) for issue/PR/MR workflows (optional)
 
 ---
 
@@ -58,7 +58,7 @@ You: /workflows:plan
   → Generates a plan (Minimal, Standard, or Comprehensive)
   → Deepens the plan with parallel research agents
   → Multi-agent plan review with adversarial validation
-  → Creates GitHub issues from approved plan
+  → Creates issues from approved plan
   → "Ready to implement? → /workflows:implement"
 
 You: /workflows:implement
@@ -75,7 +75,7 @@ You: /workflows:review
   → "Ready to ship? → /workflows:ship"
 
 You: /workflows:ship
-  → /commit-and-pr creates commit and pull request
+  → /commit-and-pr creates commit and PR/MR
   → Final documentation and validation
   → "Capture learnings? → /workflows:learn"
 ```
@@ -160,10 +160,10 @@ Reusable methodology packages, each directly invocable:
 | `/generate-plan` | Plan creation (3 tiers) with integrated research and spec-flow |
 | `/deepen-plan` | Plan enrichment with parallel research |
 | `/review-plan` | Multi-agent plan review with adversarial validation |
-| `/create-issues` | GitHub issue generation from plan |
+| `/create-issues` | Issue generation from plan |
 | `/create-adr` | Architecture Decision Records |
 | `/file-issues` | Rapid-fire issue filing with sparse templates |
-| `/file-issue` | File a single GitHub issue from a description |
+| `/file-issue` | File a single issue from a description |
 | `/enhance-issue` | Refine sparse issues with exploration and planning |
 | `/start-issue` | Issue startup with living plan |
 | `/generate-tests` | Comprehensive test generation |
@@ -173,7 +173,7 @@ Reusable methodology packages, each directly invocable:
 | `/refactor` | Guided refactoring |
 | `/fresh-eyes-review` | 13-agent smart selection review |
 | `/review-protocol` | Protocol compliance review |
-| `/commit-and-pr` | Commit and PR with finding verification |
+| `/commit-and-pr` | Commit and PR/MR with finding verification |
 | `/finalize` | Final documentation + validation |
 | `/learn` | Knowledge compounding |
 | `/todos` | File-based todo tracking |
@@ -184,8 +184,8 @@ Reusable methodology packages, each directly invocable:
 
 ### Also Included
 - **Checklists** — OWASP Top 10 2025 security checklist, AI code review criteria
-- **Templates** — Plan (3-tier), test strategy, ADR, brainstorm, solution doc, todo, living plan, GitHub issue, bug issue, recovery report
-- **Guides** — Fresh Eyes Review, failure recovery, context optimization, multi-agent patterns, GitHub Projects integration
+- **Templates** — Plan (3-tier), test strategy, ADR, brainstorm, solution doc, todo, living plan, issue, bug issue, recovery report
+- **Guides** — Fresh Eyes Review, failure recovery, context optimization, multi-agent patterns, project integration (GitHub/GitLab)
 
 ---
 
@@ -222,6 +222,11 @@ commands/                              # 6 workflow entry points
 ├── review.md
 ├── learn.md
 └── ship.md
+
+platforms/                             # Platform detection & CLI references
+├── detect.md                          # Auto-detect GitHub vs GitLab
+├── github.md                          # GitHub CLI reference
+└── gitlab.md                          # GitLab CLI reference
 
 skills/                                # 22 reusable skill packages
 ├── brainstorm/SKILL.md

@@ -1,6 +1,6 @@
 ---
 name: start-issue
-version: "1.0"
+version: "1.1"
 description: Issue startup methodology with living plan, past learnings, and branch management
 referenced_by:
   - commands/implement.md
@@ -8,13 +8,15 @@ referenced_by:
 
 # Start Issue Skill
 
-Methodology for beginning work on a GitHub issue with context loading, past learnings, living plan creation, and branch management.
+Methodology for beginning work on an issue with context loading, past learnings, living plan creation, and branch management.
+
+> **Platform:** Commands below use GitHub (`gh`) syntax. For GitLab (`glab`) equivalents, see `platforms/gitlab.md`. Run `platforms/detect.md` once per session to determine your platform.
 
 ---
 
 ## When to Apply
 
-- Have GitHub issues ready and want to start implementation
+- Have issues ready and want to start implementation
 - Picking issue from backlog to work on
 
 ---
@@ -31,7 +33,10 @@ Methodology for beginning work on a GitHub issue with context loading, past lear
 ### 1. Load Issue Details
 
 ```bash
+# GitHub:
 gh issue view NNN --json title,body,labels,assignees,state
+# GitLab:
+glab issue view NNN
 ```
 
 Extract: Title, Description, Acceptance criteria, Labels, Plan reference, Dependencies.
@@ -52,7 +57,11 @@ Check for blockers (label `status: blocked`, dependency issues still open). Warn
 ### 4. Assign Issue and Create Branch
 
 ```bash
+# GitHub:
 gh issue edit NNN --add-assignee @me
+# GitLab:
+glab issue update NNN --assignee @me
+
 git checkout -b issue-NNN-brief-description
 git push -u origin issue-NNN-brief-description
 ```
@@ -69,7 +78,10 @@ Populate with: Issue ID/title, branch name, acceptance criteria, past learnings,
 ### 6. Update Issue
 
 ```bash
+# GitHub:
 gh issue comment NNN --body "Starting implementation on branch \`issue-NNN-brief-description\`"
+# GitLab:
+glab issue note NNN --message "Starting implementation on branch \`issue-NNN-brief-description\`"
 ```
 
 ### 7. Incremental Commit Guidance
@@ -92,7 +104,7 @@ When `--pipeline` is used:
 
 ## Integration Points
 
-- **Input**: GitHub issue number
+- **Input**: Issue number
 - **Output**: Branch created, living plan in `.todos/`, past learnings surfaced
 - **Learnings search**: `agents/research/learnings-researcher.md`
 - **Living plan template**: `templates/LIVING_PLAN_TEMPLATE.md`

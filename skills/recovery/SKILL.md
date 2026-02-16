@@ -59,7 +59,7 @@ Fix identified issues. Re-run validation and review.
 3. Generate recovery report using `templates/RECOVERY_REPORT.md`
 4. Save to `docs/recovery/YYYY-MM-DD-feature.md`
 5. Hard reset remaining code
-6. Update GitHub issue with abandon comment
+6. Update issue with abandon comment
 
 ---
 

@@ -22,8 +22,8 @@ AskUserQuestion:
       description: "Enrich a plan with parallel research and review agents"
     - label: "Review plan"
       description: "Multi-agent plan review with adversarial validation"
-    - label: "Create GitHub issues"
-      description: "Generate GitHub issues from an approved plan"
+    - label: "Create issues"
+      description: "Generate issues from an approved plan"
 ```
 
 ---
@@ -35,7 +35,7 @@ AskUserQuestion:
 - **"Generate plan"** → Load and follow `skills/generate-plan/SKILL.md`
 - **"Deepen existing plan"** → Load and follow `skills/deepen-plan/SKILL.md`
 - **"Review plan"** → Load and follow `skills/review-plan/SKILL.md`
-- **"Create GitHub issues"** → Load and follow `skills/create-issues/SKILL.md`
+- **"Create issues"** → Load and follow `skills/create-issues/SKILL.md`
 
 ---
 
@@ -51,8 +51,8 @@ AskUserQuestion:
       description: "Enrich with parallel research and review agents"
     - label: "Review this plan"
       description: "Multi-agent review with adversarial validation"
-    - label: "Create GitHub issues"
-      description: "Generate issues from this plan"
+    - label: "Create issues"
+      description: "Generate issues from plan"
     - label: "Start implementing"
       description: "Move to /implement to begin coding"
 ```
@@ -65,8 +65,8 @@ AskUserQuestion:
   options:
     - label: "Review this plan"
       description: "Multi-agent review with adversarial validation"
-    - label: "Create GitHub issues"
-      description: "Generate issues from this plan"
+    - label: "Create issues"
+      description: "Generate issues from plan"
     - label: "Start implementing"
       description: "Move to /implement to begin coding"
     - label: "Done"
@@ -79,8 +79,8 @@ AskUserQuestion:
   question: "Plan reviewed. What would you like to do next?"
   header: "Next step"
   options:
-    - label: "Create GitHub issues"
-      description: "Generate issues from the approved plan"
+    - label: "Create issues"
+      description: "Generate issues from approved plan"
     - label: "Start implementing"
       description: "Move to /implement to begin coding"
     - label: "Revise the plan"
@@ -89,7 +89,7 @@ AskUserQuestion:
       description: "End workflow"
 ```
 
-**After "Create GitHub issues":**
+**After "Create issues":**
 ```
 AskUserQuestion:
   question: "Issues created. What would you like to do next?"
@@ -106,7 +106,7 @@ AskUserQuestion:
 **Routing:**
 - **"Deepen this plan"** → Load `skills/deepen-plan/SKILL.md`
 - **"Review this plan"** → Load `skills/review-plan/SKILL.md`
-- **"Create GitHub issues"** → Load `skills/create-issues/SKILL.md`
+- **"Create issues"** → Load `skills/create-issues/SKILL.md`
 - **"Start implementing"** → Suggest user invoke `/implement`
 - **"Revise the plan"** → Return to Step 1 with "Generate plan" pre-selected
 - **"Create another plan"** → Return to Step 1

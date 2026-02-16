@@ -187,16 +187,19 @@ For CRITICAL and HIGH findings, create todo files:
 - Filename: `.todos/{issue_id}-pending-{priority}-{description-slug}.md`
 - Template: `templates/TODO_TEMPLATE.md`
 
-### Mode B: GitHub Issues
+### Mode B: Platform Issues
 
 For CRITICAL and HIGH findings, create issues:
 ```bash
+# GitHub:
 gh issue create --title "[{agent}] {title}" --label "priority:p1,review-finding,agent:{name}" --assignee @me
+# GitLab:
+glab issue create --title "[{agent}] {title}" --label "priority::p1,review-finding,agent:{name}" --assignee @me
 ```
 
 ### Mode C: Both
 
-Create both file-based todos AND GitHub issues.
+Create both file-based todos AND platform issues.
 
 ---
 

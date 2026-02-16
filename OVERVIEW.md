@@ -1,106 +1,142 @@
-# AI Coding Agent Protocol — Full Overview
+# AI Coding Agent Protocol — Overview
 
-**Version:** 3.2 | **Status:** Production-ready | **Platforms:** GitHub, GitLab
+**Version:** 4.2 | **Status:** Production-ready | **Platforms:** GitHub, GitLab
 
 ---
 
 ## What This Is
 
-The AI Coding Agent Protocol is a structured framework that turns Claude Code from a general-purpose AI assistant into a disciplined software engineering partner. It provides 13 slash commands, mandatory safety checkpoints, and multi-agent review processes that enforce quality standards throughout the entire development lifecycle.
+A Claude Code plugin that turns AI-assisted coding from ad-hoc prompting into a structured, repeatable engineering process. 6 workflow commands, 22 skill packages, 21 specialized agents, knowledge compounding, and mandatory safety gates — covering the full lifecycle from exploration to shipping.
 
-Without this protocol, AI coding assistants produce code that:
-- Contains security vulnerabilities 45% of the time (Veracode study)
-- Systematically misses edge cases (null, empty, boundary values)
-- Skips tests, error handling, and input validation
-- Confirms its own biases during self-review
-
-The protocol fixes each of these failure modes with specific, enforceable countermeasures.
+**The problem it solves:** Without structure, AI coding assistants produce code that contains security vulnerabilities 45% of the time (Veracode), systematically misses edge cases, skips tests, and confirms its own biases during self-review. This protocol provides specific, enforceable countermeasures for each of those failure modes.
 
 ---
 
 ## How It Works
 
-### The Core Idea
-
-The protocol is a collection of markdown files that Claude Code reads as instructions. These files define:
-1. **What commands are available** (13 slash commands like `/explore`, `/start-issue`, `/commit-and-pr`)
-2. **What safety rules to follow** (security review, mandatory testing, edge case checks)
-3. **What workflow to execute** (explore → plan → implement → test → review → ship)
-4. **When to stop and check** (mandatory gates that cannot be bypassed)
-
 ### Architecture
 
+The protocol is a collection of markdown files that Claude Code reads as instructions. They're organized in two layers:
+
 ```
-CLAUDE.md                    Always loaded — safety rules, AI blind spots, workflow overview
-AI_CODING_AGENT_GODMODE.md   Full SOP — phase-by-phase protocol (loaded on demand)
-commands/*.md                13 slash commands — the user-facing interface
-platforms/*.md               Platform detection + CLI references (GitHub/GitLab)
-checklists/*.md              Security review (OWASP 2025), code quality criteria
-guides/*.md                  Deep references loaded just-in-time at checkpoints
-templates/*.md               PRD, ADR, test strategy, issue templates
+CLAUDE.md                        Always loaded — safety rules, AI blind spots, workflow overview
+AI_CODING_AGENT_GODMODE.md       Full SOP — phase-by-phase protocol (loaded on demand)
+
+commands/          6 workflow entry points (explore, plan, implement, review, learn, ship)
+skills/            22 reusable skill packages — the building blocks
+agents/review/     17 review agent definitions (zero-context specialists)
+agents/research/   4 research agent definitions (codebase, learnings, best practices, framework docs)
+platforms/         Platform detection + CLI references (GitHub/GitLab)
+
+checklists/        OWASP Top 10 2025 security review, code quality criteria
+guides/            Deep references loaded just-in-time at checkpoints
+templates/         10 reusable templates (plans, issues, ADRs, test strategies, etc.)
+
+docs/solutions/    Knowledge compounding — captured solved problems
+docs/plans/        Plans (Minimal, Standard, Comprehensive)
+.todos/            File-based todo tracking (committed to git)
 ```
 
-**Key design principle:** LLMs have limited attention. Critical safety rules go first. Detailed checklists load just-in-time at checkpoints — not upfront where they'd dilute attention.
+**Key design principle:** LLMs have limited attention. Critical safety rules load first (CLAUDE.md). Detailed checklists and agent definitions load just-in-time at checkpoints — not upfront where they'd dilute attention.
 
-### The Two Entry Points
+### Two-Layer Command System
 
-**Entry Point A — New Feature (Full Lifecycle)**
+**Workflows** are the top-level entry points. Each one presents a menu of sub-steps and chains to the next workflow when done:
+
+| Command | Purpose |
+|---------|---------|
+| `/explore` | Reconnaissance and ideation — codebase exploration + brainstorming |
+| `/plan` | Planning and requirements — plan generation, deepening, review, issues, ADR |
+| `/implement` | Execution — start issue, generate tests, run validation, security review |
+| `/review` | Code review — Fresh Eyes review (full/lite), protocol compliance |
+| `/learn` | Knowledge capture — save solved problems as reusable solution docs |
+| `/ship` | Ship — commit and create PR/MR, finalize, refactor |
+
+**Skills** are the building blocks inside workflows. Each skill is also directly invocable as a slash command:
+
+| Category | Skills |
+|----------|--------|
+| Planning | `explore`, `brainstorm`, `generate-plan`, `deepen-plan`, `review-plan`, `create-adr`, `create-issues` |
+| Issues | `file-issues`, `file-issue`, `enhance-issue` |
+| Execution | `start-issue`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor` |
+| Review | `fresh-eyes-review`, `review-protocol` |
+| Shipping | `commit-and-pr`, `finalize` |
+| Knowledge | `learn`, `todos` |
+
+### Common Workflows
+
+**Full feature:**
 ```
-/explore          Understand the existing codebase
-/generate-prd     Define requirements (Lite or Full PRD)
-/create-adr       Document architectural decisions (optional)
-/create-issues    Break PRD into trackable issues
-/start-issue      Begin implementation on a feature branch
-[write code]      Implement against acceptance criteria
-/generate-tests   Write tests (happy path + edge cases + errors)
-/security-review  Run OWASP Top 10 2025 checklist
-/run-validation   Tests + coverage + lint + security scan
-/fresh-eyes-review  Multi-agent review with zero prior context
-/commit-and-pr    Commit and create PR/MR
-/refactor         Polish code quality (optional)
-/finalize         Update docs and close out (optional)
+/explore → /plan → /implement → /review → /learn → /ship
 ```
 
-**Entry Point B — Existing Issue (Jump to Implementation)**
+**Bug fix:**
 ```
-/start-issue 123  Load issue context, create branch, begin work
-[write code]      Implement
-/generate-tests   Test
-/fresh-eyes-review  Review
-/commit-and-pr    Ship
+/explore → /implement → /review → /learn → /ship
+```
+
+**Quick fix (root cause known):**
+```
+/implement → /review → /ship
+```
+
+**Just review existing changes:**
+```
+/review → /ship
+```
+
+**Direct skill invocation (skip the workflow menu):**
+```
+/fresh-eyes-review          Run 13-agent code review directly
+/security-review            Run OWASP Top 10 checklist directly
+/brainstorm "auth approaches"   Structured divergent thinking
 ```
 
 ### Mandatory Gates
 
-These checkpoints cannot be skipped:
+These checkpoints cannot be bypassed:
 
 | Gate | What It Enforces | Why |
 |------|-----------------|-----|
 | **Fresh Eyes Review** | Multi-agent review where reviewers have zero conversation context | Eliminates confirmation bias — AI won't approve its own work uncritically |
 | **Security Review** | OWASP Top 10 2025 checklist, auto-triggered for auth/data/API code | 45% of AI code has vulnerabilities without explicit checking |
-| **Test Generation** | Happy path + null + empty + boundaries + error cases, >80% coverage | AI systematically skips edge cases and error handling |
+| **Test Generation** | Happy path + null + empty + boundaries + error cases | AI systematically skips edge cases and error handling |
 | **Human Approval** | Pause before merge, deploy, or finalize | AI should assist decisions, not make them autonomously |
 
-### Multi-Agent Architecture
+### 21-Agent Architecture
 
-The `/fresh-eyes-review` command is the protocol's most important safety mechanism. It spawns **parallel specialist agents** that review code with **zero conversation history**:
+The protocol uses specialized agents for two purposes:
 
-- **Security Agent** — Checks for vulnerabilities, injection, auth gaps
-- **Code Quality Agent** — Checks for edge cases, error handling, maintainability
-- **Performance Agent** — Checks for N+1 queries, missing indexes, memory leaks
+**Review agents (17)** — Spawned during `/fresh-eyes-review`. Each receives zero conversation context — only the code diff and their review checklist. This eliminates confirmation bias.
 
-A supervisor agent consolidates findings. Because these agents have no prior context, they can't be influenced by the main conversation's assumptions or biases.
+- **Core (always run):** Security, Code Quality, Edge Case, Supervisor, Adversarial Validator
+- **Conditional (triggered by diff content):** Performance, API Contract, Concurrency, Error Handling, Data Validation, Dependency, Testing Adequacy, Config/Secrets, Documentation, Architecture, Simplicity, Spec-Flow
+
+A supervisor consolidates findings and removes false positives. An adversarial validator challenges claims and demands evidence.
+
+**Research agents (4)** — Spawned during `/explore` and `/deepen-plan`. Each investigates a different dimension of the problem:
+- Codebase Researcher — maps existing patterns and architecture
+- Learnings Researcher — searches `docs/solutions/` for relevant past solutions
+- Best Practices Researcher — finds industry patterns for the problem type
+- Framework Docs Researcher — looks up framework-specific APIs and patterns
+
+### Knowledge Compounding
+
+The `/learn` skill captures solved problems as searchable docs in `docs/solutions/`. Past learnings are surfaced automatically during `/start-issue` and `/generate-plan`. Your knowledge base grows with every solved problem — each session is smarter than the last.
 
 ### Platform Support
 
-The protocol auto-detects whether you're on GitHub or GitLab by checking `git remote get-url origin`. All platform-dependent commands (issue management, PR/MR creation, project boards) use the correct CLI automatically:
+The protocol auto-detects GitHub or GitLab from `git remote get-url origin`. All platform-dependent commands (issue management, PR/MR creation, project boards) use the correct CLI syntax automatically.
 
 | Feature | GitHub | GitLab |
 |---------|--------|--------|
 | CLI tool | `gh` | `glab` |
-| Code review | Pull Request | Merge Request |
+| Code review unit | Pull Request (PR) | Merge Request (MR) |
 | Project boards | GitHub Projects | GitLab Boards (label-driven) |
+| Scoped labels | Manual convention (`type: bug`) | Native (`type::bug`) |
 | Auto-close syntax | `Closes #123` | `Closes #123` |
+
+See `platforms/detect.md` for the detection process. See `platforms/github.md` and `platforms/gitlab.md` for full CLI references.
 
 ---
 
@@ -108,27 +144,28 @@ The protocol auto-detects whether you're on GitHub or GitLab by checking `git re
 
 ### For Individual Engineers
 
-- **Faster delivery with fewer bugs.** The protocol front-loads quality checks that would otherwise surface in code review or production. Engineers spend less time on rework.
-- **Consistent workflow.** Every feature follows the same explore → plan → implement → test → review → ship pattern, regardless of who's building it.
-- **Built-in knowledge.** Security checklists, test strategies, and edge case reminders are baked into the workflow. Engineers don't need to remember everything — the protocol remembers for them.
-- **Reduced context switching.** Slash commands handle the ceremony (branch creation, issue management, PR formatting) so engineers stay focused on the problem.
+- **Faster delivery with fewer bugs.** Quality checks are front-loaded into the workflow, not discovered in code review or production. Less rework.
+- **Consistent workflow.** Every feature follows the same explore, plan, implement, test, review, ship pattern regardless of who's building it.
+- **Built-in knowledge.** Security checklists, test strategies, and edge case reminders are baked into the workflow. The protocol remembers what you'd forget.
+- **Knowledge compounds.** Every tricky problem you solve becomes a searchable doc that gets surfaced automatically in future sessions.
+- **Reduced context switching.** Workflow commands handle the ceremony — branch creation, issue management, PR/MR formatting — so you stay focused on the problem.
 
 ### For Engineering Managers
 
 - **Predictable quality.** Mandatory gates mean code can't ship without tests, security review, and independent code review. Quality is systemic, not dependent on individual discipline.
-- **Visibility into progress.** Issues created from PRDs with clear acceptance criteria. Kanban boards show what's in progress, what's blocked, what's done.
+- **Visibility into progress.** Issues with clear acceptance criteria. Project boards show what's in progress, blocked, or done.
 - **Reduced review burden.** Fresh Eyes Review catches issues before human reviewers see the code. Human reviews focus on architecture and business logic, not missing null checks.
-- **Onboarding acceleration.** New engineers (and AI agents) follow the same protocol. The workflow is documented, not tribal knowledge.
-- **Audit trail.** PRDs, ADRs, issues, and PR descriptions create a complete record of what was built, why, and what alternatives were considered.
+- **Onboarding acceleration.** New engineers and AI agents follow the same documented protocol. The workflow is explicit, not tribal knowledge.
+- **Audit trail.** Plans, ADRs, issues, PR/MR descriptions, and recovery reports create a complete record of what was built, why, and what alternatives were considered.
 
 ### For Engineering Leadership / Executives
 
-- **Risk reduction.** 45% of AI-generated code contains security vulnerabilities (Veracode). This protocol systematically catches them before they reach production. Mandatory OWASP Top 10 2025 reviews, automated security scanning, and multi-agent review create defense in depth.
-- **Faster time to market.** AI-assisted development with this protocol delivers features in roughly half the time of manual development (DX Research, 2024: 25-50% time savings), while maintaining quality standards that would otherwise slow down AI-assisted work.
-- **Scalable AI adoption.** The protocol standardizes how AI is used across teams. It's not "each engineer uses AI differently" — it's a repeatable, auditable process that works the same way every time.
-- **Platform flexibility.** Works with both GitHub and GitLab. No vendor lock-in on the development platform.
-- **Measurable quality metrics.** Every PR includes test coverage, security review status, and Fresh Eyes Review verdict. Quality is measurable, not aspirational.
-- **Institutional knowledge preservation.** ADRs capture why decisions were made. PRDs document requirements. Recovery reports document what failed and why. This knowledge persists beyond any individual's tenure.
+- **Risk reduction.** 45% of AI-generated code contains security vulnerabilities (Veracode). This protocol catches them systematically before production. Mandatory OWASP Top 10 2025 reviews, automated security scanning, and multi-agent review create defense in depth.
+- **Faster time to market.** AI-assisted development with this protocol delivers features roughly twice as fast as manual development (DX Research, 2024: 25-50% time savings), while maintaining quality standards that would otherwise slow down AI-assisted work.
+- **Scalable AI adoption.** The protocol standardizes how AI is used across teams. Not "each engineer uses AI differently" — a repeatable, auditable process that works the same way every time.
+- **Platform flexibility.** Works with both GitHub and GitLab. No vendor lock-in.
+- **Measurable quality metrics.** Every PR/MR includes test coverage, security review status, and Fresh Eyes Review verdict. Quality is measurable, not aspirational.
+- **Institutional knowledge preservation.** ADRs capture why decisions were made. Plans document requirements. Solution docs capture solved problems. Recovery reports document what failed and why. This knowledge persists beyond any individual's tenure.
 
 ### Compared to Unstructured AI Coding
 
@@ -137,52 +174,26 @@ The protocol auto-detects whether you're on GitHub or GitLab by checking `git re
 | AI skips edge cases (null, empty, boundaries) | Explicit edge case checklist at every checkpoint |
 | 45% of code has security vulnerabilities | Mandatory OWASP Top 10 2025 review |
 | AI approves its own work (confirmation bias) | Fresh Eyes agents review with zero prior context |
-| No tests or minimal tests | >80% coverage target, specific test strategy per scenario |
-| Ad-hoc workflow varies by engineer | Consistent explore → plan → build → test → review → ship |
-| No documentation of decisions | ADRs, PRDs, recovery reports create full audit trail |
+| No tests or minimal tests | Enforced test generation covering happy path + edge cases + errors |
+| Ad-hoc workflow varies by engineer | Consistent explore, plan, build, test, review, ship |
+| No documentation of decisions | Plans, ADRs, solution docs, recovery reports — full audit trail |
+| Solved problems are forgotten next session | Knowledge compounding — past solutions surfaced automatically |
 | Errors caught in production | Errors caught at mandatory gates before merge |
 
 ---
 
-## What's in the Box
+## What's Included
 
-### 13 Slash Commands
-
-| Phase | Command | What It Does |
-|-------|---------|-------------|
-| Planning | `/explore` | Maps codebase architecture, identifies patterns |
-| Planning | `/generate-prd` | Creates requirements doc (Lite: 1 page, Full: 5+ pages) |
-| Planning | `/create-adr` | Documents architectural decisions with rationale |
-| Planning | `/create-issues` | Breaks PRD into trackable issues with acceptance criteria |
-| Execution | `/start-issue` | Loads issue context, creates branch, assigns to you |
-| Execution | `/generate-tests` | Writes tests: happy path + edge cases + error cases |
-| Execution | `/security-review` | Runs OWASP Top 10 2025 checklist |
-| Execution | `/run-validation` | Runs tests + coverage + lint + security scan |
-| Execution | `/fresh-eyes-review` | Multi-agent review with zero conversation context |
-| Execution | `/recovery` | Decision tree for failed implementations (continue/rollback/abandon) |
-| Execution | `/commit-and-pr` | Commits with conventional format, creates PR/MR |
-| Finalization | `/refactor` | Guided refactoring pass |
-| Finalization | `/finalize` | Updates docs, runs final validation |
-
-### Safety Checklists
-
-- **OWASP Top 10 2025 Security Review** — Injection, broken access control, cryptographic failures, supply chain, SSRF, and more
-- **AI Code Review Criteria** — Edge cases, error handling, hallucinated APIs, performance anti-patterns
-
-### Templates
-
-- **PRD Template** — Lite (quick features) and Full (complex features) variants
-- **Test Strategy** — What tests to write for every scenario type
-- **ADR Template** — Architecture Decision Records
-- **Issue Template** — Structured issues with acceptance criteria
-
-### Guides
-
-- **Fresh Eyes Review** — How the multi-agent unbiased review works
-- **Failure Recovery** — Decision tree: continue vs rollback vs abandon
-- **Context Optimization** — Reduce token usage by 30-50%
-- **Multi-Agent Patterns** — Coordinate specialized agents
-- **GitHub/GitLab Project Integration** — Full platform workflow guides
+| Category | Count | Contents |
+|----------|-------|----------|
+| Workflow commands | 6 | explore, plan, implement, review, learn, ship |
+| Skill packages | 22 | Planning, issue management, execution, review, shipping, knowledge |
+| Review agents | 17 | Security, code quality, edge case, performance, API contract, concurrency, error handling, data validation, dependency, testing, config/secrets, documentation, architecture, simplicity, spec-flow, supervisor, adversarial validator |
+| Research agents | 4 | Codebase, learnings, best practices, framework docs |
+| Checklists | 2 | OWASP Top 10 2025 security review, AI code review criteria |
+| Templates | 10 | Plan (3-tier), test strategy, ADR, brainstorm, solution doc, todo, living plan, issue, bug issue, recovery report |
+| Guides | 7 | Fresh Eyes Review, failure recovery, context optimization, multi-agent patterns, project integration (GitHub + GitLab) |
+| Platform references | 3 | Auto-detection, GitHub CLI reference, GitLab CLI reference |
 
 ---
 
@@ -194,29 +205,30 @@ Use the following prompt with Claude or any LLM to generate a slide deck tailore
 
 ```
 Create a presentation slide deck for the AI Coding Agent Protocol. The audience
-is [CHOOSE ONE OR COMBINE: engineering executives / engineering managers /
-individual engineers / a mixed audience of all three].
+is [CHOOSE: engineering executives / engineering managers / individual engineers /
+a mixed audience of all three].
 
 Context about the protocol:
-- It's a structured framework (v3.2, production-ready) for AI-assisted software
-  development using Claude Code
-- Provides 13 slash commands covering the full dev lifecycle: explore → plan →
-  implement → test → review → ship
-- Key innovation: mandatory safety gates that can't be bypassed — security review
-  (OWASP Top 10 2025), Fresh Eyes multi-agent review (zero-context agents that
-  eliminate confirmation bias), and enforced test coverage (>80% target)
-- Addresses the core problem: 45% of AI-generated code contains security
-  vulnerabilities (Veracode study), and AI systematically misses edge cases
-- Multi-agent architecture: Fresh Eyes Review spawns parallel specialist agents
-  (Security, Code Quality, Performance) with zero conversation history to
-  provide unbiased review
+- It's a Claude Code plugin (v4.2, production-ready) for structured AI-assisted
+  software development
+- 6 workflow commands and 22 directly-invocable skills covering the full dev
+  lifecycle: explore → plan → implement → review → learn → ship
+- Two-layer architecture: workflows (orchestrators) → skills (building blocks) →
+  agents (expert personas)
+- 21 specialized agents: 17 review agents (zero-context, eliminate confirmation
+  bias) + 4 research agents (parallel codebase/learnings/best-practices/docs)
+- Mandatory safety gates: Fresh Eyes multi-agent review (zero-context agents),
+  OWASP Top 10 2025 security review, enforced test generation, human approval
+  before merge
+- Knowledge compounding: solved problems captured as searchable docs via /learn,
+  automatically surfaced in future planning and implementation
+- Addresses core problem: 45% of AI-generated code contains security
+  vulnerabilities (Veracode study), AI systematically misses edge cases
 - Supports both GitHub and GitLab (auto-detected from git remote)
 - Research-backed: DX Research shows 25-50% time savings with AI coding
   assistants; this protocol maintains those gains while adding quality controls
-- Two entry points: new feature (full lifecycle) or existing issue (jump to
-  implementation)
-- Creates full audit trail: PRDs, ADRs, issues, PR descriptions, recovery
-  reports
+- Creates full audit trail: plans, ADRs, issues, PR/MR descriptions, solution
+  docs, recovery reports
 
 Tailor the deck to the audience:
 
@@ -224,25 +236,27 @@ FOR EXECUTIVES — Focus on:
 - Risk reduction (security vulnerabilities in AI code, audit trail)
 - Time to market (25-50% faster delivery)
 - Scalable AI adoption (repeatable process, not ad-hoc)
-- Measurable quality (coverage, security status, review verdicts on every PR)
-- Platform flexibility (no vendor lock-in)
+- Measurable quality (coverage, security status, review verdicts on every PR/MR)
+- Platform flexibility (GitHub + GitLab, no vendor lock-in)
 - 3-5 slides, high-level, minimal technical detail
 
 FOR MANAGERS — Focus on:
 - Predictable quality (mandatory gates, consistent workflow)
-- Team visibility (kanban boards, issue tracking, progress metrics)
+- Team visibility (project boards, issue tracking, progress metrics)
 - Reduced review burden (AI catches issues before human review)
 - Onboarding (documented workflow, not tribal knowledge)
+- Knowledge compounding (team gets smarter with every solved problem)
 - Risk flags (BREAKING_CHANGE, SECURITY_SENSITIVE, PERFORMANCE_IMPACT)
 - 5-8 slides, mix of process and light technical detail
 
 FOR ENGINEERS — Focus on:
-- How the commands work (with examples)
-- The workflow (explore → plan → build → test → review → ship)
-- Fresh Eyes Review architecture (why zero-context matters)
+- How the 6 workflow commands and 22 skills work (with examples)
+- The two-layer architecture (workflows → skills → agents)
+- Fresh Eyes Review: 17 agents, smart selection, zero-context methodology
 - Security checklist (OWASP Top 10 2025 specifics)
+- Knowledge compounding (/learn captures, /start-issue surfaces)
 - Platform support (GitHub/GitLab auto-detection)
-- How to customize (add commands, modify checklists)
+- How to customize (add skills, modify checklists, add review agents)
 - 8-12 slides, technical detail welcome
 
 FOR MIXED AUDIENCE — Structure as:
@@ -251,13 +265,13 @@ FOR MIXED AUDIENCE — Structure as:
 - Slides 7-10: Technical deep dive (engineer-friendly)
 - Slide 11: Adoption plan / next steps (everyone)
 
-Additional context about our organization: [ADD YOUR SPECIFICS HERE — e.g.,
-"We're a 50-person startup using GitLab, shipping a B2B SaaS product, currently
+Additional context about our organization: [ADD YOUR SPECIFICS — e.g.,
+"50-person startup using GitLab, shipping a B2B SaaS product, currently
 have no formal AI coding standards"]
 
 Output format: Markdown slides using --- as slide separators. Include speaker
-notes under each slide. Keep slides scannable — use bullet points, not
-paragraphs. Include 1-2 data points per slide maximum.
+notes under each slide. Keep slides scannable — bullet points, not paragraphs.
+Include 1-2 data points per slide maximum.
 ```
 
 ---
@@ -266,20 +280,22 @@ paragraphs. Include 1-2 data points per slide maximum.
 
 **Install:**
 ```bash
-git clone https://github.com/austinbrowne/claude-agent-protocol.git
-# Copy files to ~/.claude/ (commands, checklists, guides, templates, platforms)
+/plugin marketplace add https://github.com/austinbrowne/claude-agent-protocol
+/plugin install godmode
 ```
 
 **Try it:**
 ```bash
 /explore              # Explore any codebase
-/generate-prd         # Plan a feature
-/start-issue 123      # Begin work on an issue
-/fresh-eyes-review    # Independent multi-agent code review
-/commit-and-pr        # Ship it
+/plan                 # Plan a feature (generate, review, create issues)
+/implement            # Start issue, write tests, run validation
+/review               # 17-agent independent code review
+/learn                # Capture what you just solved
+/ship                 # Commit and create PR/MR
 ```
 
 **Learn more:**
 - `QUICK_START.md` — Entry points and command reference
 - `AI_CODING_AGENT_GODMODE.md` — Full protocol SOP
-- `commands/*.md` — Individual command documentation
+- `commands/*.md` — 6 workflow commands
+- `skills/*/SKILL.md` — 22 skill packages

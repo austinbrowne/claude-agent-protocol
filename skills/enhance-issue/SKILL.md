@@ -1,12 +1,14 @@
 ---
 name: enhance-issue
-version: "1.0"
+version: "1.1"
 description: Refine needs_refinement issues with exploration, planning, and enriched details — then mark ready_for_dev
 ---
 
 # Enhance Issue Skill
 
 Takes a sparse `needs_refinement` issue, explores the codebase, runs through planning, enriches the issue with full details, and marks it `ready_for_dev`.
+
+> **Platform:** Commands below use GitHub (`gh`) syntax. For GitLab (`glab`) equivalents, see `platforms/gitlab.md`. Run `platforms/detect.md` once per session to determine your platform.
 
 ---
 
@@ -34,7 +36,10 @@ Takes a sparse `needs_refinement` issue, explores the codebase, runs through pla
 **Option B:** List issues labeled `needs_refinement`:
 
 ```bash
+# GitHub:
 gh issue list --label "needs_refinement" --json number,title,labels --limit 20
+# GitLab:
+glab issue list --label "needs_refinement" --per-page 20
 ```
 
 Display the list and ask user to pick:
@@ -50,7 +55,10 @@ AskUserQuestion:
 ### 2. Load Issue Context
 
 ```bash
+# GitHub:
 gh issue view NNN --json title,body,labels,assignees,comments
+# GitLab:
+glab issue view NNN
 ```
 
 Read the issue body. Identify what's already filled vs TBD.
@@ -82,10 +90,13 @@ The planning workflow handles sub-step selection internally.
 
 ### 5. Update the Issue
 
-After planning is complete, update the GitHub issue with enriched content:
+After planning is complete, update the issue with enriched content:
 
 ```bash
+# GitHub:
 gh issue edit NNN --body-file /tmp/enhanced-issue-body.md
+# GitLab:
+glab issue update NNN --description "$(cat /tmp/enhanced-issue-body.md)"
 ```
 
 **For bugs**, fill in all TBD sections:
@@ -106,7 +117,10 @@ gh issue edit NNN --body-file /tmp/enhanced-issue-body.md
 ### 6. Swap Labels
 
 ```bash
+# GitHub:
 gh issue edit NNN --remove-label "needs_refinement" --add-label "ready_for_dev"
+# GitLab:
+glab issue update NNN --unlabel "needs_refinement" --label "ready_for_dev"
 ```
 
 ### 7. Next Steps
@@ -141,9 +155,9 @@ AskUserQuestion:
 
 ## Integration Points
 
-- **Input**: GitHub issue number or `needs_refinement` label query
+- **Input**: Issue number or `needs_refinement` label query
 - **Exploration**: `skills/explore/SKILL.md`
 - **Planning**: `commands/plan.md` (full workflow with sub-step selection)
-- **Templates**: `templates/BUG_ISSUE_TEMPLATE.md`, `templates/GITHUB_ISSUE_TEMPLATE.md`
-- **Output**: Enriched GitHub issue with `ready_for_dev` label
+- **Templates**: `templates/BUG_ISSUE_TEMPLATE.md`, `templates/ISSUE_TEMPLATE.md`
+- **Output**: Enriched issue with `ready_for_dev` label
 - **Next step**: `/workflows:implement` or another `/enhance-issue`

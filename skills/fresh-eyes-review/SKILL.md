@@ -317,6 +317,23 @@ Launch Adversarial Validator as a Task tool call with all specialist outputs + S
 | **APPROVED_WITH_NOTES** | MEDIUM/LOW only | Proceed, address later |
 | **APPROVED** | No issues | Proceed to commit |
 
+### Write Verdict Marker
+
+After determining the verdict, write a marker file that survives context compaction:
+
+**File:** `.todos/review-verdict.md`
+
+```markdown
+---
+verdict: [APPROVED | APPROVED_WITH_NOTES | FIX_BEFORE_COMMIT | BLOCK]
+timestamp: YYYY-MM-DDTHH:MM:SS
+files_reviewed: [count]
+branch: [current branch name]
+---
+```
+
+This file is read by `/ship` Step 0 to detect review status without relying on conversation context. Overwrite on each review run.
+
 ---
 
 ## Post-Review Actions

@@ -1,10 +1,10 @@
 # AI Coding Agent Standard Operating Protocol (SOP)
 
-**Version:** 3.2
-**Last Updated:** December 2025
+**Version:** 4.2
+**Last Updated:** February 2026
 **Purpose:** Safe, effective AI-assisted software development
 
-**NEW:** 13 modular slash commands available for flexible workflows - see `~/.claude/commands/*.md` and `QUICK_START.md`
+**NEW in v4.2:** 6 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`), 22 reusable skill packages, flat `godmode:` namespace, and natural workflow chaining via `AskUserQuestion`.
 
 ---
 
@@ -12,9 +12,19 @@
 
 This is the **comprehensive reference document** for the GODMODE protocol.
 
+**For guided workflows, use the 6 workflow commands:**
+- `/explore` — Reconnaissance & ideation: codebase exploration + brainstorming
+- `/plan` — Planning & requirements: plan generation, deepen, review, issues, ADR
+- `/implement` — Implementation: start issue, tests, validation, security, recovery
+- `/review` — Code review: fresh eyes (full/lite), protocol compliance
+- `/learn` — Knowledge capture: save solved problems as reusable docs
+- `/ship` — Ship: commit/PR, finalize, refactor
+
 **For quick access:**
 - Critical safety rules → `~/.claude/CLAUDE.md` (auto-loaded with highest priority)
-- Modular commands → `~/.claude/commands/*.md` (13 commands)
+- Workflow commands → `~/.claude/commands/*.md` (6 workflows)
+- Reusable skills → `~/.claude/skills/*/SKILL.md` (22 skill packages)
+- Agent definitions → `~/.claude/agents/review/*.md` (17 review agents) + `~/.claude/agents/research/*.md` (4 research agents)
 - Quick reference → `~/.claude/QUICK_START.md`
 
 **Use this document when:**
@@ -79,9 +89,9 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 
 | Complexity | Indicators | Approach |
 |------------|-----------|----------|
-| **Small** | <4 hours, single file, clear requirements | Lite PRD → Implement → Test → Security check |
-| **Medium** | 4-16 hours, multiple files, some unknowns | Abbreviated PRD → Phased implementation |
-| **Complex** | >16 hours, architectural decisions, high risk | Full PRD + ADR → Multi-phase → Reviews |
+| **Small** | <4 hours, single file, clear requirements | Minimal plan → Implement → Test → Security check |
+| **Medium** | 4-16 hours, multiple files, some unknowns | Standard plan → Phased implementation |
+| **Complex** | >16 hours, architectural decisions, high risk | Comprehensive plan + ADR → Multi-phase → Reviews |
 
 ---
 
@@ -92,16 +102,21 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 ### Entry Point A: New Feature (Start at Phase 0)
 **Use when:** Starting a new feature from scratch
 - Proceed to **Phase 0: Exploration & Planning** (below)
-- Complete PRD, create issues (optional), then execute
+- Complete plan, create issues (optional), then execute
 
 ### Entry Point B: Pick Existing Issue from Backlog (Start at Phase 1)
-**Use when:** Picking up a pre-planned issue from project backlog
+**Use when:** Picking up a pre-planned issue from GitHub Projects backlog
 
 **Required actions:**
 
-1. **Detect platform and load the issue:**
-   - Run platform detection if not done (see `platforms/detect.md`)
-   - Use platform CLI to view issue details (see `platforms/github.md` or `platforms/gitlab.md` for syntax)
+1. **Load the issue:**
+   ```bash
+   # View issue details
+   gh issue view ISSUE_NUMBER
+
+   # Or list ready issues
+   gh project item-list PROJECT_NUM --owner OWNER
+   ```
 
 2. **Extract context from issue:**
    - **Description**: Understand what needs to be built and why
@@ -111,13 +126,13 @@ This is the **comprehensive reference document** for the GODMODE protocol.
    - **Security Considerations**: Check for `flag: security-sensitive` label
    - **Performance Considerations**: Check for `flag: performance-critical` label
    - **Related Issues**: Check dependencies (must be unblocked)
-   - **PRD Reference**: Note the linked PRD file path (e.g., `docs/prds/123-2025-11-29-user-auth.md`)
+   - **Plan Reference**: Note the linked plan file path (e.g., `docs/plans/123-2026-02-04-standard-user-auth-plan.md`)
 
 3. **Verify issue is ready:**
    - [ ] Not blocked by dependencies
    - [ ] Has clear acceptance criteria
    - [ ] Technical requirements are understood
-   - [ ] All context needed is in issue (no need to reference original PRD)
+   - [ ] All context needed is in issue (no need to reference original plan)
 
 4. **Restate the task:**
    - In your own words, summarize what needs to be built
@@ -129,7 +144,7 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 ```
 User: "Let's work on issue #45"
 
-AI: [Loads issue via platform CLI]
+AI: [Loads issue via gh issue view 45]
 
 AI: "I'll implement issue #45: Implement password hashing
 
@@ -171,6 +186,18 @@ Ready to proceed to Phase 1 implementation?"
 - Create `.claude/CODEBASE_MAP.md` for reusable architecture context
 - For files >500 lines, request summary FIRST
 
+### Step 1.5: Brainstorm (Optional but Recommended for Complex Features)
+
+**Use:** `/brainstorm` command
+
+When multiple valid approaches exist, brainstorm before committing to a solution:
+1. Search `docs/solutions/` for relevant past learnings
+2. Generate 2-3 approaches with pros/cons/complexity/risk
+3. Present comparison matrix, get user decision
+4. Save to `docs/brainstorms/YYYY-MM-DD-{slug}-brainstorm.md`
+
+**Skip for:** Clear bug fixes, small tasks, when approach is obvious.
+
 ### Step 2: Plan with Extended Thinking
 
 **Users can request deeper reasoning with these triggers:**
@@ -183,54 +210,76 @@ Ready to proceed to Phase 1 implementation?"
 - Architecture decisions with multiple valid approaches → Suggest "ultrathink"
 - Debugging that requires tracing through multiple systems → Suggest "think hard"
 
-### Step 3: Generate PRD
+### Step 3: Generate Plan
 
-**Use:** `PRD_TEMPLATE.md`
+**Use:** `PLAN_TEMPLATE.md`
 
-**Lite PRD (small tasks):** Problem + Solution + Tests + Security check
-**Full PRD (complex):** All sections
+**Minimal plan (small tasks):** Problem + Solution + Affected Files + Tests + Risks
+**Standard plan (moderate):** Adds Goals, Technical Approach, Implementation Steps, Security Review, Past Learnings
+**Comprehensive plan (complex):** Full template + Spec-Flow Analysis, Alternatives Considered, Rollback Plan
 
 **MUST include:**
 - Test strategy (specific test cases, not just "write tests")
 - Security review section (is this security-sensitive?)
 
-### Step 3a: Save PRD to File
+### Step 3a: Save Plan to File
 
-⚠️ **MANDATORY: Always save PRD to local file**
+**MANDATORY: Always save plan to local file**
 
-**Initial file location:** `docs/prds/YYYY-MM-DD-feature-name.md`
+**Initial file location:** `docs/plans/YYYY-MM-DD-type-feature-name-plan.md`
 
 **Example:**
 ```bash
-# Check for existing PRDs
-ls docs/prds/
+# Check for existing plans
+ls docs/plans/
 
 # Create directory if needed
-mkdir -p docs/prds
+mkdir -p docs/plans
 
-# Save PRD with date + descriptive name
-# Example: docs/prds/2025-11-29-user-authentication.md
+# Save plan with date + tier type + descriptive name
+# Example: docs/plans/2026-02-04-standard-user-authentication-plan.md
 ```
 
 **Naming convention:**
 - Date format: `YYYY-MM-DD`
+- Type: `minimal`, `standard`, or `comprehensive`
 - Feature name: lowercase-with-hyphens
 - Examples:
-  - `docs/prds/2025-11-29-user-authentication.md`
-  - `docs/prds/2025-11-29-api-rate-limiting.md`
-  - `docs/prds/2025-11-29-password-reset-flow.md`
+  - `docs/plans/2026-02-04-minimal-fix-login-bug-plan.md`
+  - `docs/plans/2026-02-04-standard-user-authentication-plan.md`
+  - `docs/plans/2026-02-04-comprehensive-api-redesign-plan.md`
 
-**After issue creation (Step 6):**
-- Rename PRD to prepend issue number: `NNN-YYYY-MM-DD-feature-name.md`
-- Example: Issue #123 created → Rename to `docs/prds/123-2025-11-29-user-authentication.md`
+**After GitHub issue creation (Step 6):**
+- Rename plan to prepend issue number: `NNN-YYYY-MM-DD-type-feature-name-plan.md`
+- Example: Issue #123 created → Rename to `docs/plans/123-2026-02-04-standard-user-authentication-plan.md`
 - Update issue to reference renamed file
 
-**Why save PRD:**
+**Why save plan:**
 - Reference during implementation (Phase 1)
-- Link from issues
+- Link from GitHub issues
 - Historical record of decisions
 - Context for future developers
-- Issue number creates direct link between PRD and implementation
+- Issue number creates direct link between plan and implementation
+
+### Step 3b: Deepen Plan (Optional)
+
+**Use:** `/deepen-plan` command
+
+Enrich the plan with massive parallel research:
+1. Parse plan into sections
+2. Launch research subagents per section (parallel)
+3. Launch 6 review agents against full plan (parallel)
+4. Search `docs/solutions/` for applicable learnings
+5. Update plan in-place with `[DEEPENED]` annotations
+
+### Step 3c: Review Plan (Optional)
+
+**Use:** `/review-plan` command
+
+Multi-agent plan review before implementation:
+1. Launch 4 reviewers in parallel: Architecture, Simplicity, Spec-Flow, Security
+2. Launch Adversarial Validator after reviewers (challenges plan AND findings)
+3. Consolidate report with verdict: APPROVED / REVISION_REQUESTED / APPROVED_WITH_NOTES
 
 ### Step 4: Check for Architectural Decision
 
@@ -255,34 +304,34 @@ Create ADR if:
 
 ---
 
-### Step 6: Create Issues (Optional)
+### Step 6: Create GitHub Issues (Optional)
 
 ⚠️ **DECISION POINT: Immediate Execution or Backlog Mode?**
 
-**If using project board workflow:**
+**If using GitHub Projects workflow:**
 
-1. **Generate issues from approved PRD:**
-   - Use: `/create-issues docs/prds/2025-11-29-feature-name.md`
-   - See: `guides/PROJECT_INTEGRATION.md` for platform-specific workflow
+1. **Generate issues from approved plan:**
+   - Use: `/create-issues docs/plans/2026-02-04-standard-feature-name-plan.md`
+   - See: `guides/GITHUB_PROJECT_INTEGRATION.md` for full workflow
 
-2. **Create first issue and rename PRD:**
-   - Create first issue with platform CLI (see `platforms/` for syntax)
+2. **Create first issue and rename plan:**
+   - Create first GitHub issue with `gh issue create`
    - Note the issue number returned (e.g., #123)
-   - Rename PRD file to prepend issue number:
+   - Rename plan file to prepend issue number:
      ```bash
      # Example: Issue #123 created
-     mv docs/prds/2025-11-29-user-authentication.md \
-        docs/prds/123-2025-11-29-user-authentication.md
+     mv docs/plans/2026-02-04-standard-user-authentication-plan.md \
+        docs/plans/123-2026-02-04-standard-user-authentication-plan.md
      ```
-   - Update issue body to reference renamed PRD
+   - Update issue body to reference renamed plan
 
-3. **Commit and push PRD to repository:**
+3. **Commit and push plan to repository:**
    ```bash
-   # CRITICAL: Push PRD to git so it's available to anyone picking up the issue
-   git add docs/prds/123-2025-11-29-user-authentication.md
-   git commit -m "docs: Add PRD for user authentication (Issue #123)
+   # CRITICAL: Push plan to git so it's available to anyone picking up the issue
+   git add docs/plans/123-2026-02-04-standard-user-authentication-plan.md
+   git commit -m "docs: Add plan for user authentication (Issue #123)
 
-   Generated PRD for user authentication feature.
+   Generated plan for user authentication feature.
    Linked to issue #123.
 
    🤖 Generated with Claude Code"
@@ -291,9 +340,9 @@ Create ADR if:
    ```
 
    **Why this is critical:**
-   - PRD must be in repository for other developers
-   - PRD must be available if you pick up issue later in different session
-   - Issue references PRD file path - must exist in repo
+   - Plan must be in repository for other developers
+   - Plan must be available if you pick up issue later in different session
+   - Issue references plan file path - must exist in repo
    - Enables team collaboration on backlog
 
 4. **Choose execution mode:**
@@ -306,7 +355,7 @@ Create ADR if:
 
    **FORK B: Backlog Mode**
    - Create issues without assignee
-   - Add to project board "Ready" column
+   - Add to GitHub Project "Ready" column
    - Exit GODMODE workflow
    - Issues remain in backlog for later pickup (via @claude tag or manual selection)
 
@@ -316,10 +365,10 @@ Create ADR if:
    - `area:` - frontend | backend | infrastructure | security | testing
    - `flag:` (if applicable) - security-sensitive | performance-critical | breaking-change
 
-**If NOT using project boards:** Skip to Phase 1 directly.
+**If NOT using GitHub Projects:** Skip to Phase 1 directly.
 
-**See:** `guides/PROJECT_INTEGRATION.md` for platform-specific:
-- CLI commands for issue/project management
+**See:** `guides/GITHUB_PROJECT_INTEGRATION.md` for:
+- GitHub CLI commands (`gh issue create`, `gh project item-list`)
 - Standard label system setup
 - Project board workflow
 - Assigning issues to Claude Code
@@ -329,17 +378,23 @@ Create ADR if:
 ## Phase 1: Execution Loop
 
 **Entry paths:**
-- **From Phase 0**: After PRD approval and optional issue creation
+- **From Phase 0**: After plan approval and optional issue creation
 - **From Entry Point B**: Picked existing issue from backlog (skipped Phase 0)
 
 ### Step 1: Restate & Checkpoint
 
-- Restate phase goals (from PRD or from issue context)
+- Restate phase goals (from plan or from issue context)
 - Ensure git checkpoint exists (can rollback if needed)
+- **Search `docs/solutions/` for relevant past learnings** (use `/start-issue` which does this automatically)
+- Create living plan in `.todos/{issue_id}-plan.md` for progress tracking
 
-**If working from an issue:**
+**If working from GitHub issue:**
 
-1. **Assign issue to yourself** using platform CLI (see `platforms/` for syntax)
+1. **Assign issue to user:**
+   ```bash
+   # Assign to yourself (the prompter)
+   gh issue edit ISSUE_NUM --add-assignee @me
+   ```
 
 2. **Create issue-specific branch:**
    ```bash
@@ -351,7 +406,10 @@ Create ADR if:
    git push -u origin issue-ISSUE_NUM-feature-name
    ```
 
-3. **Update issue status** with a comment using platform CLI (see `platforms/` for syntax)
+3. **Update issue status** (if using GitHub Projects):
+   ```bash
+   gh issue comment ISSUE_NUM --body "🚧 Starting implementation on branch \`issue-ISSUE_NUM-feature-name\`"
+   ```
 
 **Branch naming convention:**
 - Format: `issue-NNN-brief-description`
@@ -364,10 +422,10 @@ Create ADR if:
 
 ### Step 2: Implement Code
 
-**Reference PRD if needed:**
-- If from Phase 0: PRD context is fresh in memory
-- If from Entry Point B: PRD file path is in issue (e.g., `docs/prds/123-2025-11-29-user-auth.md`)
-- Read PRD if:
+**Reference plan if needed:**
+- If from Phase 0: Plan context is fresh in memory
+- If from Entry Point B: Plan file path is in issue (e.g., `docs/plans/123-2026-02-04-standard-user-auth-plan.md`)
+- Read plan if:
   - Issue context is unclear
   - Need broader architectural context
   - Want to understand tradeoffs considered
@@ -566,7 +624,7 @@ Next: Awaiting approval for Phase [N+1]
 
 ⚠️ **CHECKPOINT: Implementation Complete**
 
-**If working from an issue:**
+**If working from GitHub issue:**
 
 1. **Commit all changes:**
    ```bash
@@ -605,7 +663,7 @@ Next: Awaiting approval for Phase [N+1]
 
    Ready to create Pull Request?
    - PR will link to issue #ISSUE_NUM (auto-closes on merge)
-   - Reviewable on platform before merging
+   - Reviewable on GitHub before merging
    - Can be merged when approved
 
    Proceed with PR creation? (yes/no)
@@ -621,29 +679,59 @@ Next: Awaiting approval for Phase [N+1]
    Target branch: _____
    ```
 
-4. **Create PR/MR with specified base branch** using platform CLI (see `platforms/` for syntax):
-   - Title: `"feat: [Brief description] (Closes #ISSUE_NUM)"`
-   - Body should include: Summary, Changes, Testing, Acceptance Criteria, PRD Reference
-   - Include `Closes #ISSUE_NUM` for auto-close on merge
-   - Target the user's chosen base branch
+4. **Create PR with specified base branch:**
+   ```bash
+   # Replace BASE_BRANCH with user's choice (main, experimental, etc.)
+   gh pr create \
+     --title "feat: [Brief description] (Closes #ISSUE_NUM)" \
+     --body "$(cat <<'EOF'
+   ## Summary
+   [Brief description of what was implemented]
+
+   ## Changes
+   - [Key change 1]
+   - [Key change 2]
+   - [Key change 3]
+
+   ## Testing
+   - ✅ Unit tests: [N] tests, [X]% coverage
+   - ✅ Integration tests: [Status]
+   - ✅ Edge cases: Null, empty, boundaries, errors
+   - ✅ Security review: [Completed | Not applicable]
+
+   ## Acceptance Criteria
+   - [x] [Criterion 1]
+   - [x] [Criterion 2]
+   - [x] [Criterion 3]
+
+   ## Plan Reference
+   Source: `docs/plans/ISSUE_NUM-YYYY-MM-DD-type-feature-name-plan.md`
+
+   Closes #ISSUE_NUM
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   EOF
+   )" \
+     --base BASE_BRANCH
+   ```
 
    **Common base branches:**
-   - `main` - For production-ready changes
-   - `experimental` - For testing/development changes
-   - `develop` - If using GitFlow workflow
+   - `--base main` - For production-ready changes
+   - `--base experimental` - For testing/development changes
+   - `--base develop` - If using GitFlow workflow
 
-5. **Report PR/MR creation:**
+5. **Report PR creation:**
    ```
-   ✅ PR/MR created: [URL from CLI output]
+   ✅ Pull Request created: https://github.com/owner/repo/pull/XXX
 
    Next steps:
-   1. Review on your platform
+   1. Review PR on GitHub
    2. Approve and merge when ready
    3. Issue #ISSUE_NUM will auto-close on merge
    4. Branch issue-ISSUE_NUM-feature-name can be deleted after merge
    ```
 
-**If NOT using issues:**
+**If NOT using GitHub issues:**
 - Commit changes with standard commit message
 - Push to feature branch
 - Create PR manually or skip to Phase 2 for direct merge
@@ -680,6 +768,30 @@ Next: Awaiting approval for Phase [N+1]
 **Status:** `READY_FOR_MERGE (HIGH_CONFIDENCE)`
 
 **Wait for explicit approval before considering task complete.**
+
+---
+
+## Phase 3: Compound (After Merge)
+
+### Step 1: Capture Learnings
+
+**Use:** `/learn` command
+
+After completing a feature or fixing a tricky bug:
+1. Identify key learnings, gotchas, and insights from the implementation
+2. Check if similar solutions already exist in `docs/solutions/`
+3. Create solution doc with enum-validated YAML frontmatter: module, problem_type, component, symptoms, root_cause, resolution_type, severity, tags
+4. Save to `docs/solutions/{problem_type-directory}/{slug}-{YYYYMMDD}.md`
+
+**Auto-trigger phrases (Claude should suggest `/learn` when these appear):**
+- "the trick was", "the fix was", "root cause was"
+- "I learned that", "next time we should"
+- "key insight", "important gotcha"
+
+**Why compound:**
+- Future `/explore` and `/start-issue` runs search `docs/solutions/`
+- Prevents repeating the same mistakes
+- Builds institutional knowledge that survives across sessions
 
 ---
 
@@ -815,11 +927,16 @@ Next: Awaiting approval for Phase [N+1]
 - `checklists/AI_CODE_REVIEW.md` - Code quality review
 - `templates/TEST_STRATEGY.md` - Comprehensive testing guide
 - `templates/ADR_TEMPLATE.md` - Architecture decisions
+- `agents/review/*.md` - 17 review agent definitions
+- `agents/research/*.md` - 4 research agent definitions
+- `skills/*/SKILL.md` - 22 reusable skill packages
+- `commands/*.md` - 6 workflow commands
 - `guides/CONTEXT_OPTIMIZATION.md` - Advanced context techniques
 - `guides/MULTI_AGENT_PATTERNS.md` - Complex coordination
+- `guides/FRESH_EYES_REVIEW.md` - Smart selection review process
 
 **Reference these at the marked checkpoints. They are MANDATORY, not optional.**
 
 ---
 
-*Last Updated: November 2025 | Version: 3.1 | Next Review: Quarterly*
+*Last Updated: February 2026 | Version: 4.2 | Next Review: Quarterly*

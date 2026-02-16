@@ -1061,8 +1061,8 @@ Use this guide to quickly classify failures and choose appropriate recovery path
 
 - **GODMODE Protocol:** `AI_CODING_AGENT_GODMODE.md` (Phase 1 workflow)
 - **Recovery Report Template:** `templates/RECOVERY_REPORT.md`
-- **Learning Loop:** (PRD #6 - tracks failure patterns for protocol improvement)
-- **Complexity & Time Budgets:** (PRD #5 - helps detect when to trigger recovery)
+- **Learning Loop:** (Plan #6 - tracks failure patterns for protocol improvement)
+- **Complexity & Time Budgets:** (Plan #5 - helps detect when to trigger recovery)
 
 ---
 

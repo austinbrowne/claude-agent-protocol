@@ -21,7 +21,7 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 
 | Rule | What It Means |
 |------|---------------|
-| **EXPLORE FIRST** | NEVER guess. Use Grep to find patterns. Read relevant files BEFORE proposing solutions. |
+| **EXPLORE FIRST** | NEVER guess. Use Grep to find patterns. Read relevant files BEFORE proposing solutions. Search `docs/solutions/` for past learnings. |
 | **HUMAN IN LOOP** | NEVER merge, deploy, or finalize without explicit human approval. ALWAYS pause for feedback. |
 | **SECURITY FIRST** | 45% of AI code has vulnerabilities. ALWAYS run security checklist for auth/data/APIs. |
 | **TEST EVERYTHING** | Every function MUST have tests. ALWAYS test: happy path + null + boundaries + errors. |
@@ -29,6 +29,7 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 | **SIMPLE > CLEVER** | Prefer clear, maintainable code. Avoid over-engineering. |
 | **FLAG UNCERTAINTY** | If unsure, ask. Don't hallucinate APIs or make assumptions. |
 | **CONTEXT EFFICIENT** | Grep before read. Line ranges over full files. Exploration subagents preserve main context. |
+| **COMPOUND LEARNINGS** | When you solve something tricky, capture it in `docs/solutions/` via `/learn`. |
 
 ---
 
@@ -64,49 +65,68 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 
 # Workflow
 
-## Two Modes Available
+## 6 Workflow Commands
 
-### Mode 1: Full Protocol (Complex Tasks)
-For comprehensive guidance, see `~/.claude/AI_CODING_AGENT_GODMODE.md`
+Use workflow commands as entry points. Each workflow offers sub-step selection via `AskUserQuestion` and chains to the next workflow after completion.
 
-### Mode 2: Modular Commands (Flexible Workflows)
-Use individual commands as needed. All commands support hybrid invocation (interactive or direct).
-
-**Phase 0: Planning**
 | Command | Purpose |
 |---------|---------|
-| `/explore` | Codebase exploration |
-| `/generate-prd` | Create PRD (Lite or Full) |
-| `/create-adr` | Document architecture decisions |
-| `/create-issues` | Generate GitHub issues from PRD |
-
-**Phase 1: Execution**
-| Command | Purpose |
-|---------|---------|
-| `/start-issue` | Begin work on GitHub issue |
-| `/generate-tests` | Generate comprehensive tests |
-| `/security-review` | Run OWASP security checklist |
-| `/run-validation` | Tests + coverage + lint + security |
-| `/fresh-eyes-review` | Multi-agent unbiased review |
-| `/recovery` | Handle failed implementations |
-| `/commit-and-pr` | Commit and create PR |
-
-**Phase 2: Finalization**
-| Command | Purpose |
-|---------|---------|
-| `/refactor` | Guided refactoring |
-| `/finalize` | Final docs and validation |
+| `/explore` | Reconnaissance & ideation — codebase exploration + brainstorming |
+| `/plan` | Planning & requirements — plan generation, deepen, review, issues, ADR |
+| `/implement` | Implementation — start issue, tests, validation, security, recovery |
+| `/review` | Code review — fresh eyes review (full/lite), protocol compliance |
+| `/learn` | Knowledge capture — save solved problems as reusable solution docs |
+| `/ship` | Ship — commit/PR, finalize, refactor |
 
 ### Quick Workflows
 
 **Full feature:**
-`/explore` → `/generate-prd` → `/create-issues` → `/start-issue` → [implement] → `/generate-tests` → `/fresh-eyes-review` → `/commit-and-pr`
+`/explore` → `/plan` → `/implement` → `/review` → `/learn` → `/ship`
 
-**Quick bug fix:**
-`/start-issue` → [fix] → `/fresh-eyes-review --lite` → `/commit-and-pr`
+**Bug fix:**
+`/explore` → `/implement` → `/review` → `/learn` → `/ship`
+
+**Quick fix:**
+`/implement` → `/review` → `/ship`
 
 **Just review:**
-[staged changes] → `/fresh-eyes-review` → `/commit-and-pr`
+`/review` → `/ship`
+
+### Individual Skills (Also User-Invocable)
+
+Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly invocable as slash commands:
+
+**Planning skills:** `explore`, `brainstorm`, `generate-plan`, `deepen-plan`, `review-plan`, `create-adr`, `create-issues`
+
+**Issue skills:** `file-issues`, `file-issue`, `enhance-issue`
+
+**Execution skills:** `start-issue`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor`
+
+**Review skills:** `fresh-eyes-review`, `review-protocol`
+
+**Shipping skills:** `commit-and-pr`, `finalize`
+
+**Knowledge skills:** `learn`, `todos`
+
+---
+
+## Full Protocol (Complex Tasks)
+For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
+
+---
+
+## Project Conventions
+
+| Directory | Purpose |
+|-----------|---------|
+| `commands/` | 6 workflow entry points |
+| `skills/` | 22 reusable skill packages (also user-invocable) |
+| `agents/review/` | 17 review agent definitions |
+| `agents/research/` | 4 research agent definitions |
+| `docs/solutions/` | Knowledge compounding — captured solved problems |
+| `docs/brainstorms/` | Brainstorm session records |
+| `.todos/` | File-based todo tracking (committed to git) |
+| `docs/plans/` | Plans (Minimal, Standard, Comprehensive) |
 
 ---
 
@@ -160,10 +180,10 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - Skip tests for any code change
 - Deploy or merge without explicit human approval
 - Modify dependency lock files without approval
-- **Skip `/fresh-eyes-review` before committing** - even if context was summarized, run it
+- **Skip fresh-eyes review before committing** - even if context was summarized, run it
 - Ignore edge cases (null, empty, boundaries)
 
-**⚠️ Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When running `/commit-and-pr`, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/fresh-eyes-review` again.
+**Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When shipping, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/review` again.
 
 ---
 
@@ -173,8 +193,11 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Full protocol documentation |
 | `QUICK_START.md` | Entry points and command reference |
-| `commands/*.md` | 13 modular slash commands |
-| `platforms/*.md` | Platform detection and CLI references (GitHub/GitLab) |
+| `commands/*.md` | 6 workflow commands |
+| `skills/*/SKILL.md` | 22 reusable skill packages |
+| `agents/review/*.md` | 17 review agent definitions |
+| `agents/research/*.md` | 4 research agent definitions |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
-| `guides/FRESH_EYES_REVIEW.md` | Multi-agent review process |
+| `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
+| `templates/*.md` | 10 reusable templates |

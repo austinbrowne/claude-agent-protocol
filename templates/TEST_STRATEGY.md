@@ -437,9 +437,9 @@ Add these to your project:
 
 ---
 
-## Adding Test Strategy to PRD
+## Adding Test Strategy to Plan
 
-**In PRD Section 5 (Implementation Plan), add for each phase:**
+**In plan Implementation Steps section, add for each phase:**
 
 ### Phase X: [Name]
 

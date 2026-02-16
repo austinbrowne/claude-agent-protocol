@@ -1,7 +1,7 @@
 {
-  "name": "ai-coding-agent-protocol",
-  "description": "Comprehensive AI-driven development workflow (GODMODE) with 13 modular slash commands, OWASP security checklists, multi-agent Fresh Eyes review, and structured phases for planning, execution, and finalization.",
-  "version": "3.2.0",
+  "name": "godmode",
+  "version": "4.2.0",
+  "description": "AI-powered development workflow. 6 workflow commands, 22 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
   "author": {
     "name": "Austin Browne",
     "url": "https://github.com/austinbrowne"
@@ -15,34 +15,10 @@
     "owasp",
     "code-review",
     "fresh-eyes",
-    "prd",
     "godmode",
     "multi-agent",
-    "testing"
-  ],
-  "commands": [
-    "explore",
-    "generate-prd",
-    "create-adr",
-    "create-issues",
-    "start-issue",
-    "generate-tests",
-    "security-review",
-    "run-validation",
-    "fresh-eyes-review",
-    "recovery",
-    "commit-and-pr",
-    "refactor",
-    "finalize"
-  ],
-  "features": [
-    "13 modular slash commands with hybrid invocation (interactive + direct)",
-    "OWASP Top 10 2025 security checklist",
-    "Multi-agent Fresh Eyes Review (zero-context for unbiased review)",
-    "Failure recovery framework (Continue/Rollback/Abandon)",
-    "GitHub integration (issues, PRs, projects)",
-    "PRD templates (Lite and Full)",
-    "Architecture Decision Record (ADR) templates",
-    "Context-efficient design (behavioral triggers, not documentation bloat)"
+    "knowledge-compounding",
+    "brainstorm",
+    "adversarial-validation"
   ]
 }

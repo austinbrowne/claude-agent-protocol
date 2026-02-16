@@ -216,10 +216,11 @@ SECURITY CHECKLIST:
 CODE CHANGES TO REVIEW:
 [inline content from /tmp/review-diff.txt]
 
-CRITICAL: Do NOT read any files. Do NOT use Bash, Grep, Glob, or Read tools.
-Everything you need is above. Do NOT write any files.
-Do NOT create intermediary files, analysis documents, or temp files.
-The orchestrator handles all file writes.
+CRITICAL RULES:
+- Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
+- Everything you need is in this prompt. Do NOT read additional files for "context."
+- Return ALL findings as text in your response. Do NOT write findings to files.
+- No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
 
 Instructions:
 - Post findings to the task list with severity (CRITICAL/HIGH/MEDIUM/LOW)
@@ -298,10 +299,11 @@ CODE CHANGES TO REVIEW:
 Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
 Include file:line references and specific fixes.
 
-CRITICAL: Do NOT read any files. Do NOT use Bash, Grep, Glob, or Read tools.
-Everything you need is above. Do NOT write any files.
-Do NOT create intermediary files, analysis documents, or temp files.
-The orchestrator handles all file writes.
+CRITICAL RULES:
+- Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
+- Everything you need is in this prompt. Do NOT read additional files for "context."
+- Return ALL findings as text in your response. Do NOT write findings to files.
+- No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
 ```
 
 **Agent definitions referenced:**

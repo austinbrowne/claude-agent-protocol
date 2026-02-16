@@ -10,26 +10,9 @@
 
 ## Detection Mechanism
 
-Every skill that supports team mode checks for availability at its start:
+Only `team-implement` uses Agent Teams. It checks for `TeamCreate` in its tool list at Step 0. If unavailable, it halts and directs to single-agent `/implement` → `start-issue`.
 
-```
-Step 0: Detect Execution Mode
-
-CRITICAL: Check your tool list RIGHT NOW. Do NOT use conversation history to decide.
-Each skill invocation re-evaluates independently.
-
-Check if the `TeamCreate` tool is available in your tool list.
-  → Available: follow [TEAM MODE] instructions throughout this skill
-  → Not available: follow [SUBAGENT MODE] instructions (existing Task tool behavior)
-
-Note: The Agent Teams tools are `TeamCreate`, `TeamDelete`, and `SendMessage`. Check for `TeamCreate` specifically — it is the definitive signal that Agent Teams is enabled.
-```
-
-This is prompt-level detection. No config files, no environment variable checks. The agent inspects its own available tools **at invocation time**.
-
-**Re-evaluate every time.** If you used subagent mode earlier in this conversation, that does NOT mean you should use subagent mode now. Check your tool list fresh. Conversation history is not a valid signal for tool availability.
-
-**Fallback is mandatory.** Agent Teams is experimental and may not be available. Every skill MUST have a working `[SUBAGENT MODE]` path that produces identical output.
+All other skills (reviews, planning, research) use subagents exclusively — no detection step needed.
 
 ---
 
@@ -49,22 +32,24 @@ This is prompt-level detection. No config files, no environment variable checks.
 
 | Skill | Mode | Rationale |
 |-------|------|-----------|
-| `fresh-eyes-review` | Team | Specialists can cross-validate, Lead can interrogate |
-| `review-plan` | Team | Reviewers can debate trade-offs, Lead challenges live |
-| `deepen-plan` | Team | Research findings inform review focus in real-time |
-| `team-implement` | Team | Analyst broadcasts findings to implementers in real-time; Lead coordinates file ownership |
+| `team-implement` | Team | Analyst broadcasts findings to implementers in real-time; Lead coordinates file ownership. 2-4 teammates (within recommended range). |
+| `fresh-eyes-review` | Subagent | 3-14 independent parallel reviewers. No mid-task communication needed. Coordination overhead dominates at scale. |
+| `review-plan` | Subagent | 4 independent reviewers + 1 sequential validator. Same pattern as fresh-eyes. |
+| `deepen-plan` | Subagent | Sequential phases (research then review) negate real-time communication benefit. |
 | `triage-issues` | Subagent | Fire-and-forget planning per issue, no inter-agent discussion needed |
 | `generate-plan` | Subagent | Fire-and-forget research, no inter-agent discussion needed |
 | `explore` | Subagent | Fire-and-forget research |
 | `start-issue` | Subagent | Single learnings query |
 
+**Why only `team-implement` uses teams:** Research showed Agent Teams costs 3-7x more tokens than subagents (1.5-2x). Teams are justified only when agents need mid-task communication — implementers coordinating on shared code, analysts broadcasting discoveries to active coders. Review agents are independent: each gets a diff/plan, returns findings, done. The Supervisor consolidates post-hoc. No mid-task cross-talk needed.
+
 ---
 
 ## Team Formation Patterns
 
-### Pattern A: Review Team
+### Pattern A: Review Team — DEPRECATED
 
-**Used by:** `fresh-eyes-review`, `review-plan`
+**Previously used by:** `fresh-eyes-review`, `review-plan`. **Now uses subagents instead.** Review agents are independent (zero-context, no mid-task communication). Subagent fan-out/fan-in is cheaper and simpler. Kept here for reference only.
 
 **Structure:**
 ```
@@ -111,49 +96,9 @@ When complete, mark your task as done.
 
 ---
 
-### Pattern B: Research + Review Team
+### Pattern B: Research + Review Team — DEPRECATED
 
-**Used by:** `deepen-plan`
-
-**Structure:**
-```
-Lead (you) = Coordinator + Consolidator
-Research Teammates = Codebase, Learnings, Best Practices, Framework Docs
-Review Teammates = Architecture, Simplicity, Security, Performance, Edge Case, Spec-Flow
-```
-
-**Lead responsibilities:**
-- Spawn all teammates (research + review) with specific prompts
-- Create shared task list for research and review phases
-- Monitor cross-team communication
-- Synthesize all findings into plan annotations
-
-**Research teammate responsibilities:**
-- Execute assigned research against their domain
-- Broadcast relevant findings as discovered (don't wait until done)
-- Respond to reviewer requests for deeper investigation
-- Example broadcast: "Codebase Researcher here — found an existing auth middleware pattern at `src/middleware/auth.ts` that uses JWT validation. Relevant to anyone reviewing auth-related plan sections."
-
-**Review teammate responsibilities:**
-- Review plan against domain criteria
-- Consume research findings as they arrive — adjust focus accordingly
-- Request specific research via direct message: "Learnings Researcher, do we have any past solutions for handling rate limiting? The plan doesn't address it."
-- Message other reviewers about overlapping concerns
-
-**Spawn prompt template for research teammates:**
-```
-You are a [research type] researching the codebase to support plan enrichment. Read `agents/research/[agent-file].md` for your full research process.
-
-Research target:
-[plan content / section assignments]
-
-Instructions:
-- As you discover relevant findings, broadcast them to the team immediately
-- Don't wait until you're done — share as you go so reviewers can use your findings
-- If a reviewer asks you for deeper research on a topic, prioritize that
-- Post your final summary to the task list when complete
-- Mark your task as done when finished
-```
+**Previously used by:** `deepen-plan`. **Now uses subagents instead.** Research and review phases are sequential in practice — by the time reviewers start, research is complete. The "real-time broadcast" benefit only exists if both phases run simultaneously, which means reviewers start before research finishes. Subagent fan-out/fan-in for each phase is cheaper and simpler. Kept here for reference only.
 
 ---
 
@@ -344,17 +289,7 @@ When implementing individual issues (after triage), each issue gets its own bran
 
 Agent Teams provides a shared task list that all teammates can see and update. Use it for coordination:
 
-### Review Teams (Patterns A, B)
-```
-Task list:
-- [ ] Security review of diff (assigned: security-reviewer)
-- [ ] Code quality review (assigned: code-quality-reviewer)
-- [ ] Edge case review (assigned: edge-case-reviewer)
-- [ ] Consolidate findings (assigned: lead, blocked by above)
-- [ ] Adversarial validation (assigned: lead, blocked by consolidation)
-```
-
-### Implementation Swarms (Patterns C, D)
+### Implementation Teams (Patterns C, D)
 ```
 Task list:
 - [ ] Implement auth middleware (assigned: teammate-1)
@@ -369,12 +304,7 @@ Tasks with dependencies block until their prerequisite completes. Teammates self
 
 ## Fallback Behavior
 
-When Agent Teams is not available, skills fall back to `[SUBAGENT MODE]`:
-
-- **Review skills:** Launch specialists as parallel Task tool calls (existing behavior). Supervisor and Adversarial Validator run as sequential Task tool calls. No inter-agent communication.
-- **Implementation skills:** Execute tasks sequentially via existing `start-issue` skill. No parallelization.
-
-The output format is **identical** regardless of execution mode. Users see the same review reports, the same plan annotations, the same implementation results.
+When Agent Teams is not available, `team-implement` halts and directs the user to `/implement` → `start-issue` for single-agent implementation. All other skills use subagents exclusively and do not require Agent Teams.
 
 ---
 
@@ -431,4 +361,4 @@ From the official Agent Teams documentation:
 ---
 
 **Last Updated:** February 2026
-**Referenced by:** `skills/fresh-eyes-review/SKILL.md`, `skills/review-plan/SKILL.md`, `skills/deepen-plan/SKILL.md`, `skills/team-implement/SKILL.md`, `skills/triage-issues/SKILL.md`
+**Referenced by:** `skills/team-implement/SKILL.md`

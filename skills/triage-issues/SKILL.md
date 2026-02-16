@@ -4,7 +4,6 @@ version: "2.0"
 description: Batch-triage and plan open GitHub issues — categorize by readiness, parallel-plan sparse ones, stop when all are ready_for_dev
 referenced_by:
   - commands/implement.md
-  - guides/AGENT_TEAMS_GUIDE.md
 ---
 
 # Triage Issues Skill

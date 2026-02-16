@@ -120,7 +120,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 ### Review Skills
 | Skill | Purpose |
 |-------|---------|
-| `fresh-eyes-review` | 14-agent smart selection review with adversarial validation (Agent Teams mode available) |
+| `fresh-eyes-review` | 14-agent smart selection review with adversarial validation |
 | `review-protocol` | Protocol compliance check and status report |
 | `document-review` | Document quality review for plans, brainstorms, ADRs (clarity, completeness, specificity, YAGNI) |
 

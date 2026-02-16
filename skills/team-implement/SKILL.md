@@ -211,10 +211,13 @@ Create tasks for each group. Independent groups start unblocked. Serialized task
 
 **4b. Spawn Analyst (if composition includes one):**
 
-Read `agents/team/analyst.md` for the full role definition. Spawn prompt:
+**Before spawning:** The orchestrator reads `agents/team/analyst.md` and inlines the content into the spawn prompt. The Analyst still needs file access (Read, Grep, Glob) for codebase research — that's their job. But they should NOT need to read their own role definition.
 
 ```
-You are the Analyst on an implementation team. Read `agents/team/analyst.md` for your full role and process.
+You are the Analyst on an implementation team.
+
+YOUR ROLE DEFINITION:
+[inline content from agents/team/analyst.md]
 
 [For plan input:]
 Plan: [plan file path]
@@ -244,10 +247,15 @@ Rules:
 
 **4c. Spawn Implementer(s):**
 
-Read `agents/team/implementer.md` for the full role definition. One spawn per task group.
+**Before spawning:** The orchestrator reads `agents/team/implementer.md` and inlines the content into the spawn prompt. Implementers need full file access (Read, Write, Edit, Bash, Grep, Glob) for implementation — that's their job. But they should NOT need to read their own role definition.
+
+One spawn per task group.
 
 ```
-You are an Implementer on an implementation team. Read `agents/team/implementer.md` for your full role and process.
+You are an Implementer on an implementation team.
+
+YOUR ROLE DEFINITION:
+[inline content from agents/team/implementer.md]
 
 Your assigned tasks:
 [task descriptions for this group]

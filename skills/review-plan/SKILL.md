@@ -1,10 +1,9 @@
 ---
 name: review-plan
 version: "2.0"
-description: Multi-agent plan review methodology with adversarial validation and optional Agent Teams mode
+description: Multi-agent plan review methodology with adversarial validation
 referenced_by:
   - commands/plan.md
-  - guides/AGENT_TEAMS_GUIDE.md
 ---
 
 # Plan Review Skill
@@ -37,19 +36,6 @@ referenced_by:
 
 - Plan file exists
 - Plan should be in `READY_FOR_REVIEW` or `DEEPENED_READY_FOR_REVIEW` status
-
----
-
-## Step 0: Detect Execution Mode
-
-**CRITICAL: Check your tool list RIGHT NOW.** Do NOT rely on what you did earlier in this conversation. Each skill invocation must re-evaluate independently — conversation history is not a valid signal for tool availability.
-
-Check if the `TeamCreate` tool is available in your tool list.
-
-- **Available** → follow `[TEAM MODE]` instructions throughout this skill
-- **Not available** → follow `[SUBAGENT MODE]` instructions (existing Task tool behavior)
-
-See `guides/AGENT_TEAMS_GUIDE.md` for full team formation patterns and best practices (Pattern A: Review Team).
 
 ---
 
@@ -107,60 +93,29 @@ Receives the plan AND all 4 reviewer outputs.
 
 ### Step 2: Launch Specialist Reviews
 
-#### `[TEAM MODE]` — Agent Teams Execution
-
-Form a Plan Review Team. You (the Lead) act as Coordinator and Adversarial Validator.
-
-1. Spawn 4 specialist teammates — one per reviewer domain
-2. Each teammate receives a spawn prompt containing:
-   - Zero conversation context (only the plan content)
-   - Their agent definition file reference
-   - Agent-specific evaluation criteria
-3. Create a shared task list with one review task per specialist
-4. Teammates can message each other about trade-offs: "Architecture Reviewer, your scalability concern at Phase 3 conflicts with my simplicity finding — can we discuss?"
-5. Teammates broadcast CRITICAL findings immediately
-
-**Teammate spawn prompt template:**
-```
-You are a [specialist type]. Read your review process from [agent definition file].
-
-Review this plan:
-[full plan content]
-
-Evaluate: [agent-specific criteria]
-
-CRITICAL: Do NOT write any files. Return your findings as text in your response.
-Do NOT create intermediary files, analysis documents, or temp files.
-The orchestrator handles all file writes.
-
-Instructions:
-- Post findings to the task list with severity (CRITICAL/HIGH/MEDIUM/LOW)
-- If you find a CRITICAL issue, broadcast it to the team immediately
-- If your finding relates to another reviewer's domain, message them
-- When the Lead asks a question, respond with specific reasoning
-- Format findings as: VERDICT, FINDINGS list, SUMMARY
-
-Mark your task as done when complete.
-```
-
-#### `[SUBAGENT MODE]` — Task Tool Execution (Fallback)
-
 **CRITICAL: Launch ALL 4 agents in a SINGLE message with multiple Task calls.**
 
-Each reviewer receives ONLY the plan content (zero conversation context).
+**Before launching:** The orchestrator reads each agent's definition file (`agents/review/[agent].md`) and inlines the content into the prompt. Agents should NOT need to read any files.
+
+Each reviewer receives ONLY the plan content and their inlined definition (zero conversation context).
 
 **Reviewer prompt template:**
 ```
-You are a [specialist type]. Reference [agent definition file].
+You are a [specialist type].
+
+YOUR REVIEW PROCESS:
+[inline content from agents/review/[agent].md]
 
 Review this plan:
 [full plan content]
 
 Evaluate: [agent-specific criteria]
 
-CRITICAL: Do NOT write any files. Return your findings as text in your response.
-Do NOT create intermediary files, analysis documents, or temp files.
-The orchestrator handles all file writes.
+CRITICAL RULES:
+- Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
+- Everything you need is in this prompt. Do NOT read additional files for "context."
+- Return ALL findings as text in your response. Do NOT write findings to files.
+- No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
 
 Return:
 VERDICT: APPROVED | REVISION_REQUESTED | APPROVED_WITH_NOTES
@@ -169,7 +124,7 @@ FINDINGS:
 SUMMARY: [1-2 sentence assessment]
 ```
 
-#### Agent-specific evaluation criteria (both modes):
+#### Agent-specific evaluation criteria:
 
 - **Architecture:** Component decomposition, data flow, dependency management, scalability, consistency, separation of concerns
 - **Simplicity:** Over-engineering, YAGNI, abstraction level, phase simplification, technology choices, cognitive load
@@ -178,23 +133,12 @@ SUMMARY: [1-2 sentence assessment]
 
 ### Step 3: Adversarial Validation
 
-#### `[TEAM MODE]`
-
-After all 4 specialist teammates complete, the Lead performs adversarial validation directly:
-
-1. Read all specialist findings from the task list and messages
-2. For ambiguous findings, message the specialist: "What evidence supports [finding]?"
-3. Specialists respond with reasoning or concede the finding
-4. Challenge plan claims — assumptions validated? Estimates realistic? Hidden dependencies?
-5. Challenge reviewer findings — false positives? False negatives? Contradictions between reviewers?
-6. Identify systemic blind spots — what is nobody thinking about?
-7. Shut down specialist teammates and clean up the team
-
-#### `[SUBAGENT MODE]`
-
 Launch Adversarial Validator as a Task tool call after all 4 specialists complete.
 
-**Adversarial Validator receives:**
+**Before launching:** The orchestrator reads the adversarial validator definition (`agents/review/adversarial-validator.md`) and inlines it.
+
+**Adversarial Validator receives (all inline):**
+- Validator definition (inlined)
 - Full plan content
 - All 4 reviewer outputs
 

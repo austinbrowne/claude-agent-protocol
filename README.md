@@ -177,8 +177,8 @@ Reusable methodology packages, each directly invocable:
 | `/explore` | Multi-agent codebase exploration |
 | `/brainstorm` | Structured divergent thinking |
 | `/generate-plan` | Plan creation (3 tiers) with integrated research and spec-flow |
-| `/deepen-plan` | Plan enrichment with parallel research (Agent Teams mode available) |
-| `/review-plan` | Multi-agent plan review with adversarial validation (Agent Teams mode available) |
+| `/deepen-plan` | Plan enrichment with parallel research |
+| `/review-plan` | Multi-agent plan review with adversarial validation |
 | `/create-issues` | GitHub issue generation from plan |
 | `/create-adr` | Architecture Decision Records |
 | `/file-issues` | Rapid-fire issue filing with sparse templates |
@@ -192,7 +192,7 @@ Reusable methodology packages, each directly invocable:
 | `/security-review` | OWASP security methodology |
 | `/recovery` | Failure recovery decision tree |
 | `/refactor` | Guided refactoring |
-| `/fresh-eyes-review` | 14-agent smart selection review (Agent Teams mode available) |
+| `/fresh-eyes-review` | 14-agent smart selection review with adversarial validation |
 | `/review-protocol` | Protocol compliance review |
 | `/document-review` | Document quality review (plans, brainstorms, ADRs) |
 | `/commit-and-pr` | Commit and PR with finding verification |

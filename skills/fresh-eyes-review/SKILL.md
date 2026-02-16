@@ -124,54 +124,13 @@ This is a Rails API. Focus on N+1 queries and mass assignment.
 ### Step 1: Generate Diff
 
 ```bash
-git diff --staged > /tmp/review-diff.txt
-git diff --staged --name-only > /tmp/review-files.txt
-wc -l < /tmp/review-diff.txt  # measure diff size
+git diff --staged -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-diff.txt
+git diff --staged --name-only -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-files.txt
 ```
 
-If no staged changes: notify user to stage changes first.
+**Excluded from review diff:** Lock and auto-generated files (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `Gemfile.lock`, `go.sum`, `Cargo.lock`, `composer.lock`, `poetry.lock`, etc.). These are machine-generated and inflate diffs by thousands of lines without reviewable content. The Dependency Reviewer evaluates manifest files (`package.json`, `Gemfile`, etc.) — not lock files.
 
-### Step 1b: Diff Size Guard
-
-**Check the diff line count.** Agent prompts have a context limit — a diff that's too large will cause agents to fail with "prompt too long."
-
-**Threshold: 1500 lines.** Above this, agents cannot reliably receive the full diff plus their instructions.
-
-**If diff ≤ 1500 lines:** Proceed normally — all agents receive `/tmp/review-diff.txt` (full diff).
-
-**If diff > 1500 lines:** Split the diff into per-file diffs for targeted distribution.
-
-```bash
-# Generate per-file diffs
-mkdir -p /tmp/review-diffs
-while IFS= read -r file; do
-  safe_name=$(echo "$file" | tr '/' '_')
-  git diff --staged -- "$file" > "/tmp/review-diffs/${safe_name}.diff"
-done < /tmp/review-files.txt
-```
-
-**Agent-relevant file mapping (used in Phase 1 to select which per-file diffs each agent receives):**
-
-| Agent | Receives diffs for files matching |
-|-------|----------------------------------|
-| Security | All files (security issues can hide anywhere) — but truncate to 1500 lines total. If still over, prioritize: auth/config/API files first, then by file size descending |
-| Code Quality | All non-test source files — truncate to 1500 lines total |
-| Edge Case | All non-test source files — truncate to 1500 lines total |
-| Performance | Files matching DB/ORM/query patterns, loop-heavy files |
-| API Contract | Route/controller/endpoint files, schema files |
-| Concurrency | Files with async/thread/lock patterns |
-| Error Handling | Files with external calls, try/catch |
-| Data Validation | Files with user input handling, parse/decode |
-| Dependency | Dependency manifest files only (package.json, etc.) |
-| Testing Adequacy | Test files + the source files they test |
-| Config & Secrets | Config files, env files, files with secret patterns |
-| Documentation | Public API files, exported modules |
-
-**When sending split diffs to agents, replace the prompt instruction:**
-- Instead of: `Review the code changes in /tmp/review-diff.txt`
-- Use: `Review the following code changes:` followed by the concatenated relevant per-file diffs inline
-
-**Always inform the agent when diff was split:** Add to prompt: "Note: This is a partial diff filtered to files relevant to your review domain. The full changeset spans {N} files and {M} lines."
+If no staged changes (after exclusions): notify user to stage changes first. If the only staged changes ARE lock files, note: "Only lock file changes staged — nothing to review."
 
 ### Step 2: Trigger Detection
 
@@ -233,21 +192,32 @@ Proceed with this selection? (yes / customize): ___
 Form a Review Team. You (the Lead) act as Coordinator, Supervisor, and Adversarial Validator.
 
 1. Spawn one teammate per specialist from the roster (core + triggered conditional agents)
-2. Each teammate receives a spawn prompt containing:
-   - Zero conversation context (fresh eyes principle preserved)
-   - The diff content: full diff from `/tmp/review-diff.txt` if ≤1500 lines, or agent-relevant split diffs if over (see Step 1b)
-   - Their agent definition file reference
-   - Relevant checklist (security agent gets `checklists/AI_CODE_SECURITY_REVIEW.md`)
-3. Create a shared task list with one review task per specialist
-4. Teammates execute their reviews independently
+2. **Before spawning:** The Lead reads all needed files and inlines their content into each spawn prompt:
+   - Read each agent's definition file (`agents/review/[agent].md`)
+   - Read the diff (`/tmp/review-diff.txt`)
+   - Read the security checklist (`checklists/AI_CODE_SECURITY_REVIEW.md`) for the security agent
+3. Each teammate receives a spawn prompt containing ALL content inline — **agents should NOT need to read any files**
+4. Create a shared task list with one review task per specialist
+5. Teammates execute their reviews independently
+
+**CRITICAL — Zero file reads by agents:** Agents reading files triggers permission prompts (33 prompts across 11 agents is unacceptable UX). The Lead MUST inline all content. Agents have everything they need in their spawn prompt.
 
 **Teammate spawn prompt template:**
 ```
 You are a [specialist type] with zero context about this project.
-Read your review process from [agent definition file].
-Review the code changes in /tmp/review-diff.txt.
 
-CRITICAL: Do NOT write any files. Return your findings as text in your response.
+YOUR REVIEW PROCESS:
+[inline content from agents/review/[agent].md]
+
+[For security agent only:]
+SECURITY CHECKLIST:
+[inline content from checklists/AI_CODE_SECURITY_REVIEW.md]
+
+CODE CHANGES TO REVIEW:
+[inline content from /tmp/review-diff.txt]
+
+CRITICAL: Do NOT read any files. Do NOT use Bash, Grep, Glob, or Read tools.
+Everything you need is above. Do NOT write any files.
 Do NOT create intermediary files, analysis documents, or temp files.
 The orchestrator handles all file writes.
 
@@ -298,40 +268,38 @@ After producing the final report, shut down all specialist teammates and clean u
 
 Launch ALL specialist agents in a **single message** with multiple Task tool calls.
 
-**Each agent receives:**
+**Before launching:** The orchestrator reads all needed files and inlines their content into each agent prompt:
+- Read each agent's definition file (`agents/review/[agent].md`)
+- Read the diff (`/tmp/review-diff.txt`)
+- Read the security checklist (`checklists/AI_CODE_SECURITY_REVIEW.md`) for the security agent
+
+**Each agent receives (all inline, zero file reads needed):**
 - Zero conversation context
-- Diff content: full diff from `/tmp/review-diff.txt` if ≤1500 lines, or agent-relevant split diffs inline if over (see Step 1b)
-- Agent definition file
-- Relevant checklist (security agent gets `checklists/AI_CODE_SECURITY_REVIEW.md`)
+- Agent review process (inlined from definition file)
+- Diff content (inlined from `/tmp/review-diff.txt`)
+- Security checklist (inlined, security agent only)
 
-**Agent prompt template (normal diff ≤1500 lines):**
+**CRITICAL — Zero file reads by agents:** Agents reading files triggers permission prompts on mobile clients (33 prompts across 11 agents is unacceptable UX). The orchestrator MUST inline all content. Agents should not need to use Read, Grep, or Glob tools.
+
+**Agent prompt template:**
 ```
 You are a [specialist type] with zero context about this project.
-Read your review process from [agent definition file].
-Review the code changes in /tmp/review-diff.txt.
-Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-Include file:line references and specific fixes.
 
-CRITICAL: Do NOT write any files. Return your findings as text in your response.
-Do NOT create intermediary files, analysis documents, or temp files.
-The orchestrator handles all file writes.
-```
+YOUR REVIEW PROCESS:
+[inline content from agents/review/[agent].md]
 
-**Agent prompt template (large diff >1500 lines — split mode):**
-```
-You are a [specialist type] with zero context about this project.
-Read your review process from [agent definition file].
+[For security agent only:]
+SECURITY CHECKLIST:
+[inline content from checklists/AI_CODE_SECURITY_REVIEW.md]
 
-Note: This is a partial diff filtered to files relevant to your review domain.
-The full changeset spans {N} files and {M} lines.
-
-Review the following code changes:
-[concatenated agent-relevant per-file diffs]
+CODE CHANGES TO REVIEW:
+[inline content from /tmp/review-diff.txt]
 
 Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
 Include file:line references and specific fixes.
 
-CRITICAL: Do NOT write any files. Return your findings as text in your response.
+CRITICAL: Do NOT read any files. Do NOT use Bash, Grep, Glob, or Read tools.
+Everything you need is above. Do NOT write any files.
 Do NOT create intermediary files, analysis documents, or temp files.
 The orchestrator handles all file writes.
 ```

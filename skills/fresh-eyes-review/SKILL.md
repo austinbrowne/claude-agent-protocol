@@ -126,9 +126,52 @@ This is a Rails API. Focus on N+1 queries and mass assignment.
 ```bash
 git diff --staged > /tmp/review-diff.txt
 git diff --staged --name-only > /tmp/review-files.txt
+wc -l < /tmp/review-diff.txt  # measure diff size
 ```
 
 If no staged changes: notify user to stage changes first.
+
+### Step 1b: Diff Size Guard
+
+**Check the diff line count.** Agent prompts have a context limit — a diff that's too large will cause agents to fail with "prompt too long."
+
+**Threshold: 1500 lines.** Above this, agents cannot reliably receive the full diff plus their instructions.
+
+**If diff ≤ 1500 lines:** Proceed normally — all agents receive `/tmp/review-diff.txt` (full diff).
+
+**If diff > 1500 lines:** Split the diff into per-file diffs for targeted distribution.
+
+```bash
+# Generate per-file diffs
+mkdir -p /tmp/review-diffs
+while IFS= read -r file; do
+  safe_name=$(echo "$file" | tr '/' '_')
+  git diff --staged -- "$file" > "/tmp/review-diffs/${safe_name}.diff"
+done < /tmp/review-files.txt
+```
+
+**Agent-relevant file mapping (used in Phase 1 to select which per-file diffs each agent receives):**
+
+| Agent | Receives diffs for files matching |
+|-------|----------------------------------|
+| Security | All files (security issues can hide anywhere) — but truncate to 1500 lines total. If still over, prioritize: auth/config/API files first, then by file size descending |
+| Code Quality | All non-test source files — truncate to 1500 lines total |
+| Edge Case | All non-test source files — truncate to 1500 lines total |
+| Performance | Files matching DB/ORM/query patterns, loop-heavy files |
+| API Contract | Route/controller/endpoint files, schema files |
+| Concurrency | Files with async/thread/lock patterns |
+| Error Handling | Files with external calls, try/catch |
+| Data Validation | Files with user input handling, parse/decode |
+| Dependency | Dependency manifest files only (package.json, etc.) |
+| Testing Adequacy | Test files + the source files they test |
+| Config & Secrets | Config files, env files, files with secret patterns |
+| Documentation | Public API files, exported modules |
+
+**When sending split diffs to agents, replace the prompt instruction:**
+- Instead of: `Review the code changes in /tmp/review-diff.txt`
+- Use: `Review the following code changes:` followed by the concatenated relevant per-file diffs inline
+
+**Always inform the agent when diff was split:** Add to prompt: "Note: This is a partial diff filtered to files relevant to your review domain. The full changeset spans {N} files and {M} lines."
 
 ### Step 2: Trigger Detection
 
@@ -192,7 +235,7 @@ Form a Review Team. You (the Lead) act as Coordinator, Supervisor, and Adversari
 1. Spawn one teammate per specialist from the roster (core + triggered conditional agents)
 2. Each teammate receives a spawn prompt containing:
    - Zero conversation context (fresh eyes principle preserved)
-   - The diff content from `/tmp/review-diff.txt`
+   - The diff content: full diff from `/tmp/review-diff.txt` if ≤1500 lines, or agent-relevant split diffs if over (see Step 1b)
    - Their agent definition file reference
    - Relevant checklist (security agent gets `checklists/AI_CODE_SECURITY_REVIEW.md`)
 3. Create a shared task list with one review task per specialist
@@ -257,15 +300,34 @@ Launch ALL specialist agents in a **single message** with multiple Task tool cal
 
 **Each agent receives:**
 - Zero conversation context
-- `/tmp/review-diff.txt`
+- Diff content: full diff from `/tmp/review-diff.txt` if ≤1500 lines, or agent-relevant split diffs inline if over (see Step 1b)
 - Agent definition file
 - Relevant checklist (security agent gets `checklists/AI_CODE_SECURITY_REVIEW.md`)
 
-**Agent prompt template:**
+**Agent prompt template (normal diff ≤1500 lines):**
 ```
 You are a [specialist type] with zero context about this project.
 Read your review process from [agent definition file].
 Review the code changes in /tmp/review-diff.txt.
+Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
+Include file:line references and specific fixes.
+
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
+```
+
+**Agent prompt template (large diff >1500 lines — split mode):**
+```
+You are a [specialist type] with zero context about this project.
+Read your review process from [agent definition file].
+
+Note: This is a partial diff filtered to files relevant to your review domain.
+The full changeset spans {N} files and {M} lines.
+
+Review the following code changes:
+[concatenated agent-relevant per-file diffs]
+
 Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
 Include file:line references and specific fixes.
 

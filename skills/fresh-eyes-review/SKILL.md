@@ -1,11 +1,10 @@
 ---
 name: fresh-eyes-review
 version: "2.1"
-description: 14-agent smart selection code review system with zero-context methodology and optional Agent Teams mode
+description: 14-agent smart selection code review system with zero-context methodology
 referenced_by:
   - commands/review.md
   - guides/FRESH_EYES_REVIEW.md
-  - guides/AGENT_TEAMS_GUIDE.md
 ---
 
 # Fresh Eyes Review Skill
@@ -39,19 +38,6 @@ Zero-context multi-agent code review with smart agent selection.
 ## Core Principle
 
 Review agents receive **zero conversation context** — they only see the code diff and their review checklist. This eliminates confirmation bias and ensures truly unbiased review.
-
----
-
-## Step 0: Detect Execution Mode
-
-**CRITICAL: Check your tool list RIGHT NOW.** Do NOT rely on what you did earlier in this conversation. Each skill invocation must re-evaluate independently — conversation history is not a valid signal for tool availability.
-
-Check if the `TeamCreate` tool is available in your tool list.
-
-- **Available** → follow `[TEAM MODE]` instructions throughout this skill
-- **Not available** → follow `[SUBAGENT MODE]` instructions (existing Task tool behavior)
-
-See `guides/AGENT_TEAMS_GUIDE.md` for full team formation patterns and best practices (Pattern A: Review Team).
 
 ---
 
@@ -185,86 +171,6 @@ Proceed with this selection? (yes / customize): ___
 
 ## Execution Pattern
 
-### `[TEAM MODE]` — Agent Teams Execution
-
-**Phase 1: Spawn Specialist Teammates**
-
-Form a Review Team. You (the Lead) act as Coordinator, Supervisor, and Adversarial Validator.
-
-1. Spawn one teammate per specialist from the roster (core + triggered conditional agents)
-2. **Before spawning:** The Lead reads all needed files and inlines their content into each spawn prompt:
-   - Read each agent's definition file (`agents/review/[agent].md`)
-   - Read the diff (`/tmp/review-diff.txt`)
-   - Read the security checklist (`checklists/AI_CODE_SECURITY_REVIEW.md`) for the security agent
-3. Each teammate receives a spawn prompt containing ALL content inline — **agents should NOT need to read any files**
-4. Create a shared task list with one review task per specialist
-5. Teammates execute their reviews independently
-
-**CRITICAL — Zero file reads by agents:** Agents reading files triggers permission prompts (33 prompts across 11 agents is unacceptable UX). The Lead MUST inline all content. Agents have everything they need in their spawn prompt.
-
-**Teammate spawn prompt template:**
-```
-You are a [specialist type] with zero context about this project.
-
-YOUR REVIEW PROCESS:
-[inline content from agents/review/[agent].md]
-
-[For security agent only:]
-SECURITY CHECKLIST:
-[inline content from checklists/AI_CODE_SECURITY_REVIEW.md]
-
-CODE CHANGES TO REVIEW:
-[inline content from /tmp/review-diff.txt]
-
-CRITICAL RULES:
-- Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
-- Everything you need is in this prompt. Do NOT read additional files for "context."
-- Return ALL findings as text in your response. Do NOT write findings to files.
-- No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
-
-Instructions:
-- Post findings to the task list with severity (CRITICAL/HIGH/MEDIUM/LOW)
-- Include file:line references and specific fixes
-- If you find a CRITICAL issue, broadcast it to the team immediately
-- If your finding overlaps with another reviewer's domain, message them
-- When the Lead asks a question, respond with specific evidence from the code
-- Format: [ID] severity:LEVEL file:line description
-
-Mark your task as done when complete.
-```
-
-**Inter-agent communication during Phase 1:**
-- Specialists may message each other about overlapping findings
-- CRITICAL findings are broadcast to the entire team
-- Lead monitors progress via the shared task list
-
-**Phase 2: Lead Consolidation (Supervisor Role)**
-
-After all specialists complete:
-1. Read all specialist findings from the task list and messages
-2. Identify duplicate findings — message involved specialists: "You and [other specialist] both flagged [location]. Can you clarify the distinction?"
-3. For ambiguous findings — message the specialist: "What evidence supports [finding]? Is this exploitable or theoretical?"
-4. Remove false positives based on specialist responses
-5. Prioritize by severity AND real-world impact
-6. Create todo specifications for CRITICAL/HIGH findings
-
-**Phase 3: Lead Adversarial Validation**
-
-After consolidation:
-1. Inventory all claims from the implementation and the review
-2. Challenge findings by messaging specialists directly: "Security Reviewer, what evidence confirms [claim]?"
-3. Specialists respond with evidence or retract their finding
-4. Classify claims: VERIFIED | UNVERIFIED | DISPROVED | INCOMPLETE
-5. DISPROVED claims on CRITICAL/HIGH findings escalate to BLOCK verdict
-6. Challenge your own consolidation decisions — did you remove any valid findings?
-
-**Team cleanup:**
-After producing the final report, shut down all specialist teammates and clean up the team.
-
----
-
-### `[SUBAGENT MODE]` — Task Tool Execution (Fallback)
-
 **Phase 1: Specialist Reviews (Parallel)**
 
 Launch ALL specialist agents in a **single message** with multiple Task tool calls.
@@ -322,11 +228,11 @@ CRITICAL RULES:
 
 **Phase 2: Supervisor (Sequential, after Phase 1)**
 
-Launch Supervisor as a Task tool call with all specialist outputs:
-- Validates each finding against code diff
-- Removes false positives
-- Consolidates duplicates
-- Prioritizes by severity AND impact
+Launch Supervisor as a Task tool call with all specialist outputs. **Do NOT include the diff** — the Supervisor's job is consolidation, not re-review. Specialist findings already contain file:line references and code snippets.
+
+- Removes false positives (based on specialist evidence, not re-reading code)
+- Consolidates duplicates across specialists
+- Prioritizes by severity AND real-world impact
 - Creates todo specifications for CRITICAL/HIGH
 
 **Phase 3: Adversarial Validation (Sequential, after Phase 2)**

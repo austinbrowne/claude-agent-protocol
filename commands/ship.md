@@ -122,10 +122,10 @@ AskUserQuestion:
 
 **Based on selection:**
 
-- **"Commit and create PR"** or **"Commit and update PR"** or **"Push and create PR"** → Load and follow `skills/commit-and-pr/SKILL.md`
+- **"Commit and create PR"** or **"Commit and update PR"** or **"Push and create PR"** → Invoke `Skill(skill="godmode:commit-and-pr")`
   - This skill enforces the Fresh Eyes Review gate — if not yet run, it will trigger automatically
-- **"Finalize"** or **"Finalize first"** → Load and follow `skills/finalize/SKILL.md`
-- **"Run review first"** → Load `commands/review.md` and execute starting from Step 0. Do NOT skip any steps. Follow the command file exactly. After review completes, return to Step 0 of this command (re-detect state).
+- **"Finalize"** or **"Finalize first"** → Invoke `Skill(skill="godmode:finalize")`
+- **"Run review first"** → Invoke `Skill(skill="godmode:review")`. Execute from Step 0. Do NOT skip any steps. After review completes, return to Step 0 of this command (re-detect state).
 - **"Capture learnings"** → Load `commands/learn.md` and execute starting from Step 0. Do NOT skip any steps. Follow the command file exactly.
 - **"Done"** → End workflow.
 
@@ -178,8 +178,8 @@ AskUserQuestion:
 ```
 
 **Routing:**
-- **"Finalize":** Load and follow `skills/finalize/SKILL.md`. After finalize completes, return to Step 3.
+- **"Finalize":** Invoke `Skill(skill="godmode:finalize")`. After finalize completes, return to Step 3.
 - **"Capture learnings":** Load `commands/learn.md` and execute starting from Step 0. Do NOT skip any steps. Follow the command file exactly.
 - **"Retry":** Return to Step 2 and re-execute the same skill.
-- **"Run review":** Load `commands/review.md` and execute starting from Step 0. Do NOT skip any steps. Follow the command file exactly. After review completes, return to Step 0 of this command (re-detect state).
+- **"Run review":** Invoke `Skill(skill="godmode:review")`. Execute from Step 0. Do NOT skip any steps. After review completes, return to Step 0 of this command (re-detect state).
 - **"Done":** End workflow.

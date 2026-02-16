@@ -13,8 +13,8 @@
         "repo": "austinbrowne/claude-agent-protocol",
         "ref": "experimental-agent-teams"
       },
-      "description": "GODMODE v5.4.7-experimental — 7 workflow commands, 26 skill packages, 24 agents (17 review + 4 research + 3 team roles), Agent Teams with defined implementation team roles and autodetection routing, autonomous development loops, per-project review configuration, document quality review, knowledge compounding.",
-      "version": "5.4.7-experimental",
+      "description": "GODMODE v5.4.8-experimental — 7 workflow commands, 26 skill packages, 24 agents (17 review + 4 research + 3 team roles), Agent Teams with defined implementation team roles and autodetection routing, autonomous development loops, per-project review configuration, document quality review, knowledge compounding.",
+      "version": "5.4.8-experimental",
       "keywords": [
         "workflow",
         "ai-coding",

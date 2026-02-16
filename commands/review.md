@@ -45,9 +45,9 @@ AskUserQuestion:
 
 **Based on selection:**
 
-- **"Fresh eyes review (full)"** → Load and follow `skills/fresh-eyes-review/SKILL.md` (full mode)
-- **"Fresh eyes review (lite)"** → Load and follow `skills/fresh-eyes-review/SKILL.md` (lite mode — Security + Edge Case + Supervisor only)
-- **"Review protocol compliance"** → Load and follow `skills/review-protocol/SKILL.md`
+- **"Fresh eyes review (full)"** → Invoke `Skill(skill="godmode:fresh-eyes-review", args="full mode")`
+- **"Fresh eyes review (lite)"** → Invoke `Skill(skill="godmode:fresh-eyes-review", args="lite mode — Security + Edge Case + Supervisor only")`
+- **"Review protocol compliance"** → Invoke `Skill(skill="godmode:review-protocol")`
 
 ---
 
@@ -106,6 +106,6 @@ AskUserQuestion:
 **Routing:**
 - **"Fix findings":** Help fix issues, then re-run Fresh Eyes Review.
 - **"Capture learnings":** Load `commands/learn.md` and execute starting from Step 0. Do NOT skip any steps. Follow the command file exactly.
-- **"Ship it":** Load `commands/ship.md` and execute starting from Step 0. Do NOT skip any steps. Follow the command file exactly.
+- **"Ship it":** Invoke `Skill(skill="godmode:ship")`. Execute from Step 0. Do NOT skip any steps.
 - **"Re-run full review":** Return to Step 2 and execute fresh-eyes-review again.
 - **"Done":** End workflow.

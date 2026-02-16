@@ -59,10 +59,10 @@ AskUserQuestion:
 
 **Based on selection:**
 
-- **"Generate plan"** → Load and follow `skills/generate-plan/SKILL.md`
-- **"Deepen existing plan"** → Load and follow `skills/deepen-plan/SKILL.md`
-- **"Review plan"** → Load and follow `skills/review-plan/SKILL.md`
-- **"Create GitHub issues"** → Load and follow `skills/create-issues/SKILL.md`
+- **"Generate plan"** → Invoke `Skill(skill="godmode:generate-plan")` with the task description as arguments
+- **"Deepen existing plan"** → Invoke `Skill(skill="godmode:deepen-plan")` with the plan path as arguments
+- **"Review plan"** → Invoke `Skill(skill="godmode:review-plan")` with the plan path as arguments
+- **"Create GitHub issues"** → Invoke `Skill(skill="godmode:create-issues")` with the plan path as arguments
 
 ---
 
@@ -135,11 +135,11 @@ AskUserQuestion:
 ```
 
 **Routing:**
-- **"Review document quality"** → Load and follow `skills/document-review/SKILL.md`. After document-review completes, re-present the "After Generate plan" AskUserQuestion above.
-- **"Deepen this plan"** → Load `skills/deepen-plan/SKILL.md`
-- **"Review this plan"** → Load `skills/review-plan/SKILL.md`
-- **"Create GitHub issues"** → Load `skills/create-issues/SKILL.md`
-- **"Start implementing"** → Load `commands/implement.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
+- **"Review document quality"** → Invoke `Skill(skill="godmode:document-review")` with the plan path as arguments. After document-review completes, re-present the "After Generate plan" AskUserQuestion above.
+- **"Deepen this plan"** → Invoke `Skill(skill="godmode:deepen-plan")` with the plan path as arguments
+- **"Review this plan"** → Invoke `Skill(skill="godmode:review-plan")` with the plan path as arguments
+- **"Create GitHub issues"** → Invoke `Skill(skill="godmode:create-issues")` with the plan path as arguments
+- **"Start implementing"** → Invoke `Skill(skill="godmode:implement")`. Execute from Step 0. Do NOT skip any steps.
 - **"Revise the plan"** → Return to Step 1 with "Generate plan" pre-selected
 - **"Create another plan"** → Return to Step 1
 - **"Done"** → End workflow

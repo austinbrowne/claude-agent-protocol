@@ -69,5 +69,5 @@ AskUserQuestion:
       description: "End workflow — solution saved to docs/solutions/"
 ```
 
-**If "Ship it":** Load `commands/ship.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
+**If "Ship it":** Invoke `Skill(skill="godmode:ship")`. Execute from Step 0. Do NOT skip any steps.
 **If "Done":** End workflow.

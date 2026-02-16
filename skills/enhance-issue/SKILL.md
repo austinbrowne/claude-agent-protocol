@@ -146,7 +146,7 @@ AskUserQuestion:
 ```
 
 **If "Enhance another":** Return to Step 1.
-**If "Start implementing":** Load and follow `commands/implement.md`.
+**If "Start implementing":** Invoke `Skill(skill="godmode:implement")`. Execute from Step 0. Do NOT skip any steps.
 **If "Done":** End workflow.
 
 ---

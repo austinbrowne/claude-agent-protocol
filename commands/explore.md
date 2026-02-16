@@ -68,8 +68,8 @@ AskUserQuestion:
       description: "End workflow — exploration findings available in conversation"
 ```
 
-**If "Brainstorm approaches":** Load and follow `skills/brainstorm/SKILL.md`. After brainstorm completes, present the post-brainstorm menu below.
-**If "Start planning":** Load `commands/plan.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
+**If "Brainstorm approaches":** Invoke `Skill(skill="godmode:brainstorm")`. After brainstorm completes, present the post-brainstorm menu below.
+**If "Start planning":** Invoke `Skill(skill="godmode:plan")`. Execute from Step 0. Do NOT skip any steps.
 **If "Done":** End workflow.
 
 ---
@@ -89,6 +89,6 @@ AskUserQuestion:
       description: "End workflow — brainstorm findings available in conversation"
 ```
 
-**If "Review brainstorm":** Load and follow `skills/document-review/SKILL.md`. After document-review completes, re-present the "After Brainstorm Completes" AskUserQuestion above.
-**If "Start planning":** Load `commands/plan.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
+**If "Review brainstorm":** Invoke `Skill(skill="godmode:document-review")`. After document-review completes, re-present the "After Brainstorm Completes" AskUserQuestion above.
+**If "Start planning":** Invoke `Skill(skill="godmode:plan")`. Execute from Step 0. Do NOT skip any steps.
 **If "Done":** End workflow.

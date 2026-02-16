@@ -95,12 +95,12 @@ AskUserQuestion:
 
 **Based on selection:**
 
-- **"Start issue"** → Load and follow `skills/start-issue/SKILL.md`
-- **"Team implementation"** → Load and follow `skills/team-implement/SKILL.md`
-- **"Triage issues"** → Load and follow `skills/triage-issues/SKILL.md`
-- **"Generate tests"** → Load and follow `skills/generate-tests/SKILL.md`
-- **"Run validation"** → Load and follow `skills/run-validation/SKILL.md`
-- **"Security review"** → Load and follow `skills/security-review/SKILL.md`
+- **"Start issue"** → Invoke `Skill(skill="godmode:start-issue")`
+- **"Team implementation"** → Invoke `Skill(skill="godmode:team-implement")`
+- **"Triage issues"** → Invoke `Skill(skill="godmode:triage-issues")`
+- **"Generate tests"** → Invoke `Skill(skill="godmode:generate-tests")`
+- **"Run validation"** → Invoke `Skill(skill="godmode:run-validation")`
+- **"Security review"** → Invoke `Skill(skill="godmode:security-review")`
 
 ---
 
@@ -140,8 +140,8 @@ AskUserQuestion:
       description: "End workflow — address issues manually"
 ```
 
-**If "Generate tests":** Load and follow `skills/generate-tests/SKILL.md`.
-**If "Review code":** Load `commands/review.md` and execute starting from Step 0. Do NOT skip any steps. Do NOT implement directly. Follow the command file exactly.
+**If "Generate tests":** Invoke `Skill(skill="godmode:generate-tests")`.
+**If "Review code":** Invoke `Skill(skill="godmode:review")`. Execute from Step 0. Do NOT skip any steps.
 **If "Another implementation step":** Return to Step 0 (re-detect state, then Step 1).
-**If "Recovery":** Load and follow `skills/recovery/SKILL.md`.
+**If "Recovery":** Invoke `Skill(skill="godmode:recovery")`.
 **If "Done":** End workflow.

@@ -1,6 +1,6 @@
 ---
 name: edge-case-reviewer
-model: inherit
+model: sonnet
 description: Review code for null/undefined handling, empty collections, boundary values, unicode edge cases, off-by-one errors, and type coercion traps.
 ---
 

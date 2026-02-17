@@ -1,6 +1,6 @@
 ---
 name: data-validation-reviewer
-model: inherit
+model: sonnet
 description: Review code for input validation completeness, sanitization, type coercion safety, schema validation, allowlist vs blocklist, and file upload validation.
 ---
 

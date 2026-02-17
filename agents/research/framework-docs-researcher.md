@@ -1,6 +1,6 @@
 ---
 name: framework-docs-researcher
-model: inherit
+model: haiku
 description: Query Context7 MCP for framework-specific documentation when a known framework is detected.
 ---
 

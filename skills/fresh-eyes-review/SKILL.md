@@ -45,29 +45,29 @@ Review agents receive **zero conversation context** — they only see the code d
 
 ### Core Agents (Always Run)
 
-| # | Agent | Definition | Focus |
-|---|-------|-----------|-------|
-| 1 | Security Reviewer | `agents/review/security-reviewer.md` | OWASP Top 10, injection, auth, secrets |
-| 2 | Code Quality Reviewer | `agents/review/code-quality-reviewer.md` | Naming, structure, SOLID, complexity |
-| 3 | Edge Case Reviewer | `agents/review/edge-case-reviewer.md` | Null/empty/boundary (biggest AI blind spot) |
-| 4 | Supervisor | `agents/review/supervisor.md` | Consolidate, deduplicate, prioritize |
-| 5 | Adversarial Validator | `agents/review/adversarial-validator.md` | Falsification over confirmation |
+| # | Agent | Definition | Model | Focus |
+|---|-------|-----------|-------|-------|
+| 1 | Security Reviewer | `agents/review/security-reviewer.md` | opus | OWASP Top 10, injection, auth, secrets |
+| 2 | Code Quality Reviewer | `agents/review/code-quality-reviewer.md` | sonnet | Naming, structure, SOLID, complexity |
+| 3 | Edge Case Reviewer | `agents/review/edge-case-reviewer.md` | sonnet | Null/empty/boundary (biggest AI blind spot) |
+| 4 | Supervisor | `agents/review/supervisor.md` | sonnet | Consolidate, deduplicate, prioritize |
+| 5 | Adversarial Validator | `agents/review/adversarial-validator.md` | opus | Falsification over confirmation |
 
 ### Conditional Agents (Triggered by Diff)
 
 See `skills/fresh-eyes-review/references/trigger-patterns.md` for detailed patterns.
 
-| # | Agent | Trigger Summary |
-|---|-------|----------------|
-| 6 | Performance | DB/ORM patterns, nested loops, LOC > 200 |
-| 7 | API Contract | Route/endpoint definitions, API schema files |
-| 8 | Concurrency | async/await/Promise/Thread/Lock/Mutex patterns |
-| 9 | Error Handling | External calls, try/catch, LOC > 300 |
-| 10 | Data Validation | User input handling, parse/decode operations |
-| 11 | Dependency | Modified dependency files, >3 new imports |
-| 12 | Testing Adequacy | Test files changed, OR code without tests |
-| 13 | Config & Secrets | Config patterns, env/secret/key/token |
-| 14 | Documentation | Public API changes, magic numbers, LOC > 300 |
+| # | Agent | Model | Trigger Summary |
+|---|-------|-------|----------------|
+| 6 | Performance | sonnet | DB/ORM patterns, nested loops, LOC > 200 |
+| 7 | API Contract | haiku | Route/endpoint definitions, API schema files |
+| 8 | Concurrency | opus | async/await/Promise/Thread/Lock/Mutex patterns |
+| 9 | Error Handling | sonnet | External calls, try/catch, LOC > 300 |
+| 10 | Data Validation | sonnet | User input handling, parse/decode operations |
+| 11 | Dependency | haiku | Modified dependency files, >3 new imports |
+| 12 | Testing Adequacy | haiku | Test files changed, OR code without tests |
+| 13 | Config & Secrets | sonnet | Config patterns, env/secret/key/token |
+| 14 | Documentation | haiku | Public API changes, magic numbers, LOC > 300 |
 
 ---
 
@@ -187,6 +187,8 @@ Launch ALL specialist agents in a **single message** with multiple Task tool cal
 - Security checklist (inlined, security agent only)
 
 **CRITICAL — Zero file reads by agents:** Agents reading files triggers permission prompts on mobile clients (33 prompts across 11 agents is unacceptable UX). The orchestrator MUST inline all content. Agents should not need to use Read, Grep, or Glob tools.
+
+**Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the roster tables above (e.g., `model: "opus"` for Security Reviewer, `model: "sonnet"` for Code Quality Reviewer, `model: "haiku"` for Documentation Reviewer). The `Explore` subagent type manages its own model internally — do not pass `model` for it. Each agent's definition file also declares its tier in YAML frontmatter for reference.
 
 **Agent prompt template:**
 ```

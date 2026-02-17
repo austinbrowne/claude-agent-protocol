@@ -1,6 +1,6 @@
 ---
 name: dependency-reviewer
-model: inherit
+model: haiku
 description: Review dependency changes for justification, maintenance status, known vulnerabilities, license compatibility, circular dependencies, and bundle impact.
 ---
 

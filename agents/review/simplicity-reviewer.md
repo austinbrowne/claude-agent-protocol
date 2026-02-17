@@ -1,6 +1,6 @@
 ---
 name: simplicity-reviewer
-model: inherit
+model: sonnet
 description: Review plans for YAGNI compliance, over-engineering detection, unnecessary abstractions, premature optimization, and feature creep.
 ---
 

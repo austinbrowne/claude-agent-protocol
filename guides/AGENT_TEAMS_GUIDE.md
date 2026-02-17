@@ -365,6 +365,39 @@ When Agent Teams is not available, `team-implement` halts and directs the user t
 
 ---
 
+## Model Strategy
+
+Three-tier model assignment reduces token cost by ~35-40% while preserving quality where it matters. Each agent's definition file declares its model tier in YAML frontmatter (`model: haiku|sonnet|opus`). Skills pass the `model` parameter in Task tool calls at runtime.
+
+### Tiers
+
+| Tier | Model | Cost | Agent Count | Criteria |
+|------|-------|------|-------------|----------|
+| **Haiku** | claude-haiku-4-5 | $1/$5 per MTok | 7 | Retrieval, search, pure pattern matching |
+| **Sonnet** | claude-sonnet-4-5 | $3/$15 per MTok | 12 | Judgment-based review, flow analysis, implementation |
+| **Opus** | claude-opus-4-6 | $5/$25 per MTok | 5 | Deep reasoning, security, architecture, adversarial, orchestration |
+
+### Assignments
+
+**Haiku:** documentation-reviewer, api-contract-reviewer, dependency-reviewer, testing-adequacy-reviewer, learnings-researcher, best-practices-researcher, framework-docs-researcher
+
+**Sonnet:** code-quality-reviewer, data-validation-reviewer, config-secrets-reviewer, error-handling-reviewer, performance-reviewer, spec-flow-reviewer, edge-case-reviewer, simplicity-reviewer, supervisor, codebase-researcher, team-implementer, team-analyst
+
+**Opus:** security-reviewer, adversarial-validator, architecture-reviewer, concurrency-reviewer, team-lead
+
+### How It Works
+
+1. **Agent YAML frontmatter** (`model: haiku|sonnet|opus`) — source of truth and documentation
+2. **Task tool `model` parameter** — runtime mechanism. Skills pass this when spawning agents
+
+Both layers are needed. Frontmatter alone is NOT automatically honored — skills must explicitly pass `model` in the Task tool call. For built-in subagent types (`Explore`, `Plan`), model selection is managed internally by Claude Code — do not pass `model` for these.
+
+### Rollback
+
+Each agent's model is a single YAML field. To promote an agent: change `model: haiku` to `model: sonnet` in its definition file and update the corresponding Task call in the skill file. Rollback can be done per-agent — no need to revert all at once.
+
+---
+
 ## Known Limitations
 
 From the official Agent Teams documentation:

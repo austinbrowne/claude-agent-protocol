@@ -1,6 +1,6 @@
 ---
 name: config-secrets-reviewer
-model: inherit
+model: sonnet
 description: Review code for hardcoded values, environment variable usage, config file safety, .gitignore completeness, secrets in logs, and credential rotation patterns.
 ---
 

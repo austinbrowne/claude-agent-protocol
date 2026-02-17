@@ -1,6 +1,6 @@
 ---
 name: learnings-researcher
-model: inherit
+model: haiku
 description: Search docs/solutions/ for relevant past solutions using multi-pass Grep filtering on enum-validated YAML frontmatter.
 ---
 

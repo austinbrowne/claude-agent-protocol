@@ -1,6 +1,6 @@
 ---
 name: concurrency-reviewer
-model: inherit
+model: opus
 description: Review code for race conditions, deadlocks, thread safety, transaction isolation, atomic operations, and shared state mutation risks.
 ---
 

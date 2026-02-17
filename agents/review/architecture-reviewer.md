@@ -1,6 +1,6 @@
 ---
 name: architecture-reviewer
-model: inherit
+model: opus
 description: Review plans for component decomposition, dependency direction, scalability design, pattern consistency, separation of concerns, and module boundaries.
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: team-analyst
-model: inherit
+model: sonnet
 description: Parallel research support agent that explores the codebase, surfaces past learnings, and broadcasts findings to implementers in real-time during team implementation.
 ---
 

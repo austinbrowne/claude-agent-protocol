@@ -72,9 +72,9 @@ Extract: Title, Description, Acceptance criteria, Labels, Estimated files, Plan 
 
 Launch research agents in parallel via Task tool:
 
-1. **Learnings Research Agent** (`subagent_type: "godmode:research:learnings-researcher"`): Search `docs/solutions/` for past solutions relevant to this issue. Use multi-pass Grep strategy: tags → category → keywords → full-text.
+1. **Learnings Research Agent** (`subagent_type: "godmode:research:learnings-researcher"`, `model: "haiku"`): Search `docs/solutions/` for past solutions relevant to this issue. Use multi-pass Grep strategy: tags → category → keywords → full-text.
 
-2. **Codebase Research Agent** (`subagent_type: "Explore"`): Explore the areas of the codebase that this issue affects. Identify existing patterns, utilities, conventions, dependencies, and potential gotchas.
+2. **Codebase Research Agent** (`subagent_type: "Explore"`): Explore the areas of the codebase that this issue affects. Identify existing patterns, utilities, conventions, dependencies, and potential gotchas. Note: `Explore` is a built-in subagent type — model is managed internally.
 
 Present findings to the user before proceeding.
 
@@ -221,6 +221,7 @@ Launch a single `godmode:team:team-lead` agent via the Task tool. The Team Lead 
 ```
 Task(
   subagent_type="godmode:team:team-lead",
+  model="opus",
   prompt="""You are the Team Lead for an issue implementation team.
 
 YOUR ROLE DEFINITION:
@@ -252,8 +253,8 @@ Acceptance criteria: [N]
 
 1. Create a team via TeamCreate
 2. Create the shared task list — decompose the issue into implementation tasks with file ownership boundaries
-3. Spawn Analyst as a teammate — include their role definition, issue context, and affected areas
-4. Spawn Implementer(s) as teammates — one per task group. Include in each spawn prompt: their role definition, task description, owned files (EXCLUSIVE), and issue reference
+3. Spawn Analyst as a teammate (model: "sonnet") — include their role definition, issue context, and affected areas
+4. Spawn Implementer(s) as teammates (model: "sonnet") — one per task group. Include in each spawn prompt: their role definition, task description, owned files (EXCLUSIVE), and issue reference
 5. Monitor progress: watch task list, handle blockers, resolve file conflicts, relay analyst findings
 6. When all tasks complete: shut down all teammates, clean up the team
 7. Return a consolidated summary in your output format
@@ -265,6 +266,7 @@ Rules:
 - 2-4 teammates maximum
 - Broadcast sparingly — prefer direct messages
 - Commits should reference: Part of #NNN or Closes #NNN
+- Model tiers for teammate spawns: Implementers = sonnet, Analyst = sonnet
 """)
 ```
 

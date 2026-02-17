@@ -1,6 +1,6 @@
 ---
 name: team-lead
-model: inherit
+model: opus
 description: Team orchestrator that decomposes work into parallel tasks with file ownership boundaries, coordinates teammates, monitors progress, resolves conflicts, and synthesizes results.
 ---
 

@@ -169,6 +169,7 @@ Launch a single `godmode:team:team-lead` agent via the Task tool. The Team Lead 
 ```
 Task(
   subagent_type="godmode:team:team-lead",
+  model="opus",
   prompt="""You are the Team Lead for an implementation team.
 
 YOUR ROLE DEFINITION:
@@ -207,8 +208,8 @@ Serialized tasks: [N]
 
 1. Create a team via TeamCreate
 2. Create the shared task list (independent groups start unblocked, serialized tasks blocked by dependencies)
-3. Spawn Analyst (if included) as a teammate — include their role definition, plan/issue context, and affected areas in the spawn prompt
-4. Spawn Implementer(s) as teammates — one per task group. Include in each spawn prompt: their role definition, task description, owned files (EXCLUSIVE), and plan/issue reference
+3. Spawn Analyst (if included) as a teammate (model: "sonnet") — include their role definition, plan/issue context, and affected areas in the spawn prompt
+4. Spawn Implementer(s) as teammates (model: "sonnet") — one per task group. Include in each spawn prompt: their role definition, task description, owned files (EXCLUSIVE), and plan/issue reference
 5. Monitor progress: watch task list, handle blockers, resolve file conflicts, relay analyst findings
 6. For serialized tasks: when dependencies complete, either assign to an idle teammate or spawn a new implementer
 7. When all tasks complete: shut down all teammates, clean up the team
@@ -220,6 +221,7 @@ Rules:
 - If a teammate needs a file outside their boundary, they message you first
 - 2-4 teammates maximum. For larger plans, run in waves.
 - Broadcast sparingly — prefer direct messages
+- Model tiers for teammate spawns: Implementers = sonnet, Analyst = sonnet
 """)
 ```
 

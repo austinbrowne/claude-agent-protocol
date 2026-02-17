@@ -60,20 +60,20 @@ Before launching reviewers, check for a per-project config file:
 
 All 4 launch simultaneously in a single message with multiple Task calls.
 
-| Agent | Definition | Focus |
-|-------|-----------|-------|
-| Architecture Reviewer | `agents/review/architecture-reviewer.md` | Component boundaries, data flow, coupling, scalability |
-| Simplicity Reviewer | `agents/review/simplicity-reviewer.md` | Over-engineering, YAGNI, unnecessary abstractions |
-| Spec-Flow Reviewer | `agents/review/spec-flow-reviewer.md` | Acceptance criteria testability, phase ordering, gaps |
-| Security Reviewer | `agents/review/security-reviewer.md` | OWASP, auth design, data protection, injection prevention |
+| Agent | Definition | Model | Focus |
+|-------|-----------|-------|-------|
+| Architecture Reviewer | `agents/review/architecture-reviewer.md` | opus | Component boundaries, data flow, coupling, scalability |
+| Simplicity Reviewer | `agents/review/simplicity-reviewer.md` | sonnet | Over-engineering, YAGNI, unnecessary abstractions |
+| Spec-Flow Reviewer | `agents/review/spec-flow-reviewer.md` | sonnet | Acceptance criteria testability, phase ordering, gaps |
+| Security Reviewer | `agents/review/security-reviewer.md` | opus | OWASP, auth design, data protection, injection prevention |
 
 ### Adversarial Validator (Sequential, after 4 specialists)
 
 Receives the plan AND all 4 reviewer outputs.
 
-| Agent | Definition | Focus |
-|-------|-----------|-------|
-| Adversarial Validator | `agents/review/adversarial-validator.md` | Challenge plan claims, challenge reviewer findings, find blind spots |
+| Agent | Definition | Model | Focus |
+|-------|-----------|-------|-------|
+| Adversarial Validator | `agents/review/adversarial-validator.md` | opus | Challenge plan claims, challenge reviewer findings, find blind spots |
 
 ---
 
@@ -96,6 +96,8 @@ Receives the plan AND all 4 reviewer outputs.
 **CRITICAL: Launch ALL 4 agents in a SINGLE message with multiple Task calls.**
 
 **Before launching:** The orchestrator reads each agent's definition file (`agents/review/[agent].md`) and inlines the content into the prompt. Agents should NOT need to read any files.
+
+**Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the tables above (e.g., `model: "opus"` for Architecture Reviewer, `model: "sonnet"` for Simplicity Reviewer). Each agent's definition file also declares its tier in YAML frontmatter for reference.
 
 Each reviewer receives ONLY the plan content and their inlined definition (zero conversation context).
 

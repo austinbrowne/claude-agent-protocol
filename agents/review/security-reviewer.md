@@ -1,6 +1,6 @@
 ---
 name: security-reviewer
-model: inherit
+model: opus
 description: Review code changes for OWASP Top 10 vulnerabilities, injection flaws, auth bypass, secrets exposure, and input validation gaps.
 ---
 

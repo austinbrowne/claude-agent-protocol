@@ -1,6 +1,6 @@
 ---
 name: error-handling-reviewer
-model: inherit
+model: sonnet
 description: Review code for try/catch completeness, error propagation, retry logic, circuit breakers, timeout handling, error message safety, and graceful degradation.
 ---
 

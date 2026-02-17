@@ -1,6 +1,6 @@
 ---
 name: team-implementer
-model: inherit
+model: sonnet
 description: Parallel feature builder that implements tasks within strict file ownership boundaries, following the full protocol pipeline (learnings, living plan, code, tests, validation).
 ---
 

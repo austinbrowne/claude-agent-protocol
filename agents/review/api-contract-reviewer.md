@@ -1,6 +1,6 @@
 ---
 name: api-contract-reviewer
-model: inherit
+model: haiku
 description: Review API changes for REST/GraphQL design, HTTP status codes, request/response validation, versioning, backwards compatibility, and content type handling.
 ---
 

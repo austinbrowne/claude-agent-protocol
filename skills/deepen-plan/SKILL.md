@@ -33,12 +33,12 @@ Methodology for enriching a plan with parallel research, multi-agent review, and
 
 **Before launching:** The orchestrator reads each agent's definition file and inlines the content into the prompt. Research agents still need file access (Grep, Read, Glob) to explore the codebase — that's their job. But they should NOT need to read their own definition file.
 
-| Agent | Condition | Reference |
-|-------|-----------|-----------|
-| Codebase Research (1 per section) | Sections needing codebase context | `agents/research/codebase-researcher.md` |
-| Learnings Research | Always (1 for entire plan) | `agents/research/learnings-researcher.md` |
-| Framework Docs Research | If framework detected | `agents/research/framework-docs-researcher.md` |
-| Web Research | High-risk or novel sections | `agents/research/best-practices-researcher.md` |
+| Agent | Condition | Model | Reference |
+|-------|-----------|-------|-----------|
+| Codebase Research (1 per section) | Sections needing codebase context | (built-in) | `agents/research/codebase-researcher.md` |
+| Learnings Research | Always (1 for entire plan) | haiku | `agents/research/learnings-researcher.md` |
+| Framework Docs Research | If framework detected | haiku | `agents/research/framework-docs-researcher.md` |
+| Web Research | High-risk or novel sections | haiku | `agents/research/best-practices-researcher.md` |
 
 **Total agents:** 3-8+ depending on plan size.
 
@@ -48,14 +48,16 @@ Methodology for enriching a plan with parallel research, multi-agent review, and
 
 **Before launching:** The orchestrator reads each reviewer's definition file and inlines the content. Review agents should NOT need to read any files — they get plan content, research findings, and their definition all inline.
 
-| Agent | Definition |
-|-------|-----------|
-| Architecture Reviewer | `agents/review/architecture-reviewer.md` |
-| Simplicity Reviewer | `agents/review/simplicity-reviewer.md` |
-| Security Reviewer | `agents/review/security-reviewer.md` |
-| Performance Reviewer | `agents/review/performance-reviewer.md` |
-| Edge Case Reviewer | `agents/review/edge-case-reviewer.md` |
-| Spec-Flow Reviewer | `agents/review/spec-flow-reviewer.md` |
+**Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the tables above and in Phase 2. For research agents using `subagent_type: "general-purpose"`, pass `model: "haiku"`. The `Explore` subagent type manages its own model internally. For review agents, pass the model from the table (opus for Architecture/Security, sonnet for others).
+
+| Agent | Definition | Model |
+|-------|-----------|-------|
+| Architecture Reviewer | `agents/review/architecture-reviewer.md` | opus |
+| Simplicity Reviewer | `agents/review/simplicity-reviewer.md` | sonnet |
+| Security Reviewer | `agents/review/security-reviewer.md` | opus |
+| Performance Reviewer | `agents/review/performance-reviewer.md` | sonnet |
+| Edge Case Reviewer | `agents/review/edge-case-reviewer.md` | sonnet |
+| Spec-Flow Reviewer | `agents/review/spec-flow-reviewer.md` | sonnet |
 
 **Review agent prompt template:**
 ```

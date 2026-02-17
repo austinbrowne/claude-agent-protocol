@@ -1,6 +1,6 @@
 ---
 name: supervisor
-model: inherit
+model: sonnet
 description: Consolidate specialist review findings, deduplicate, remove false positives, prioritize by severity and impact, and produce actionable todo specifications.
 ---
 

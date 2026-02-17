@@ -1,6 +1,6 @@
 # AI Coding Agent Standard Operating Protocol (SOP)
 
-**Version:** 5.3.0-experimental
+**Version:** 5.8.0-experimental
 **Last Updated:** February 2026
 **Purpose:** Safe, effective AI-assisted software development
 
@@ -940,4 +940,4 @@ After completing a feature or fixing a tricky bug:
 
 ---
 
-*Last Updated: February 2026 | Version: 5.3.0-experimental | Next Review: Quarterly*
+*Last Updated: February 2026 | Version: 5.8.0-experimental | Next Review: Quarterly*

@@ -1,6 +1,6 @@
 # GODMODE - AI Coding Agent Protocol
 
-**Version:** 5.4.0-experimental
+**Version:** 5.8.0-experimental
 **Status:** Experimental (Agent Teams integration)
 
 A Claude Code plugin for AI-assisted software development. 7 workflow commands, 26 skill packages, 24 specialized agents (17 review + 4 research + 3 team roles), Agent Teams integration with defined implementation team roles and autodetection routing, knowledge compounding, and structured phases for planning, execution, and finalization.

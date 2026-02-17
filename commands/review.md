@@ -32,7 +32,7 @@ AskUserQuestion:
   header: "Review"
   options:
     - label: "Fresh eyes review (full)"
-      description: "14-agent smart selection review with adversarial validation"
+      description: "11-agent smart selection review with adversarial validation"
     - label: "Fresh eyes review (lite)"
       description: "Quick 3-agent review (Security + Edge Case + Supervisor)"
     - label: "Review protocol compliance"

@@ -3,7 +3,7 @@
 **Status:** MANDATORY for ALL code changes
 **Purpose:** Unbiased code review using specialized agents with zero conversation context
 **When:** Phase 1, Step 6 - After implementation and testing, before commit
-**Version:** 4.0 — Smart agent selection with 13 specialists
+**Version:** 5.0 — Smart agent selection with 11 specialists, LOC gate, hunk extraction, output summarization
 
 ---
 
@@ -42,13 +42,11 @@
 |---|-------|-----------|-----------------|
 | 6 | Performance Reviewer | `agents/review/performance-reviewer.md` | DB/ORM patterns, nested loops, LOC > 200, model/service/api file paths |
 | 7 | API Contract Reviewer | `agents/review/api-contract-reviewer.md` | Route/endpoint definitions, controller/handler paths, API schema files |
-| 8 | Concurrency Reviewer | `agents/review/concurrency-reviewer.md` | async/await/Promise/Thread/Lock/Mutex/goroutine/Channel/atomic/volatile |
-| 9 | Error Handling Reviewer | `agents/review/error-handling-reviewer.md` | External HTTP calls, file I/O, try/catch patterns, LOC > 300 |
-| 10 | Data Validation Reviewer | `agents/review/data-validation-reviewer.md` | User input handling (req.body/params/form), file uploads, parse/decode |
-| 11 | Dependency Reviewer | `agents/review/dependency-reviewer.md` | Modified dependency files, >3 new imports |
-| 12 | Testing Adequacy Reviewer | `agents/review/testing-adequacy-reviewer.md` | Test files changed, OR implementation without tests, >50 LOC non-test |
-| 13 | Config & Secrets Reviewer | `agents/review/config-secrets-reviewer.md` | Config patterns (env/secret/key/token/password), config file modifications |
-| 14 | Documentation Reviewer | `agents/review/documentation-reviewer.md` | Public API changes, magic numbers, LOC > 300, README/docs changes |
+| 8 | Concurrency Reviewer | `agents/review/concurrency-reviewer.md` | Promise.all/race/allSettled, Lock/Mutex/Semaphore, goroutine/channel, Thread/spawn/actor |
+| 9 | Error Handling Reviewer | `agents/review/error-handling-reviewer.md` | External HTTP/fs calls, try/catch patterns, LOC > 300 |
+| 10 | Dependency Reviewer | `agents/review/dependency-reviewer.md` | Modified dependency files, >3 new imports |
+| 11 | Testing Adequacy Reviewer | `agents/review/testing-adequacy-reviewer.md` | Test files changed, OR implementation without tests, >50 LOC non-test |
+| 12 | Documentation Reviewer | `agents/review/documentation-reviewer.md` | Public API changes, magic numbers, LOC > 300, README/docs changes |
 
 ---
 
@@ -57,7 +55,7 @@
 ### Step 1: Generate Diff
 
 ```bash
-git diff --staged > /tmp/review-diff.txt
+git diff --staged -U5 > /tmp/review-diff.txt
 git diff --staged --name-only > /tmp/review-files.txt
 ```
 
@@ -67,7 +65,7 @@ For each conditional agent, Grep the diff content AND file list for trigger patt
 
 **Performance Reviewer triggers:**
 - Diff content: `SELECT|INSERT|UPDATE|DELETE|\.find|\.where|\.query|ORM|prisma|sequelize|knex|typeorm`
-- Diff content: nested `for|while|\.map.*\.map|\.forEach.*\.forEach`
+- Diff content: chained iterations `\.find\(.*\.find\(|\.filter\(.*\.filter\(|\.map\(.*\.map\(|\.forEach\(.*\.forEach\(`
 - LOC changed > 200
 - File paths: `model|service|api|repository`
 
@@ -77,15 +75,12 @@ For each conditional agent, Grep the diff content AND file list for trigger patt
 - Diff content: `openapi|swagger|schema\.json|\.graphql`
 
 **Concurrency Reviewer triggers:**
-- Diff content: `async|await|Promise|Thread|Lock|Mutex|goroutine|channel|atomic|volatile|Semaphore|\.lock\(\)|synchronized|actor|spawn`
+- Diff content: `Promise\.all|Promise\.race|Promise\.allSettled|new Promise|\.lock\(|\.unlock\(|Mutex|Semaphore|goroutine|channel|atomic\.|volatile |synchronized |Thread\(|spawn\(|actor |worker_threads|SharedArrayBuffer|Atomics\.|concurrent\.|parallelStream`
 
 **Error Handling Reviewer triggers:**
-- Diff content: `fetch\(|axios\.|http\.|request\(|\.get\(|\.post\(|fs\.|readFile|writeFile|open\(`
+- Diff content: `fetch\(|axios\.|http\.(get|post|put|delete)|request\(|fs\.(readFile|writeFile|access|mkdir|unlink|stat)|open\(.*O_|createReadStream|createWriteStream`
 - Diff content: `try|catch|except|rescue|recover`
 - LOC changed > 300
-
-**Data Validation Reviewer triggers:**
-- Diff content: `req\.body|req\.params|req\.query|request\.form|request\.data|params\[|FormData|multipart|upload|parse|decode|JSON\.parse|parseInt|parseFloat`
 
 **Dependency Reviewer triggers:**
 - File paths: `package\.json|Cargo\.toml|go\.mod|go\.sum|requirements\.txt|Gemfile|pom\.xml|build\.gradle|pyproject\.toml`
@@ -95,15 +90,71 @@ For each conditional agent, Grep the diff content AND file list for trigger patt
 - File paths matching: `test|spec|__tests__`
 - OR: >50 LOC of non-test code with NO test file changes
 
-**Config & Secrets Reviewer triggers:**
-- Diff content (non-test files): `env|secret|key|token|password|credential|api_key|API_KEY`
-- File paths: `\.env|config\.|settings\.|\.config\.|\.yaml|\.yml|\.toml`
-
 **Documentation Reviewer triggers:**
-- Diff content: `export|public|module\.exports|__all__`
+- Diff content: `export (default |function |class |const |interface |type )|module\.exports\s*=|__all__\s*=`
 - Diff content: bare numeric literals > 1 (magic numbers)
 - LOC changed > 300
 - File paths: `README|docs|\.md`
+
+### Step 2.5: LOC Gate & Mode Recommendation
+
+After trigger detection, calculate LOC added and recommend Full or Lite review.
+
+**1. Calculate LOC Added (non-test files only):**
+
+```bash
+git diff --staged --numstat | grep -v -E 'test|spec|__tests__' | awk '{ sum += $1 } END { print sum }'
+```
+
+**2. Check Security-Sensitive Overrides:**
+
+Scan diff content for security-sensitive patterns (non-test files):
+- `process\.env|os\.environ|API_KEY|SECRET_KEY|password|credential`
+
+Scan file list for security-sensitive paths:
+- `\.env|config\.|settings\.|auth|middleware|permission`
+
+Scan file list for dependency files:
+- `package\.json|Cargo\.toml|go\.mod|requirements\.txt|Gemfile|pyproject\.toml`
+
+**3. Decision:**
+
+| Condition | Recommendation |
+|-----------|---------------|
+| LOC_added <= 50 AND no overrides | Recommend **Lite** |
+| LOC_added <= 50 AND override detected | Recommend **Full** |
+| LOC_added > 50 | Proceed to Step 3 (Full) |
+
+Present recommendation to user with option to override.
+
+If Lite accepted: skip Step 3, run Security + Edge Case + Supervisor only.
+
+Skip this gate when the user explicitly chose `--lite` or Full from `commands/review.md`.
+
+### Step 2.6: Hunk Extraction (Conditional Agents)
+
+For each triggered conditional agent, extract only the diff hunks relevant to that agent's domain. This reduces token consumption by sending each agent only the code relevant to its review focus.
+
+**Algorithm:**
+
+1. **Parse the unified diff** into file-level blocks, each containing one or more hunks (sections starting with `@@`).
+
+2. **For each conditional agent**, apply its trigger patterns from `skills/fresh-eyes-review/references/trigger-patterns.md`:
+   - **Diff content patterns:** Include hunks where added lines (`+`) or removed lines (`-`) match the agent's content patterns.
+   - **File path patterns:** Include ALL hunks from files whose path matches the agent's file path patterns.
+
+3. **LOC-threshold-only agents** (triggered by LOC > N without a content or file path match): pass the full diff -- no filtering.
+
+4. **Merge adjacent hunks** within 10 lines of each other in the same file to preserve context continuity.
+
+5. **Full-diff fallback:** If the filtered diff contains >80% of the full diff's total hunks, pass the full diff instead (filtering provides negligible savings).
+
+6. **Write filtered diff** to `/tmp/review-diff-{agent-name}.txt` (e.g., `/tmp/review-diff-performance.txt`).
+
+**Agents that always receive the full diff (`/tmp/review-diff.txt`):**
+- Core agents: Security Reviewer, Code Quality Reviewer, Edge Case Reviewer
+- Supervisor (Phase 2)
+- Adversarial Validator (Phase 3)
 
 ### Step 3: Build Agent Roster
 
@@ -125,21 +176,28 @@ Launch ALL specialist agents simultaneously in a single message with multiple Ta
 
 **Each agent receives:**
 - Zero conversation context (fresh eyes)
-- `/tmp/review-diff.txt` (the code diff)
 - Agent definition file (from `agents/review/`)
 - Relevant checklist file (security → `checklists/AI_CODE_SECURITY_REVIEW.md`, etc.)
+- **Core agents** receive the full diff: `/tmp/review-diff.txt`
+- **Conditional agents** receive their filtered diff: `/tmp/review-diff-{agent-name}.txt` (produced by Step 2.6)
 
-**Agent prompt template:**
+**Agent prompt template (core agents):**
 ```
 You are a [specialist type] with zero context about this project.
-
 Read your review process from [agent definition file].
 Review the code changes in /tmp/review-diff.txt.
-
-[Checklist reference if applicable]
-
 Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-Include file:line references and specific fixes for each finding.
+Include file:line references and specific fixes.
+```
+
+**Agent prompt template (conditional agents):**
+```
+You are a [specialist type] with zero context about this project.
+Read your review process from [agent definition file].
+Review the code changes in /tmp/review-diff-[agent-name].txt.
+This diff contains only hunks relevant to your review domain.
+Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
+Include file:line references and specific fixes.
 ```
 
 **CRITICAL:** All specialist agents MUST run in parallel (single message).
@@ -147,7 +205,7 @@ Include file:line references and specific fixes for each finding.
 ### Phase 2: Supervisor Consolidation (Sequential)
 
 After ALL specialists complete, launch Supervisor:
-- Receives: all specialist findings + original diff
+- Receives: Phase 1.5 summarized findings (not raw output)
 - Tasks: validate findings, remove false positives, deduplicate, prioritize
 - Output: consolidated report with todo specifications
 
@@ -209,6 +267,8 @@ For quick reviews (`--lite` flag), run only:
 
 Skip: Adversarial Validator, all conditional agents.
 
+**Auto-routing:** The LOC gate (Step 2.5) automatically recommends Lite review for small changesets (<= 50 LOC added, no security-sensitive patterns). Users can override at the gate prompt.
+
 ---
 
 ## Why Fresh Eyes Review Works
@@ -237,7 +297,7 @@ Skip: Adversarial Validator, all conditional agents.
 |-------------|--------|---------------|
 | Lite | 3 (Security + Edge Case + Supervisor) | ~$0.05-0.10 |
 | Standard (3-5 triggered) | 6-8 total | ~$0.15-0.30 |
-| Full (all triggered) | 14 total | ~$0.30-0.50 |
+| Full (all triggered) | 12 total | ~$0.30-0.50 |
 
 **ROI:** Prevents costly production bugs, security vulnerabilities, and technical debt.
 

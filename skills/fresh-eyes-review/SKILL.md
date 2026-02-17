@@ -1,7 +1,7 @@
 ---
 name: fresh-eyes-review
 version: "2.1"
-description: 14-agent smart selection code review system with zero-context methodology
+description: 11-agent smart selection code review system with zero-context methodology
 referenced_by:
   - commands/review.md
   - guides/FRESH_EYES_REVIEW.md
@@ -61,13 +61,11 @@ See `skills/fresh-eyes-review/references/trigger-patterns.md` for detailed patte
 |---|-------|-------|----------------|
 | 6 | Performance | sonnet | DB/ORM patterns, nested loops, LOC > 200 |
 | 7 | API Contract | haiku | Route/endpoint definitions, API schema files |
-| 8 | Concurrency | opus | async/await/Promise/Thread/Lock/Mutex patterns |
-| 9 | Error Handling | sonnet | External calls, try/catch, LOC > 300 |
-| 10 | Data Validation | sonnet | User input handling, parse/decode operations |
-| 11 | Dependency | haiku | Modified dependency files, >3 new imports |
-| 12 | Testing Adequacy | haiku | Test files changed, OR code without tests |
-| 13 | Config & Secrets | sonnet | Config patterns, env/secret/key/token |
-| 14 | Documentation | haiku | Public API changes, magic numbers, LOC > 300 |
+| 8 | Concurrency | opus | Promise.all/race/allSettled, Lock/Mutex/Semaphore, goroutine/channel, Thread/spawn/actor |
+| 9 | Error Handling | sonnet | External HTTP/fs calls, try/catch, LOC > 300 |
+| 10 | Dependency | haiku | Modified dependency files, >3 new imports |
+| 11 | Testing Adequacy | haiku | Test files changed, OR code without tests |
+| 12 | Documentation | haiku | Public API changes, magic numbers, LOC > 300 |
 
 ---
 
@@ -110,7 +108,7 @@ This is a Rails API. Focus on N+1 queries and mass assignment.
 ### Step 1: Generate Diff
 
 ```bash
-git diff --staged -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-diff.txt
+git diff --staged -U5 -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-diff.txt
 git diff --staged --name-only -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-files.txt
 ```
 
@@ -126,15 +124,73 @@ For each conditional agent, Grep the diff content AND file list for trigger patt
 
 | Agent | Patterns (Grep diff + file paths) |
 |-------|-----------------------------------|
-| Performance | `SELECT\|INSERT\|UPDATE\|DELETE\|\.find\|\.where\|\.query\|ORM\|prisma\|sequelize`, nested loops, LOC > 200 |
+| Performance | `SELECT\|INSERT\|UPDATE\|DELETE\|\.find\|\.where\|\.query\|ORM\|prisma\|sequelize`, chained iterations (`.find(.*\.find(\|.filter(.*\.filter(`), LOC > 200 |
 | API Contract | `router\.\|app\.\(get\|post\|put\|delete\)\|@Controller\|@Route`, route/controller files, openapi/swagger |
-| Concurrency | `async\|await\|Promise\|Thread\|Lock\|Mutex\|goroutine\|channel\|atomic\|Semaphore` |
-| Error Handling | `fetch\(\|axios\.\|http\.\|fs\.\|readFile\|writeFile`, `try\|catch\|except\|rescue`, LOC > 300 |
-| Data Validation | `req\.body\|req\.params\|req\.query\|FormData\|upload\|parse\|JSON\.parse\|parseInt` |
+| Concurrency | `Promise\.all\|Promise\.race\|Promise\.allSettled\|new Promise\|\.lock\(\|\.unlock\(\|Mutex\|Semaphore\|goroutine\|channel\|atomic\.\|volatile \|synchronized \|Thread\(\|spawn\(\|actor \|worker_threads\|SharedArrayBuffer\|Atomics\.\|concurrent\.\|parallelStream` |
+| Error Handling | `fetch\(\|axios\.\|http\.\(get\|post\|put\|delete\)\|request\(\|fs\.\(readFile\|writeFile\|access\|mkdir\|unlink\|stat\)\|createReadStream\|createWriteStream`, `try\|catch\|except\|rescue\|recover`, LOC > 300 |
 | Dependency | Modified `package\.json\|Cargo\.toml\|go\.mod\|requirements\.txt\|Gemfile`, >3 new imports |
 | Testing Adequacy | test/spec files changed, OR >50 LOC non-test code with NO test changes |
-| Config & Secrets | `env\|secret\|key\|token\|password\|credential\|api_key\|\.env\|config\.\|settings\.` |
-| Documentation | Exported/public API changes, magic numbers, LOC > 300 |
+| Documentation | `export (default \|function \|class \|const \|interface \|type )\|module\.exports\s*=\|__all__\s*=`, magic numbers, LOC > 300 |
+
+### Step 2.5: LOC Gate & Mode Recommendation
+
+After trigger detection, calculate LOC added and recommend Full or Lite review.
+
+**1. Calculate LOC Added (non-test files only):**
+
+```bash
+git diff --staged --numstat | grep -v -E 'test|spec|__tests__' | awk '{ sum += $1 } END { print sum }'
+```
+
+**2. Check Security-Sensitive Overrides:**
+
+Scan diff content for security-sensitive patterns (non-test files):
+- `process\.env|os\.environ|API_KEY|SECRET_KEY|password|credential`
+
+Scan file list for security-sensitive paths:
+- `\.env|config\.|settings\.|auth|middleware|permission`
+
+Scan file list for dependency files:
+- `package\.json|Cargo\.toml|go\.mod|requirements\.txt|Gemfile|pyproject\.toml`
+
+**3. Decision:**
+
+| Condition | Recommendation |
+|-----------|---------------|
+| LOC_added <= 50 AND no overrides | Recommend **Lite** |
+| LOC_added <= 50 AND override detected | Recommend **Full** |
+| LOC_added > 50 | Proceed to Step 3 (Full) |
+
+Present recommendation to user with option to override.
+
+If Lite accepted: skip Step 3, run Security + Edge Case + Supervisor only.
+
+Skip this gate when the user explicitly chose `--lite` or Full from `commands/review.md`.
+
+### Step 2.6: Hunk Extraction (Conditional Agents)
+
+For each triggered conditional agent, extract only the diff hunks relevant to that agent's domain. This reduces token consumption by sending each agent only the code relevant to its review focus.
+
+**Algorithm:**
+
+1. **Parse the unified diff** into file-level blocks, each containing one or more hunks (sections starting with `@@`).
+
+2. **For each conditional agent**, apply its trigger patterns from `skills/fresh-eyes-review/references/trigger-patterns.md`:
+   - **Diff content patterns:** Include hunks where added lines (`+`) or removed lines (`-`) match the agent's content patterns.
+   - **File path patterns:** Include ALL hunks from files whose path matches the agent's file path patterns.
+
+3. **LOC-threshold-only agents** (triggered by LOC > N without a content or file path match): pass the full diff -- no filtering.
+
+4. **Merge adjacent hunks** within 10 lines of each other in the same file to preserve context continuity.
+
+5. **Full-diff fallback:** If the filtered diff contains >80% of the full diff's total hunks, pass the full diff instead (filtering provides negligible savings).
+
+6. **Write filtered diff** to `/tmp/review-diff-{agent-name}.txt` (e.g., `/tmp/review-diff-performance.txt`).
+
+**Agents that always receive the full diff (`/tmp/review-diff.txt`):**
+- Core agents: Security Reviewer, Code Quality Reviewer, Edge Case Reviewer
+- Supervisor (Phase 2)
+- Adversarial Validator (Phase 3)
 
 ### Step 3: Build Roster
 
@@ -190,7 +246,7 @@ Launch ALL specialist agents in a **single message** with multiple Task tool cal
 
 **Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the roster tables above (e.g., `model: "opus"` for Security Reviewer, `model: "sonnet"` for Code Quality Reviewer, `model: "haiku"` for Documentation Reviewer). The `Explore` subagent type manages its own model internally — do not pass `model` for it. Each agent's definition file also declares its tier in YAML frontmatter for reference.
 
-**Agent prompt template:**
+**Agent prompt template (core agents — full diff):**
 ```
 You are a [specialist type] with zero context about this project.
 
@@ -214,6 +270,27 @@ CRITICAL RULES:
 - No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
 ```
 
+**Agent prompt template (conditional agents — filtered diff):**
+```
+You are a [specialist type] with zero context about this project.
+
+YOUR REVIEW PROCESS:
+[inline content from agents/review/[agent].md]
+
+CODE CHANGES TO REVIEW:
+[inline content from /tmp/review-diff-[agent-name].txt]
+This diff contains only hunks relevant to your review domain.
+
+Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
+Include file:line references and specific fixes.
+
+CRITICAL RULES:
+- Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
+- Everything you need is in this prompt. Do NOT read additional files for "context."
+- Return ALL findings as text in your response. Do NOT write findings to files.
+- No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
+```
+
 **Agent definitions referenced:**
 - `agents/review/security-reviewer.md`
 - `agents/review/code-quality-reviewer.md`
@@ -222,15 +299,32 @@ CRITICAL RULES:
 - `agents/review/api-contract-reviewer.md` (if triggered)
 - `agents/review/concurrency-reviewer.md` (if triggered)
 - `agents/review/error-handling-reviewer.md` (if triggered)
-- `agents/review/data-validation-reviewer.md` (if triggered)
 - `agents/review/dependency-reviewer.md` (if triggered)
 - `agents/review/testing-adequacy-reviewer.md` (if triggered)
-- `agents/review/config-secrets-reviewer.md` (if triggered)
 - `agents/review/documentation-reviewer.md` (if triggered)
 
-**Phase 2: Supervisor (Sequential, after Phase 1)**
+**Phase 1.5: Summarize Specialist Output**
 
-Launch Supervisor as a Task tool call with all specialist outputs. **Do NOT include the diff** — the Supervisor's job is consolidation, not re-review. Specialist findings already contain file:line references and code snippets.
+Before forwarding to the Supervisor, the orchestrator compacts each specialist's output into a structured summary. This prevents verbose narrative from consuming the Supervisor's context window.
+
+**For each specialist output**, extract findings into this format:
+```
+[ID] SEVERITY file:line — description (fix: short_fix)
+```
+
+**Example:**
+```
+Security Reviewer (3 findings):
+[SEC-001] CRITICAL src/api/users.ts:45 — Raw SQL with user input (fix: use parameterized query)
+[SEC-002] HIGH src/config/payments.py:12 — Hardcoded Stripe key (fix: move to env var)
+[SEC-003] MEDIUM src/auth/login.ts:34 — Password in debug log (fix: remove from log statement)
+```
+
+If a specialist returns no findings, summarize as: `[Agent]: No findings.`
+
+**Phase 2: Supervisor (Sequential, after Phase 1.5)**
+
+Launch Supervisor as a Task tool call with the **Phase 1.5 summarized findings** (not raw specialist output). **Do NOT include the diff** — the Supervisor's job is consolidation, not re-review. Summarized findings already contain file:line references and fix descriptions.
 
 - Removes false positives (based on specialist evidence, not re-reading code)
 - Consolidates duplicates across specialists
@@ -400,6 +494,8 @@ For quick reviews (`--lite`), run only:
 - Supervisor
 
 Skip: Adversarial Validator, all conditional agents.
+
+**Auto-routing:** The LOC gate (Step 2.5) automatically recommends Lite review for small changesets (<= 50 LOC added, no security-sensitive patterns). Users can override at the gate prompt.
 
 ---
 

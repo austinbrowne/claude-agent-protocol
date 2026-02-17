@@ -80,7 +80,7 @@ Based on detected stack, recommend these review agent sets:
 
 ### Web Backend (JS/TS/Python/Ruby/Go/Rust/Java/C#/Elixir with API patterns)
 
-Add: `api-contract-reviewer`, `error-handling-reviewer`, `data-validation-reviewer`
+Add: `api-contract-reviewer`, `error-handling-reviewer`
 
 ### Frontend (React/Vue/Angular/Svelte detected)
 
@@ -88,7 +88,7 @@ Add: `testing-adequacy-reviewer`, `performance-reviewer`
 
 ### Database-Heavy (ORM/migration files detected)
 
-Add: `performance-reviewer`, `data-validation-reviewer`
+Add: `performance-reviewer`
 
 ### Concurrency-Heavy (Go/Rust/Elixir or async patterns)
 
@@ -96,7 +96,7 @@ Add: `concurrency-reviewer`
 
 ### Infrastructure/DevOps (Docker/Terraform/CI detected)
 
-Add: `config-secrets-reviewer`, `dependency-reviewer`
+Add: `dependency-reviewer`
 
 ---
 
@@ -221,7 +221,7 @@ Review Configuration Summary
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Review agents: security-reviewer, code-quality-reviewer, edge-case-reviewer,
-               api-contract-reviewer, error-handling-reviewer, data-validation-reviewer
+               api-contract-reviewer, error-handling-reviewer
 Plan review agents: architecture-reviewer, simplicity-reviewer
 Review depth: thorough
 
@@ -253,7 +253,7 @@ Write `godmode.local.md` to the project root with YAML frontmatter:
 
 ```markdown
 ---
-review_agents: [security-reviewer, code-quality-reviewer, edge-case-reviewer, api-contract-reviewer, error-handling-reviewer, data-validation-reviewer]
+review_agents: [security-reviewer, code-quality-reviewer, edge-case-reviewer, api-contract-reviewer, error-handling-reviewer]
 plan_review_agents: [architecture-reviewer, simplicity-reviewer]
 review_depth: thorough  # fast | thorough | comprehensive
 ---
@@ -298,9 +298,7 @@ All agents are defined in `agents/review/`:
 | API Contract Reviewer | `agents/review/api-contract-reviewer.md` | Routes, schemas, versioning |
 | Concurrency Reviewer | `agents/review/concurrency-reviewer.md` | Race conditions, deadlocks, async |
 | Error Handling Reviewer | `agents/review/error-handling-reviewer.md` | Try/catch, external call resilience |
-| Data Validation Reviewer | `agents/review/data-validation-reviewer.md` | Input validation, parsing |
 | Dependency Reviewer | `agents/review/dependency-reviewer.md` | Package updates, supply chain |
-| Config & Secrets Reviewer | `agents/review/config-secrets-reviewer.md` | Env vars, hardcoded secrets |
 | Testing Adequacy Reviewer | `agents/review/testing-adequacy-reviewer.md` | Coverage, test quality |
 | Documentation Reviewer | `agents/review/documentation-reviewer.md` | API docs, code clarity |
 | Architecture Reviewer | `agents/review/architecture-reviewer.md` | System design, boundaries |

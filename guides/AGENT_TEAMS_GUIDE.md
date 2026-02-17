@@ -381,7 +381,7 @@ Three-tier model assignment reduces token cost by ~35-40% while preserving quali
 
 **Haiku:** documentation-reviewer, api-contract-reviewer, dependency-reviewer, testing-adequacy-reviewer, learnings-researcher, best-practices-researcher, framework-docs-researcher
 
-**Sonnet:** code-quality-reviewer, data-validation-reviewer, config-secrets-reviewer, error-handling-reviewer, performance-reviewer, spec-flow-reviewer, edge-case-reviewer, simplicity-reviewer, supervisor, codebase-researcher, team-implementer, team-analyst
+**Sonnet:** code-quality-reviewer, error-handling-reviewer, performance-reviewer, spec-flow-reviewer, edge-case-reviewer, simplicity-reviewer, supervisor, codebase-researcher, team-implementer, team-analyst
 
 **Opus:** security-reviewer, adversarial-validator, architecture-reviewer, concurrency-reviewer, team-lead
 

@@ -11,7 +11,7 @@ status: pending | ready | complete
 priority: critical | high | medium | low
 title: "Brief description of finding or task"
 source: fresh-eyes-review | review-plan | deepen-plan | manual
-agent: security-reviewer | code-quality-reviewer | edge-case-reviewer | performance-reviewer | api-contract-reviewer | concurrency-reviewer | error-handling-reviewer | data-validation-reviewer | dependency-reviewer | testing-adequacy-reviewer | config-secrets-reviewer | documentation-reviewer | supervisor | adversarial-validator
+agent: security-reviewer | code-quality-reviewer | edge-case-reviewer | performance-reviewer | api-contract-reviewer | concurrency-reviewer | error-handling-reviewer | dependency-reviewer | testing-adequacy-reviewer | documentation-reviewer | supervisor | adversarial-validator
 file: "path/to/affected/file.ts"
 line: NNN
 finding: "Description of the issue found"

@@ -3,7 +3,7 @@
 **Version:** 5.4.0-experimental
 **Status:** Experimental (Agent Teams integration)
 
-A Claude Code plugin for AI-assisted software development. 7 workflow commands, 26 skill packages, 24 specialized agents (17 review + 4 research + 3 team roles), Agent Teams integration with defined implementation team roles and autodetection routing, knowledge compounding, and structured phases for planning, execution, and finalization.
+A Claude Code plugin for AI-assisted software development. 7 workflow commands, 26 skill packages, 22 specialized agents (15 review + 4 research + 3 team roles), Agent Teams integration with defined implementation team roles and autodetection routing, knowledge compounding, and structured phases for planning, execution, and finalization.
 
 ---
 
@@ -201,8 +201,8 @@ Reusable methodology packages, each directly invocable:
 | `/todos` | File-based todo tracking |
 | `/setup` | Per-project review agent configuration |
 
-### Agents (24)
-- **17 review agents** — security, code quality, edge case, supervisor, adversarial validator, performance, API contract, concurrency, error handling, data validation, dependency, testing adequacy, config/secrets, documentation, architecture, simplicity, spec-flow
+### Agents (22)
+- **15 review agents** — security, code quality, edge case, supervisor, adversarial validator, performance, API contract, concurrency, error handling, dependency, testing adequacy, documentation, architecture, simplicity, spec-flow
 - **4 research agents** — codebase researcher, learnings researcher, best practices researcher, framework docs researcher
 - **3 team roles** — lead, implementer, analyst
 
@@ -297,7 +297,7 @@ skills/                                # 26 reusable skill packages
 └── setup/SKILL.md                     # Per-project review configuration
 
 agents/
-├── review/                            # 17 review agent definitions
+├── review/                            # 15 review agent definitions
 ├── research/                          # 4 research agent definitions
 └── team/                              # 3 team role definitions (Lead, Implementer, Analyst)
 

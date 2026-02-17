@@ -112,7 +112,11 @@ This is a Rails API. Focus on N+1 queries and mass assignment.
 ```bash
 git diff --staged -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-diff.txt
 git diff --staged --name-only -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-files.txt
+cp /tmp/review-diff.txt /tmp/review-diff-baseline.txt
+mkdir -p /tmp/review-findings
 ```
+
+**Baseline copy:** `/tmp/review-diff-baseline.txt` is used by incremental re-review (see "Incremental Re-Review Mode" section below) to detect what changed between review runs.
 
 **Excluded from review diff:** Lock and auto-generated files (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `Gemfile.lock`, `go.sum`, `Cargo.lock`, `composer.lock`, `poetry.lock`, etc.). These are machine-generated and inflate diffs by thousands of lines without reviewable content. The Dependency Reviewer evaluates manifest files (`package.json`, `Gemfile`, etc.) — not lock files.
 
@@ -180,13 +184,13 @@ Launch ALL specialist agents in a **single message** with multiple Task tool cal
 - Read the diff (`/tmp/review-diff.txt`)
 - Read the security checklist (`checklists/AI_CODE_SECURITY_REVIEW.md`) for the security agent
 
-**Each agent receives (all inline, zero file reads needed):**
-- Zero conversation context
-- Agent review process (inlined from definition file)
-- Diff content (inlined from `/tmp/review-diff.txt`)
+**Each agent receives:**
+- Zero conversation context (fresh eyes)
+- Agent review process (inlined from definition file — small, ~80 lines)
+- Instructions to read the diff from file (NOT inlined — agents read `/tmp/review-diff.txt`)
 - Security checklist (inlined, security agent only)
 
-**CRITICAL — Zero file reads by agents:** Agents reading files triggers permission prompts on mobile clients (33 prompts across 11 agents is unacceptable UX). The orchestrator MUST inline all content. Agents should not need to use Read, Grep, or Glob tools.
+**Diff reads from file, not inline.** The diff is NOT duplicated in each agent's spawn prompt. Instead, agents read it from `/tmp/review-diff.txt` using the Read tool. The permission rule `Read(*)` in settings.json allows this without triggering mobile permission prompts. This saves ~15K tokens per agent (for a 500-line diff), totaling ~90-195K tokens saved per full review.
 
 **Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the roster tables above (e.g., `model: "opus"` for Security Reviewer, `model: "sonnet"` for Code Quality Reviewer, `model: "haiku"` for Documentation Reviewer). The `Explore` subagent type manages its own model internally — do not pass `model` for it. Each agent's definition file also declares its tier in YAML frontmatter for reference.
 
@@ -201,17 +205,28 @@ YOUR REVIEW PROCESS:
 SECURITY CHECKLIST:
 [inline content from checklists/AI_CODE_SECURITY_REVIEW.md]
 
-CODE CHANGES TO REVIEW:
-[inline content from /tmp/review-diff.txt]
+STEP 1: Read the code changes from /tmp/review-diff.txt using the Read tool.
 
-Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-Include file:line references and specific fixes.
+STEP 2: Review the diff against your checklist.
 
-CRITICAL RULES:
-- Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
-- Everything you need is in this prompt. Do NOT read additional files for "context."
+STEP 3: Report findings using the OUTPUT FORMAT below.
+
+OUTPUT FORMAT:
+- Start DIRECTLY with findings. No preamble, philosophy, or methodology.
+- Maximum 8 findings. If you find more, keep only the highest severity.
+- One block per finding, exact format:
+
+  [ID] SEVERITY: Brief description — file:line
+    Evidence: code snippet or pattern (1-2 lines max)
+    Fix: specific remediation (1 line)
+
+- If no findings in your domain, return exactly: NO_FINDINGS
+- Do NOT include passed checks, summaries, or recommendations sections.
+
+RULES:
+- Use the Read tool ONLY to read /tmp/review-diff.txt. No other file reads.
+- Do NOT use Bash, Grep, Glob, Write, or Edit tools.
 - Return ALL findings as text in your response. Do NOT write findings to files.
-- No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
 ```
 
 **Agent definitions referenced:**
@@ -228,19 +243,71 @@ CRITICAL RULES:
 - `agents/review/config-secrets-reviewer.md` (if triggered)
 - `agents/review/documentation-reviewer.md` (if triggered)
 
-**Phase 2: Supervisor (Sequential, after Phase 1)**
+**Phase 1.5: File Persistence (Orchestrator, after Phase 1)**
 
-Launch Supervisor as a Task tool call with all specialist outputs. **Do NOT include the diff** — the Supervisor's job is consolidation, not re-review. Specialist findings already contain file:line references and code snippets.
+After all specialist agents complete, the orchestrator persists their outputs to files for progressive consolidation:
+
+1. Write each specialist's output to `/tmp/review-findings/{agent-name}.md`
+2. Create manifest `/tmp/review-findings/manifest.md`:
+   ```markdown
+   # Review Findings Manifest
+   Agents: [list of agents that ran]
+   Total findings files: [N]
+
+   ## Batch 1 (security domain)
+   - /tmp/review-findings/security-reviewer.md
+   - /tmp/review-findings/config-secrets-reviewer.md
+
+   ## Batch 2 (quality domain)
+   - /tmp/review-findings/code-quality-reviewer.md
+   - /tmp/review-findings/error-handling-reviewer.md
+
+   ## Batch 3 (correctness domain)
+   - /tmp/review-findings/edge-case-reviewer.md
+   - /tmp/review-findings/data-validation-reviewer.md
+
+   ## Batch 4 (remaining)
+   - /tmp/review-findings/performance-reviewer.md
+   - /tmp/review-findings/concurrency-reviewer.md
+   - [any other triggered agents]
+   ```
+3. Group related agents into batches of 3-4 for the Supervisor to process incrementally
+
+**Phase 2: Supervisor — Progressive Consolidation (Sequential, after Phase 1.5)**
+
+Launch Supervisor as a Task tool call. **Do NOT inline specialist outputs.** Pass the manifest path instead. The Supervisor reads finding files in batches, using a working file as persistent external memory.
+
+Supervisor prompt includes:
+- Manifest path: `/tmp/review-findings/manifest.md`
+- Working file path: `/tmp/review-findings/consolidated.md`
+- Instructions for progressive processing:
+
+```
+Process findings progressively — do NOT read all files at once:
+
+1. Read /tmp/review-findings/manifest.md for batch groupings
+2. For each batch:
+   a. Read the batch's finding files
+   b. Read /tmp/review-findings/consolidated.md (your accumulated state)
+   c. Deduplicate, validate, assess impact for this batch
+   d. Write updated consolidated findings to /tmp/review-findings/consolidated.md
+      (append new findings, update severity of existing ones if cross-domain evidence changes it)
+3. After all batches: read consolidated.md one final time, produce verdict and todo specifications
+```
 
 - Removes false positives (based on specialist evidence, not re-reading code)
-- Consolidates duplicates across specialists
+- Consolidates duplicates across specialists (cross-batch via working file)
 - Prioritizes by severity AND real-world impact
 - Creates todo specifications for CRITICAL/HIGH
 
 **Phase 3: Adversarial Validation (Sequential, after Phase 2)**
 
-Launch Adversarial Validator as a Task tool call with all specialist outputs + Supervisor report:
-- Inventories every claim in the implementation
+Launch Adversarial Validator as a Task tool call. **Reads from files, not inline.**
+
+- Reads consolidated report from `/tmp/review-findings/consolidated.md`
+- Selectively reads individual specialist files from `/tmp/review-findings/` for spot-checks on challenged findings
+- Does NOT receive all specialist outputs inline
+- Inventories every claim in the consolidated report
 - Demands evidence for each claim
 - Challenges review findings
 - Classifies claims: VERIFIED | UNVERIFIED | DISPROVED | INCOMPLETE
@@ -273,6 +340,43 @@ branch: [current branch name]
 ```
 
 This file is read by `/ship` Step 0 to detect review status without relying on conversation context. Overwrite on each review run.
+
+### Write Full Review Report
+
+After writing the verdict marker, also write the full consolidated report to a persistent file:
+
+**File:** `.todos/review-report.md`
+
+```markdown
+---
+verdict: [APPROVED | APPROVED_WITH_NOTES | FIX_BEFORE_COMMIT | BLOCK]
+timestamp: YYYY-MM-DDTHH:MM:SS
+branch: [current branch name]
+agents: [list of agents that ran]
+findings_total: [N]
+findings_critical: [N]
+findings_high: [N]
+---
+
+# Review Report
+
+## MUST FIX (CRITICAL/HIGH)
+[CONS-001] HIGH: Description — file:line
+  Fix: action | Acceptance: verification
+
+## SHOULD FIX (MEDIUM)
+[CONS-002] MEDIUM: Description — file:line
+
+## CONSIDER (LOW)
+[CONS-003] LOW: Description — file:line
+
+## TODO SPECIFICATIONS
+- File: [path] | Lines: [range] | Action: [change] | Reason: [finding ID]
+```
+
+**Purpose:** Survives context compaction. Fix subagents read finding details from this file instead of relying on conversation context. `/ship` can use YAML frontmatter for commit message enrichment (finding counts, agent roster). Incremental re-review compares against this report to detect regressions.
+
+Overwrite on each review run.
 
 ---
 
@@ -403,16 +507,61 @@ Skip: Adversarial Validator, all conditional agents.
 
 ---
 
+## Incremental Re-Review Mode
+
+When re-running review after fixes, use incremental mode to reduce cost and time. Incremental mode is triggered automatically when ALL of these conditions are met:
+
+1. `.todos/review-report.md` exists with a `branch:` field matching the current branch
+2. `/tmp/review-diff-baseline.txt` exists (saved during the previous review's Step 1)
+
+### Incremental Process
+
+**Step 1: Generate delta diff**
+```bash
+git diff --staged -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-diff.txt
+```
+
+Compare the new diff against the baseline to identify which files and hunks changed since the last review.
+
+**Step 2: Determine reduced agent roster**
+
+- **Always re-run:** Security Reviewer (mandatory, cheap insurance)
+- **Re-run if domain affected:** Only trigger conditional agents whose trigger patterns match the delta (not the full diff)
+- **Skip:** Agents that had `NO_FINDINGS` in the initial run AND whose trigger patterns do NOT match the delta
+- **Always run:** Supervisor (compares against previous `.todos/review-report.md` to verify previous findings are resolved)
+- **Skip Adversarial Validator** unless new CRITICAL/HIGH findings appear
+
+**Step 3: Supervisor merges with previous report**
+
+The Supervisor receives:
+- Previous report path: `.todos/review-report.md`
+- New specialist outputs (from the reduced roster)
+- Instructions to: (1) verify previously-reported findings are resolved in the new diff, (2) add any new findings, (3) produce updated verdict
+
+**Step 4: Update report and verdict**
+
+Overwrite `.todos/review-report.md` and `.todos/review-verdict.md` with the updated results.
+Save new baseline: `cp /tmp/review-diff.txt /tmp/review-diff-baseline.txt`
+
+### Forcing Full Re-Review
+
+If the user requests a full re-review (or if incremental conditions are not met), delete `/tmp/review-diff-baseline.txt` and run the standard full review process.
+
+---
+
 ## Notes
 
 - **Zero context:** Agents have NO conversation history (true fresh eyes)
 - **Smart selection:** Agents triggered by diff content, not just LOC
 - **Parallel execution:** All specialist agents run simultaneously for speed
 - **Adversarial validation:** Final gate that challenges claims and findings
-- **Re-runnable:** Re-run after fixing issues until APPROVED
-- **Supervisor consolidates:** Deduplicates, removes false positives, prioritizes
+- **Re-runnable:** Re-run after fixing issues until APPROVED. Uses incremental mode automatically.
+- **Supervisor consolidates:** Deduplicates, removes false positives, prioritizes. Uses progressive batched consolidation via working file.
 - **Not a replacement for human review:** AI review supplements, doesn't replace
 - **Diff-based:** Reviews only changed code, not entire codebase
+- **Diff reads from file:** Agents read diff from `/tmp/review-diff.txt` — NOT inlined in prompts. Saves ~90-195K tokens per full review.
+- **Findings persisted to files:** Specialist outputs → `/tmp/review-findings/`, consolidated report → `.todos/review-report.md`. Survives context compaction.
+- **Compact output format:** Specialists return max 8 findings in structured format, no preamble. ~50% output size reduction vs prose.
 
 ---
 

@@ -3,7 +3,7 @@
 **Status:** MANDATORY for ALL code changes
 **Purpose:** Unbiased code review using specialized agents with zero conversation context
 **When:** Phase 1, Step 6 - After implementation and testing, before commit
-**Version:** 4.0 — Smart agent selection with 13 specialists
+**Version:** 5.0 — Diff-from-file, progressive consolidation, compact output, incremental re-review
 
 ---
 
@@ -125,29 +125,29 @@ Launch ALL specialist agents simultaneously in a single message with multiple Ta
 
 **Each agent receives:**
 - Zero conversation context (fresh eyes)
-- `/tmp/review-diff.txt` (the code diff)
-- Agent definition file (from `agents/review/`)
+- Agent review process (inlined from definition file — small, ~80 lines)
+- Instructions to read diff from `/tmp/review-diff.txt` (NOT inlined in prompt)
 - Relevant checklist file (security → `checklists/AI_CODE_SECURITY_REVIEW.md`, etc.)
 
-**Agent prompt template:**
-```
-You are a [specialist type] with zero context about this project.
+**Diff reads from file, not inline.** Agents read the diff from `/tmp/review-diff.txt` using the Read tool. The `Read(*)` permission in settings.json allows this without prompts. Saves ~15K tokens per agent × N agents.
 
-Read your review process from [agent definition file].
-Review the code changes in /tmp/review-diff.txt.
-
-[Checklist reference if applicable]
-
-Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-Include file:line references and specific fixes for each finding.
-```
+**Compact output format:** Agents return max 8 findings in structured format (no preamble, no philosophy restatement). `NO_FINDINGS` for empty results.
 
 **CRITICAL:** All specialist agents MUST run in parallel (single message).
 
-### Phase 2: Supervisor Consolidation (Sequential)
+### Phase 1.5: File Persistence (Orchestrator)
 
-After ALL specialists complete, launch Supervisor:
-- Receives: all specialist findings + original diff
+After all specialists complete:
+1. Write each output to `/tmp/review-findings/{agent-name}.md`
+2. Create manifest `/tmp/review-findings/manifest.md` with batch groupings
+3. Group related agents: (security + config-secrets), (quality + error-handling), (edge-case + data-validation), (remaining)
+
+### Phase 2: Supervisor — Progressive Consolidation (Sequential)
+
+After Phase 1.5, launch Supervisor with manifest path (NOT inline specialist outputs):
+- Reads finding files in batches of 3-4 from manifest
+- Uses working file `/tmp/review-findings/consolidated.md` as persistent external memory
+- Re-reads working file each batch (file is ground truth, not conversation memory)
 - Tasks: validate findings, remove false positives, deduplicate, prioritize
 - Output: consolidated report with todo specifications
 
@@ -156,13 +156,20 @@ After ALL specialists complete, launch Supervisor:
 ### Phase 3: Adversarial Validation (Sequential)
 
 After Supervisor completes, launch Adversarial Validator:
-- Receives: supervisor's consolidated report + original diff
+- Reads consolidated report from `/tmp/review-findings/consolidated.md`
+- Selectively reads specialist files for spot-checks on challenged findings
+- Does NOT receive all specialist outputs inline
 - Tasks: inventory claims, demand evidence, challenge findings, classify claims
 - Output: claim verification (VERIFIED / UNVERIFIED / DISPROVED / INCOMPLETE)
 
 **DISPROVED claims escalate to BLOCK verdict.**
 
 **See:** `agents/review/adversarial-validator.md`
+
+### Post-Phase 3: Persist Results
+
+- Write verdict to `.todos/review-verdict.md` (read by `/ship`)
+- Write full report to `.todos/review-report.md` (used by fix agents, incremental re-review)
 
 ---
 
@@ -235,9 +242,12 @@ Skip: Adversarial Validator, all conditional agents.
 
 | Review Type | Agents | Estimated Cost |
 |-------------|--------|---------------|
-| Lite | 3 (Security + Edge Case + Supervisor) | ~$0.05-0.10 |
-| Standard (3-5 triggered) | 6-8 total | ~$0.15-0.30 |
-| Full (all triggered) | 14 total | ~$0.30-0.50 |
+| Lite | 3 (Security + Edge Case + Supervisor) | ~$0.03-0.08 |
+| Standard (3-5 triggered) | 6-8 total | ~$0.08-0.18 |
+| Full (all triggered) | 14 total | ~$0.15-0.30 |
+| Incremental re-review | 3-5 total | ~$0.05-0.12 |
+
+**Token savings vs v2.0:** Diff-from-file (~40-60% main context reduction), compact output (~50% specialist output reduction), progressive consolidation (prevents overflow on full reviews), incremental re-review (~60-70% cost reduction on fix-and-re-review cycles).
 
 **ROI:** Prevents costly production bugs, security vulnerabilities, and technical debt.
 

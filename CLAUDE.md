@@ -110,7 +110,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly in
 
 **Review skills:** `fresh-eyes-review`, `review-protocol`, `document-review`
 
-**Shipping skills:** `commit-and-pr`, `finalize`
+**Shipping skills:** `commit-and-pr`, `finalize`, `bump-version`
 
 **Knowledge skills:** `capture-learning`, `todos`
 

@@ -24,7 +24,7 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 **For quick access:**
 - Critical safety rules → `CLAUDE.md` (auto-loaded with highest priority)
 - Workflow commands → `commands/*.md` (7 workflows)
-- Reusable skills → `skills/*/SKILL.md` (26 skill packages)
+- Reusable skills → `skills/*/SKILL.md` (27 skill packages)
 - Agent definitions → `agents/review/*.md` (15 review agents) + `agents/research/*.md` (4 research agents) + `agents/team/*.md` (3 team roles)
 - Quick reference → `QUICK_START.md`
 

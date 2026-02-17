@@ -3,7 +3,7 @@
 **Version:** 5.4.0-experimental
 **Status:** Experimental (Agent Teams integration)
 
-A Claude Code plugin for AI-assisted software development. 7 workflow commands, 26 skill packages, 22 specialized agents (15 review + 4 research + 3 team roles), Agent Teams integration with defined implementation team roles and autodetection routing, knowledge compounding, and structured phases for planning, execution, and finalization.
+A Claude Code plugin for AI-assisted software development. 7 workflow commands, 27 skill packages, 22 specialized agents (15 review + 4 research + 3 team roles), Agent Teams integration with defined implementation team roles and autodetection routing, knowledge compounding, and structured phases for planning, execution, and finalization.
 
 ---
 
@@ -335,7 +335,7 @@ docs/
 - Document quality review skill with 4-dimension scoring (`/document-review`)
 - Cross-workflow routing enforcement language strengthened across all commands
 - 5-layer security model for per-project config (gitignore, prompt injection, minimum agents, validation, precedence)
-- 26 skill packages, 7 workflow commands
+- 27 skill packages, 7 workflow commands
 
 **v5.1.x-experimental (February 2026)**
 - `/loop` command — autonomous development loop with Task subagent context rotation
@@ -349,7 +349,7 @@ docs/
 - New `/triage-issues` skill — batch GitHub issue triage and planning
 - Agent Teams guide (`guides/AGENT_TEAMS_GUIDE.md`) — formation patterns, detection, fallback
 - Automatic fallback to subagent mode when Agent Teams is disabled
-- 26 skill packages (added `team-implement`, `triage-issues`)
+- 27 skill packages (added `team-implement`, `triage-issues`)
 
 **v4.2.0 (February 2026)**
 - Renamed "PRD" to "Plan" throughout — clearer terminology

@@ -145,6 +145,8 @@ AskUserQuestion:
   options:
     - label: "Finalize (Recommended)"
       description: "Final documentation, close issue, update plan status"
+    - label: "Bump version"
+      description: "Bump plugin version on feature branch + marketplace on main"
     - label: "Capture learnings"
       description: "Move to /learn to capture knowledge from this session"
     - label: "Done"
@@ -157,7 +159,9 @@ AskUserQuestion:
   question: "Finalization complete. What would you like to do next?"
   header: "Next step"
   options:
-    - label: "Capture learnings (Recommended)"
+    - label: "Bump version (Recommended)"
+      description: "Bump plugin version on feature branch + marketplace on main"
+    - label: "Capture learnings"
       description: "Move to /learn to capture knowledge from this session"
     - label: "Done"
       description: "End workflow"
@@ -179,6 +183,7 @@ AskUserQuestion:
 
 **Routing:**
 - **"Finalize":** Invoke `Skill(skill="godmode:finalize")`. After finalize completes, return to Step 3.
+- **"Bump version":** Load and follow `skills/bump-version/SKILL.md`. After version bump completes, return to Step 3.
 - **"Capture learnings":** Load `commands/learn.md` and execute starting from Step 0. Do NOT skip any steps. Follow the command file exactly.
 - **"Retry":** Return to Step 2 and re-execute the same skill.
 - **"Run review":** Invoke `Skill(skill="godmode:review")`. Execute from Step 0. Do NOT skip any steps. After review completes, return to Step 0 of this command (re-detect state).

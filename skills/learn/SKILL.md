@@ -1,5 +1,5 @@
 ---
-name: learn
+name: capture-learning
 version: "1.1"
 description: Methodology for capturing solved problems as searchable, reusable solution docs — compatible with compound-engineering plugin
 referenced_by:

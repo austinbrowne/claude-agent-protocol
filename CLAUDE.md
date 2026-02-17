@@ -112,7 +112,7 @@ Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly in
 
 **Shipping skills:** `commit-and-pr`, `finalize`
 
-**Knowledge skills:** `learn`, `todos`
+**Knowledge skills:** `capture-learning`, `todos`
 
 **Configuration skills:** `setup`
 
@@ -127,7 +127,7 @@ For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
 
 | Directory | Purpose |
 |-----------|---------|
-| `commands/` | 7 workflow entry points |
+| `commands/` | 6 workflow entry points (`/explore` merged into its skill) |
 | `skills/` | 26 reusable skill packages (also user-invocable) |
 | `agents/review/` | 17 review agent definitions |
 | `agents/research/` | 4 research agent definitions |

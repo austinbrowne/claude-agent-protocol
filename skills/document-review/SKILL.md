@@ -4,7 +4,7 @@ version: "1.0"
 description: Document quality review for plans, brainstorms, and other markdown documents — assesses clarity, completeness, specificity, and YAGNI compliance
 referenced_by:
   - commands/plan.md
-  - commands/explore.md
+  - skills/explore/SKILL.md
 ---
 
 # Document Review Skill

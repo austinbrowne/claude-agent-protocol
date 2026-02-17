@@ -76,7 +76,7 @@ Read the issue body. Identify what's already filled vs TBD.
 
 ### 3. Explore the Codebase
 
-Load and follow `skills/explore/SKILL.md` scoped to the issue:
+Invoke `Skill(skill="godmode:explore")` scoped to the issue:
 
 - Identify affected files and modules
 - Understand current behavior and patterns

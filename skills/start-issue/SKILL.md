@@ -21,7 +21,7 @@ Methodology for beginning work on a GitHub issue with context loading, past lear
 
 ## Skills Referenced
 
-- `skills/learn/SKILL.md` — For searching `docs/solutions/` to surface relevant past learnings
+- `skills/learn/SKILL.md` (`capture-learning`) — For searching `docs/solutions/` to surface relevant past learnings
 - `skills/todos/SKILL.md` — For creating living plans in `.todos/` and tracking progress
 
 ---

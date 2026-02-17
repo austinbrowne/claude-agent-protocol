@@ -45,7 +45,7 @@ Run `/learn` to capture, or ignore to skip.
 
 ## Step 2: Execute Knowledge Capture
 
-**Load and follow:** `skills/learn/SKILL.md`
+Invoke `Skill(skill="godmode:capture-learning")`
 
 This handles:
 - Learning extraction and confirmation

@@ -118,6 +118,21 @@ Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly in
 
 ---
 
+## Plans vs Enhanced Issues
+
+**Enhanced issue** = **what** to build. Requirements, acceptance criteria, scope, affected files. Sufficient for implementation when the approach is obvious. Most work falls here.
+
+**Plan** = **how** to build it. Technical approach, architecture decisions, tradeoffs, decomposition. Only needed when multiple valid approaches exist, architectural implications need review, or the work needs formal decomposition.
+
+| Complexity | What You Need | Path |
+|-----------|--------------|------|
+| Bug / small fix | Issue only | `file-issue` → `start-issue` |
+| Medium feature | Enhanced issue | `file-issue` → `enhance-issue` → `start-issue` |
+| Complex feature | Plan (implements directly) | `/plan` → `team-implement` |
+| Large multi-issue epic | Plan + issues | `/plan` → `create-issues` → `start-issue` each |
+
+---
+
 ## Full Protocol (Complex Tasks)
 For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
 

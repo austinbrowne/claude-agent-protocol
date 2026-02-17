@@ -34,14 +34,15 @@ All other skills (reviews, planning, research) use subagents exclusively — no 
 
 | Skill | Mode | Rationale |
 |-------|------|-----------|
-| `team-implement` | Team | Analyst broadcasts findings to implementers in real-time; Lead coordinates file ownership. 2-4 teammates (within recommended range). |
+| `team-implement` (plan input) | Team | Analyst broadcasts findings to implementers in real-time; Lead coordinates file ownership. 2-4 teammates. |
+| `start-issue` (team path) | Team | Same pattern as team-implement but for complex issues. Analyst + Implementers coordinated by spawned Lead. |
 | `fresh-eyes-review` | Subagent | 3-14 independent parallel reviewers. No mid-task communication needed. Coordination overhead dominates at scale. |
 | `review-plan` | Subagent | 4 independent reviewers + 1 sequential validator. Same pattern as fresh-eyes. |
 | `deepen-plan` | Subagent | Sequential phases (research then review) negate real-time communication benefit. |
 | `triage-issues` | Subagent | Fire-and-forget planning per issue, no inter-agent discussion needed |
 | `generate-plan` | Subagent | Fire-and-forget research, no inter-agent discussion needed |
 | `explore` | Subagent | Fire-and-forget research |
-| `start-issue` | Subagent | Single learnings query |
+| `start-issue` (single-agent path) | Subagent | Learnings + codebase research before implementation |
 
 **Why only `team-implement` uses teams:** Research showed Agent Teams costs 3-7x more tokens than subagents (1.5-2x). Teams are justified only when agents need mid-task communication — implementers coordinating on shared code, analysts broadcasting discoveries to active coders. Review agents are independent: each gets a diff/plan, returns findings, done. The Supervisor consolidates post-hoc. No mid-task cross-talk needed.
 
@@ -146,13 +147,13 @@ Optional: Analyst (for mixed-independence plans, see agents/team/analyst.md)
 
 **CRITICAL:** Teammates must follow the protocol. They are not shortcutting — each one executes the same quality pipeline a single agent would. The value is parallelism, not cutting corners.
 
-**Spawn prompts:** See `skills/team-implement/SKILL.md` Step 4 for full spawn prompt templates referencing the role definitions.
+**Spawn prompts:** See `skills/team-implement/SKILL.md` Step 4 for the Team Lead spawn prompt template.
 
 ---
 
 ### Pattern D: Issue Implementation Team
 
-**Used by:** `team-implement` (issue input, MEDIUM/LARGE complexity)
+**Used by:** `start-issue` (team path for LARGE complexity issues)
 
 **Structure:**
 ```
@@ -191,7 +192,7 @@ Implementer(s) = Code + tests + validation (see agents/team/implementer.md)
 
 **Key insight:** The Analyst provides the communication advantage that justifies teams over subagents. A fire-and-forget research subagent returns results after the implementer has already committed to an approach. An Analyst teammate broadcasts "there's an existing utility for this" while the implementer is still coding.
 
-**Spawn prompts:** See `skills/team-implement/SKILL.md` Step 4 for full spawn prompt templates referencing the role definitions.
+**Spawn prompts:** See `skills/start-issue/SKILL.md` Step 5 for the Team Lead spawn prompt template.
 
 ---
 

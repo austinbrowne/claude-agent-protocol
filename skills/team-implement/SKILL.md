@@ -1,7 +1,7 @@
 ---
 name: team-implement
 version: "1.0"
-description: Unified team-based implementation — composes Lead, Analyst, and Implementer roles based on complexity assessment for plans and issues
+description: Plan-based team implementation — swarmability assessment, team composition, and parallel execution for approved plans
 referenced_by:
   - commands/implement.md
   - guides/AGENT_TEAMS_GUIDE.md
@@ -9,7 +9,7 @@ referenced_by:
 
 # Team Implement Skill
 
-Assess a plan or issue for team-based implementation, compose the right team from defined roles (Lead, Analyst, Implementer), and execute with coordination. Handles everything from single complex issues to multi-task plan swarms.
+Assess an approved plan for team-based implementation, compose the right team from defined roles (Lead, Analyst, Implementer), and execute with coordination. For issue-based implementation (any complexity), use `start-issue` instead.
 
 ---
 
@@ -27,18 +27,17 @@ Assess a plan or issue for team-based implementation, compose the right team fro
 
 ## When to Apply
 
-- After a plan is approved and ready for implementation (replaces former swarm-plan)
-- Complex issue that would benefit from parallel research + implementation
+- After a plan is approved and ready for implementation
+- Plan has multiple implementation tasks that benefit from parallelism
 - Agent Teams is enabled (`TeamCreate` tool available)
-- User wants team-based execution instead of single-agent start-issue
 
 ---
 
 ## Prerequisites
 
-- Plan file with status `approved` or `ready_for_review`, OR a GitHub issue number
+- Plan file with status `approved` or `ready_for_review`
 - Agent Teams is available (`TeamCreate` tool in tool list)
-- If `TeamCreate` tool is NOT available, inform user: "Agent Teams is not enabled. Use `/implement` → `start-issue` for single-agent implementation, or enable Agent Teams with `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`."
+- If `TeamCreate` tool is NOT available, inform user: "Agent Teams is not enabled. Use `/implement` → `start-issue` for issue-based implementation, or enable Agent Teams with `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`."
 
 ---
 
@@ -52,25 +51,18 @@ Check if the `TeamCreate` tool is available in your tool list.
 - Available: Continue with this skill
 - Not available: HALT. Inform user that Agent Teams is required for this skill. Suggest `/implement` → `start-issue` instead.
 
-### Step 1: Load Input
+### Step 1: Load Plan
 
 **If plan path provided or referenced in conversation:**
 - Read specified plan file
 - Extract: Implementation Steps, Affected Files per step, Dependencies between steps
 
-**If issue number provided:**
-- Fetch issue: `gh issue view NNN --json title,body,labels,assignees,state`
-- Extract: Title, Body, Acceptance criteria, Labels, Estimated complexity
-
-**If neither:**
-1. Check conversation for most recent plan or issue reference
+**If no plan path:**
+1. Check conversation for most recent plan reference
 2. If not found, check for plans: `Glob docs/plans/*.md` — read YAML frontmatter and filter out `status: complete` plans. Only show active (non-complete) plans.
-3. Check for issues: `gh issue list --limit 10 --json number,title,labels --state open`
-4. Ask user to specify
+3. Ask user to specify
 
-### Step 2: Assessment
-
-#### For Plan Input: Swarmability Assessment
+### Step 2: Swarmability Assessment
 
 Analyze all implementation tasks for independence.
 
@@ -104,35 +96,11 @@ Swarmability = sum(task_scores) / total_tasks × 100
 |-------------|-------------|
 | 70%+ | Lead + N Implementers (pure parallel) |
 | 40-69% | Lead + Analyst + N Implementers (analyst supports complex tasks) |
-| <40% | Recommend sequential `/implement` → `start-issue` instead |
-
-#### For Issue Input: Complexity Assessment
-
-Estimate complexity from the issue:
-
-| Signal | Score |
-|--------|-------|
-| Body length < 200 chars | SMALL (+0) |
-| Body length 200-1000 chars | MEDIUM (+1) |
-| Body length > 1000 chars | LARGE (+2) |
-| Acceptance criteria count < 3 | SMALL (+0) |
-| Acceptance criteria count 3-6 | MEDIUM (+1) |
-| Acceptance criteria count > 6 | LARGE (+2) |
-| Estimated files mentioned: 1-2 | SMALL (+0) |
-| Estimated files mentioned: 3-5 | MEDIUM (+1) |
-| Estimated files mentioned: 6+ | LARGE (+2) |
-| Labels include `complexity: high` or `type: architectural` | LARGE (+2) |
-
-**Total score → complexity:**
-- 0-1: SMALL → Recommend `/implement` → `start-issue`
-- 2-3: MEDIUM → Lead + Analyst + Implementer
-- 4+: LARGE → Lead + Analyst + 2 Implementers (split by module)
+| <40% | Recommend sequential implementation instead |
 
 ### Step 3: Present Assessment — MANDATORY GATE
 
 **STOP. You MUST present the assessment and get explicit approval via AskUserQuestion. NEVER spawn a team without user consent.**
-
-#### For Plan Input:
 
 ```
 Team Implement — Assessment
@@ -152,23 +120,6 @@ Independent groups: [N] (can run in parallel)
 Serialized tasks: [N] (must wait for dependencies)
 ```
 
-#### For Issue Input:
-
-```
-Team Implement — Assessment
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Issue: #NNN — [title]
-Complexity: [SMALL/MEDIUM/LARGE]
-Estimated files: [N]
-Acceptance criteria: [N]
-
-Recommended composition:
-  Lead (you) — coordination and monitoring
-  Analyst — codebase research, past learnings, requirements validation
-  Implementer(s) — [N] implementer(s) with file ownership: [module split if >1]
-```
-
 ```
 AskUserQuestion:
   question: "Assessment complete. How would you like to implement?"
@@ -177,23 +128,18 @@ AskUserQuestion:
     - label: "Team mode"
       description: "[composition summary: N teammates, analyst yes/no]"
     - label: "Sequential"
-      description: "Single-agent implementation via start-issue"
+      description: "Implement tasks one at a time without a team"
     - label: "Adjust composition"
       description: "I want to change the team makeup"
 ```
 
-**Recommendation thresholds (plans):**
+**Recommendation thresholds:**
 - Swarmability 70%+ → Add "(Recommended)" to Team mode label
 - 40-69% → Neutral
 - <40% → Add "(Recommended)" to Sequential label
 
-**Recommendation thresholds (issues):**
-- LARGE → Add "(Recommended)" to Team mode label
-- MEDIUM → Neutral
-- SMALL → Add "(Recommended)" to Sequential label
-
 **If "Team mode":** Proceed to Step 4.
-**If "Sequential":** Inform user to use `/implement` → `start-issue`. End skill.
+**If "Sequential":** Inform user the plan tasks will be implemented one at a time. Iterate through each task group sequentially — for each, follow the same protocol pipeline (CLAUDE.md, learnings, living plan, code, tests, validate). End skill after all tasks complete.
 **If "Adjust composition":** Ask what changes. Update composition. Re-present Step 3.
 
 ### Step 4: Spawn Team Lead
@@ -319,7 +265,7 @@ Suggest the user proceed to `/review` for fresh-eyes review of the combined diff
 
 ## Integration Points
 
-- **Input**: Approved plan file from `docs/plans/` OR GitHub issue number
+- **Input**: Approved plan file from `docs/plans/`
 - **Role definitions**: `agents/team/lead.md`, `agents/team/implementer.md`, `agents/team/analyst.md`
 - **Output**: Implemented code with tests, ready for `/review`
 - **Guide**: `guides/AGENT_TEAMS_GUIDE.md` (Patterns C and D)

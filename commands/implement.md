@@ -17,8 +17,8 @@ Before presenting the menu, detect what exists and assess the best approach:
 
 ### 0a. Gather Signals
 
-1. **Glob `docs/plans/*.md`** — do any plan files exist? Note the most recent one with status `approved` or `ready_for_review`.
-2. **Run `gh issue list --limit 5 --json number,title,state,labels,body 2>/dev/null`** — are there open issues? Note complexity signals (body length, labels).
+1. **Glob `docs/plans/*.md`** — do any approved plan files exist? Read YAML frontmatter, note plans with status `approved`.
+2. **Run `gh issue list --limit 5 --json number,title,state,labels,body 2>/dev/null`** — are there open issues? Note `ready_for_dev` vs `needs_refinement` labels.
 3. **Run `git diff --stat HEAD`** — are there uncommitted code changes?
 4. **Check if `TeamCreate` tool is available** — is Agent Teams enabled?
 
@@ -27,19 +27,10 @@ Before presenting the menu, detect what exists and assess the best approach:
 Based on the signals, determine the recommended implementation path:
 
 **If an approved plan exists AND TeamCreate is available:**
-- Quick-scan the plan's implementation steps for task count and file overlap
-- If 3+ independent tasks → recommend "Team implementation"
-- If <3 tasks or highly coupled → recommend "Start issue"
+- Recommend "Implement plan" (team-implement handles swarmability internally)
 
-**If open issues exist AND TeamCreate is available:**
-- Check the most recent/relevant issue's complexity signals:
-  - Body length, acceptance criteria count, estimated files, labels
-  - SMALL (1-2 files, clear criteria) → recommend "Start issue"
-  - MEDIUM/LARGE (3+ files, multiple criteria) → recommend "Team implementation"
-
-**If TeamCreate is NOT available:**
-- Never show "Team implementation" option
-- Recommend "Start issue" if issues exist
+**If `ready_for_dev` issues exist:**
+- Recommend "Start issue" (start-issue handles complexity assessment internally — single-agent or team)
 
 **If no plan and no issues:**
 - Recommend "Triage issues"
@@ -57,7 +48,7 @@ Build the AskUserQuestion dynamically based on Step 0 findings. **Place the reco
 | Option | Precondition | Always show? |
 |--------|-------------|--------------|
 | Start issue | GitHub issues exist | Only if issues found |
-| Team implementation | (Plan exists OR issues exist) AND TeamCreate available | Only if preconditions met |
+| Implement plan | Approved plan exists AND TeamCreate available | Only if preconditions met |
 | Triage issues | Always available | Yes |
 | Generate tests | Code changes exist | Only if changes found |
 
@@ -68,15 +59,11 @@ AskUserQuestion:
   options:
     # Place the recommended option FIRST with "(Recommended)" in the label.
     # Include only options whose preconditions are met from Step 0.
-    # If Start issue precondition not met, omit it.
-    # If Team implementation precondition not met, omit it.
-    # If Generate tests precondition not met, omit it.
-    # Always include Triage issues.
     # Descriptions below are for reference:
     - label: "Start issue (Recommended)"  # or without (Recommended) if not the top pick
-      description: "Begin work on a GitHub issue — single-agent with living plan and past learnings"
-    - label: "Team implementation"
-      description: "Parallel team-based implementation with defined roles (Lead, Analyst, Implementers)"
+      description: "Full implementation from a GitHub issue — research, assess complexity, implement (single-agent or team), test, validate"
+    - label: "Implement plan"
+      description: "Team-based plan implementation — swarmability assessment with parallel execution"
     - label: "Triage issues"
       description: "Batch-triage and plan open GitHub issues — get them ready_for_dev"
     - label: "Generate tests"
@@ -87,7 +74,7 @@ AskUserQuestion:
 - Run validation — Execute tests + coverage + lint + security checks
 - Security review — Run OWASP security checklist on code changes
 
-**If no preconditions are met** (no plans, no issues, no changes): Show "Triage issues" and inform the user: "No plans or issues found. Run `/plan` to create a plan, or triage existing issues."
+**If no preconditions are met** (no plans, no issues, no changes): Show "Triage issues" and inform the user: "No plans or issues found. Run `/plan` to create a plan, or `/file-issue` to capture work."
 
 ---
 
@@ -96,7 +83,7 @@ AskUserQuestion:
 **Based on selection:**
 
 - **"Start issue"** → Invoke `Skill(skill="godmode:start-issue")`
-- **"Team implementation"** → Invoke `Skill(skill="godmode:team-implement")`
+- **"Implement plan"** → Invoke `Skill(skill="godmode:team-implement")`
 - **"Triage issues"** → Invoke `Skill(skill="godmode:triage-issues")`
 - **"Generate tests"** → Invoke `Skill(skill="godmode:generate-tests")`
 - **"Run validation"** → Invoke `Skill(skill="godmode:run-validation")`

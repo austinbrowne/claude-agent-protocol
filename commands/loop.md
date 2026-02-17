@@ -137,6 +137,7 @@ WHILE true:
 
   2. Spawn Worker subagent (general-purpose, mode: bypassPermissions)
      with the WORKER PROMPT below
+     Set env: CLAUDE_LOOP_WORKER=1 (enables protocol file protection hook)
 
   3. On error/timeout:
      → Read loop-context.md to check if worker made partial progress
@@ -180,13 +181,17 @@ of previous work — read files for ALL context.
    b. Update `.claude/loop-context.md`: increment tasks_blocked by 1
 6. Output a ONE-LINE summary: "DONE: <task>" or "BLOCKED: <task> — <reason>"
 
+## Environment
+- CLAUDE_LOOP_WORKER=1 (set by the loop orchestrator — enables protocol file protection hook)
+
 ## Rules
 - ONE task only. Do not implement multiple tasks.
 - Commit BEFORE checking [x] — if commit fails, leave task as [ ].
 - Do NOT push to remote. Local commits only.
 - Do NOT create PRs or modify CI/CD configs.
 - Do NOT modify .claude/ directory except loop-context.md.
-- Do NOT modify commands/*.md or agents/*.md.
+- Do NOT modify commands/*.md, agents/*.md, skills/*.md, guides/*.md, templates/*.md, checklists/*.md, or hooks/*.md.
+- Do NOT modify AI_CODING_AGENT_GODMODE.md, CLAUDE.md, QUICK_START.md, or settings.json.
 - Use the FULL task line text in Edit old_string to avoid "not unique" errors.
 - Read files BEFORE editing. Follow existing codebase patterns.
 ```

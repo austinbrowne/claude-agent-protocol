@@ -196,123 +196,90 @@ AskUserQuestion:
 **If "Sequential":** Inform user to use `/implement` → `start-issue`. End skill.
 **If "Adjust composition":** Ask what changes. Update composition. Re-present Step 3.
 
-### Step 4: Spawn Implementation Team
+### Step 4: Spawn Team Lead
 
-**Plan status update:** Before spawning any teammates, read the plan file's YAML frontmatter `status:` field (if plan input). Only update to `in_progress` if the current status is `approved` or `ready_for_review` (forward transitions only — do not regress `in_progress` or `complete`). If the frontmatter exists but has no `status:` field, add `status: in_progress`.
+**CRITICAL: The main agent does NOT act as Team Lead. Spawn a dedicated Team Lead agent via the Task tool. This preserves the main agent's context window for user interaction — team coordination overhead stays in the Lead's context.**
+
+**4a. Status updates (before spawning Lead):**
+
+**Plan status update:** Read the plan file's YAML frontmatter `status:` field (if plan input). Only update to `in_progress` if the current status is `approved` or `ready_for_review` (forward transitions only — do not regress `in_progress` or `complete`). If the frontmatter exists but has no `status:` field, add `status: in_progress`.
 
 **Issue status update:** If issue input:
 ```bash
 gh issue edit NNN --add-assignee @me --remove-label "ready_for_dev" --add-label "status: in-progress"
 ```
 
-**4a. Create shared task list:**
+**4b. Read role definitions:**
 
-Create tasks for each group. Independent groups start unblocked. Serialized tasks blocked by their dependencies.
+Read the following files and inline their content into the Team Lead's spawn prompt:
+- `agents/team/lead.md`
+- `agents/team/implementer.md`
+- `agents/team/analyst.md` (if composition includes an Analyst)
 
-**4b. Spawn Analyst (if composition includes one):**
+**4c. Spawn Team Lead:**
 
-**Before spawning:** The orchestrator reads `agents/team/analyst.md` and inlines the content into the spawn prompt. The Analyst still needs file access (Read, Grep, Glob) for codebase research — that's their job. But they should NOT need to read their own role definition.
+Launch a single `godmode:team:team-lead` agent via the Task tool. The Team Lead creates the team, spawns teammates, monitors progress, and returns consolidated results. The main agent waits for the result.
 
 ```
-You are the Analyst on an implementation team.
+Task(
+  subagent_type="godmode:team:team-lead",
+  prompt="""You are the Team Lead for an implementation team.
 
 YOUR ROLE DEFINITION:
+[inline content from agents/team/lead.md]
+
+IMPLEMENTER ROLE DEFINITION (include in every implementer spawn prompt):
+[inline content from agents/team/implementer.md]
+
+[If analyst included:]
+ANALYST ROLE DEFINITION (include in analyst spawn prompt):
 [inline content from agents/team/analyst.md]
 
+== CONTEXT ==
+
 [For plan input:]
-Plan: [plan file path]
-Tasks being implemented:
-[list of all tasks with descriptions]
+Plan file: [path]
+Plan content:
+[full plan content]
 
 [For issue input:]
 Issue: #NNN — [title]
 [issue body]
 
-Affected areas:
-[list of directories/files from assessment]
+== ASSESSMENT RESULTS ==
 
-Your job:
-1. Search docs/solutions/ for past learnings relevant to these tasks
-2. Explore the codebase areas being modified — identify patterns, utilities, conventions
-3. Broadcast findings to implementers as you discover them (don't wait)
-4. Respond to any research requests from implementers or the Lead
-5. Cross-reference implementation direction against requirements
+Team composition: [from Step 3]
+Task groups:
+  Group 1 (implementer-1): [tasks] — files: [list]
+  Group 2 (implementer-2): [tasks] — files: [list]
+  [...]
+Analyst: [Yes/No]
+Independent groups: [N]
+Serialized tasks: [N]
 
-Rules:
-- Read CLAUDE.md for project conventions
-- Broadcast relevant findings immediately — implementers are working NOW
-- Prioritize on-demand research requests over background research
-- Mark your research task complete when initial sweep is done
-```
+== INSTRUCTIONS ==
 
-**4c. Spawn Implementer(s):**
-
-**Before spawning:** The orchestrator reads `agents/team/implementer.md` and inlines the content into the spawn prompt. Implementers need full file access (Read, Write, Edit, Bash, Grep, Glob) for implementation — that's their job. But they should NOT need to read their own role definition.
-
-One spawn per task group.
-
-```
-You are an Implementer on an implementation team.
-
-YOUR ROLE DEFINITION:
-[inline content from agents/team/implementer.md]
-
-Your assigned tasks:
-[task descriptions for this group]
-
-Owned files:
-[file list for this group — EXCLUSIVE ownership]
-
-[For plan input:]
-Plan reference: [plan file path]
-
-[For issue input:]
-Issue: #NNN — [title]
-Acceptance criteria:
-[criteria from issue]
-
-Protocol pipeline (follow ALL steps):
-1. Read CLAUDE.md for project conventions
-2. Search docs/solutions/ for past learnings relevant to your tasks
-3. Create a living plan at .todos/[task-id]-plan.md
-4. Implement the code changes
-5. Generate tests (happy path + edge cases + error conditions)
-6. Run validation: lint, type-check, tests pass
-7. Mark task complete and message the Lead with summary
+1. Create a team via TeamCreate
+2. Create the shared task list (independent groups start unblocked, serialized tasks blocked by dependencies)
+3. Spawn Analyst (if included) as a teammate — include their role definition, plan/issue context, and affected areas in the spawn prompt
+4. Spawn Implementer(s) as teammates — one per task group. Include in each spawn prompt: their role definition, task description, owned files (EXCLUSIVE), and plan/issue reference
+5. Monitor progress: watch task list, handle blockers, resolve file conflicts, relay analyst findings
+6. For serialized tasks: when dependencies complete, either assign to an idle teammate or spawn a new implementer
+7. When all tasks complete: shut down all teammates, clean up the team
+8. Return a consolidated summary in your output format
 
 Rules:
-- Do NOT modify files outside your owned list unless you get Lead approval
-- If you need to modify a shared file, message the Lead FIRST and wait
-- If you discover a blocker, message the Lead immediately
-- If the Analyst broadcasts a finding relevant to your work, adjust accordingly
-- If you finish early, check the task list for unblocked tasks to claim
+- Each Implementer follows the FULL protocol pipeline: read CLAUDE.md, search docs/solutions/, create living plan, implement, test, validate
+- File ownership is EXCLUSIVE — no overlaps between implementers
+- If a teammate needs a file outside their boundary, they message you first
+- 2-4 teammates maximum. For larger plans, run in waves.
+- Broadcast sparingly — prefer direct messages
+""")
 ```
 
-**4d. For serialized tasks:** Monitor the task list. When a dependency completes, the blocked task becomes unblocked. Either an existing idle teammate claims it, or spawn a new Implementer.
+### Step 5: Present Results
 
-### Step 5: Monitor Progress
-
-While teammates work:
-
-1. **Watch the shared task list** for completion updates
-2. **Handle blockers:** If a teammate messages about a blocker:
-   - Try to resolve it (provide context, suggest approach)
-   - If unresolvable, escalate to user
-3. **Handle file conflicts:** If two teammates need the same file:
-   - Determine which change should go first
-   - Message the second teammate to wait
-   - After the first completes, message the second to proceed
-4. **Handle stuck teammates:** If a task hasn't progressed:
-   - Message the teammate: "Status update on [task]?"
-   - If no response, consider spawning a replacement
-5. **Relay analyst findings:** If the analyst discovers something critical that affects the overall plan, broadcast it or message the specific implementer
-
-### Step 6: Completion
-
-When all tasks are complete:
-
-1. Shut down all teammates and clean up the team
-2. Present summary using the Lead's output format (see `agents/team/lead.md`):
+The Team Lead returns a consolidated summary. Present it to the user:
 
 ```
 Team Implement — Complete
@@ -333,7 +300,7 @@ Validation: [clean / N issues]
 Next step: Run /review for fresh-eyes review of all changes.
 ```
 
-3. Suggest the user proceed to `/review` for fresh-eyes review of the combined diff.
+Suggest the user proceed to `/review` for fresh-eyes review of the combined diff.
 
 ---
 
@@ -343,6 +310,7 @@ Next step: Run /review for fresh-eyes review of all changes.
 - **Analyst is optional.** Pure parallel plans (70%+ swarmability) skip the analyst — implementers are independent. Complex or mixed plans get an analyst.
 - **Branch strategy.** All teammates work on the same branch. Assessment ensures minimal file overlap.
 - **Fresh-eyes review happens AFTER.** Individual teammates validate their own work. Holistic review happens at `/review` on the combined diff.
+- **Dedicated Team Lead.** The main agent never acts as Team Lead. A spawned `godmode:team:team-lead` agent handles all coordination — team creation, teammate spawning, monitoring, conflict resolution, and result synthesis. This preserves the main agent's context window for user interaction and subsequent workflow steps.
 - **Token cost.** Each teammate is a full Claude Code instance. Cost scales with team size. Only recommend teams when parallelism or communication adds genuine value.
 - **Replaces swarm-plan.** This skill absorbs all former swarm-plan functionality. The swarmability assessment algorithm is identical.
 - **Max teammates.** Recommend 2-4 teammates. For larger plans, run in waves rather than spawning more.

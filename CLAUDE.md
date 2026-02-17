@@ -195,6 +195,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - **Replace AskUserQuestion gates with plain text** - skills and workflow commands define mandatory `AskUserQuestion` interaction points. ALWAYS use the AskUserQuestion tool with the exact options defined in the skill file. NEVER substitute with a prose question like "what would you like to do next?"
 - **Override HUMAN IN LOOP without `/loop`** — only `/loop` may bypass AskUserQuestion gates, and only because the user explicitly opted in
 - **Use EnterPlanMode when executing workflow commands or skills** — the protocol has its own planning layer (`/plan`, `generate-plan`, plan files). Claude Code's native plan mode is redundant and wastes a turn. When a user invokes a workflow command (e.g. `/implement`, `/review`, `/ship`) or any skill, execute it directly — NEVER call EnterPlanMode first
+- **Act as Team Lead when spawning Agent Teams** — always spawn the Team Lead as a dedicated agent via the Task tool (`godmode:team:team-lead`). The main agent's context window is reserved for user interaction, not team coordination overhead. See `guides/AGENT_TEAMS_GUIDE.md`
 
 **Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When shipping, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/review` again.
 

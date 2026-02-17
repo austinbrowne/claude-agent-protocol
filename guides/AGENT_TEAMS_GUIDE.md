@@ -12,6 +12,8 @@
 
 Only `team-implement` uses Agent Teams. It checks for `TeamCreate` in its tool list at Step 0. If unavailable, it halts and directs to single-agent `/implement` → `start-issue`.
 
+**CRITICAL: The main agent never acts as Team Lead.** When Agent Teams is used, the main agent spawns a dedicated Team Lead via the Task tool (`godmode:team:team-lead`). The Lead handles team creation, teammate spawning, monitoring, and completion. The main agent's context window is reserved for user interaction — not coordination bookkeeping.
+
 All other skills (reviews, planning, research) use subagents exclusively — no detection step needed.
 
 ---
@@ -108,21 +110,26 @@ When complete, mark your task as done.
 
 **Structure:**
 ```
-Lead (you) = Coordinator + Monitor (see agents/team/lead.md)
+Main Agent = Input loading, assessment, user approval, result presentation
+Team Lead (spawned via Task tool) = Coordinator + Monitor (see agents/team/lead.md)
 Teammates = Implementers (one per independent task group, see agents/team/implementer.md)
 Optional: Analyst (for mixed-independence plans, see agents/team/analyst.md)
 ```
 
 **When to use:** Plan has 3+ implementation tasks with high independence (70%+ swarmability score). Each implementer owns different files and can work in parallel.
 
-**Lead responsibilities:**
+**Main agent responsibilities:**
 - Run swarmability assessment on plan tasks
 - Present assessment to user for approval
-- Spawn Implementer teammates, each assigned a task group with exclusive file ownership
+- Spawn dedicated Team Lead via Task tool with all context
+- Present Team Lead's consolidated results to user
+
+**Team Lead responsibilities (spawned agent):**
+- Create team via TeamCreate, spawn Implementer teammates with exclusive file ownership
 - Optionally spawn Analyst for mixed-independence plans (40-69% swarmability)
 - Monitor progress via shared task list
 - Handle blockers and file conflicts
-- Track completion, present summary when all done
+- Track completion, return consolidated summary
 
 **Implementer teammate responsibilities:**
 - Execute assigned task following the FULL protocol pipeline (see `agents/team/implementer.md`):
@@ -149,18 +156,25 @@ Optional: Analyst (for mixed-independence plans, see agents/team/analyst.md)
 
 **Structure:**
 ```
-Lead (you) = Coordinator + Monitor (see agents/team/lead.md)
+Main Agent = Input loading, complexity assessment, user approval, result presentation
+Team Lead (spawned via Task tool) = Coordinator + Monitor (see agents/team/lead.md)
 Analyst = Real-time research support (see agents/team/analyst.md)
 Implementer(s) = Code + tests + validation (see agents/team/implementer.md)
 ```
 
 **When to use:** Single complex issue (MEDIUM/LARGE: 3+ files, multiple acceptance criteria, some unknowns). The Analyst researches the codebase and past learnings in parallel while the Implementer codes — mid-task information exchange that subagents cannot provide.
 
-**Lead responsibilities:**
+**Main agent responsibilities:**
 - Assess issue complexity
-- Spawn Analyst + Implementer(s) with clear file ownership
+- Present assessment to user for approval
+- Spawn dedicated Team Lead via Task tool with all context
+- Present Team Lead's consolidated results to user
+
+**Team Lead responsibilities (spawned agent):**
+- Create team, spawn Analyst + Implementer(s) with clear file ownership
 - Monitor progress and relay critical Analyst findings
 - Resolve conflicts between Analyst recommendations and Implementer direction
+- Return consolidated summary when complete
 
 **Analyst responsibilities (see `agents/team/analyst.md`):**
 - Search `docs/solutions/` for past learnings relevant to the issue
@@ -341,6 +355,12 @@ When Agent Teams is not available, `team-implement` halts and directs the user t
 - Always have fallback paths
 - If team formation fails, fall back to subagent mode gracefully
 - Clean up teams when done (Lead runs cleanup)
+
+### 7. Spawn Dedicated Team Lead
+- The main agent MUST NOT act as Team Lead — spawn a `godmode:team:team-lead` agent via the Task tool
+- Team coordination overhead (teammate messages, task monitoring, conflict resolution) stays in the Lead's context
+- The main agent's context window is preserved for user interaction and subsequent workflow steps (e.g. `/review`, `/ship`)
+- The main agent handles pre-team work (input loading, assessment, user approval) and post-team work (presenting results, next steps)
 
 ---
 

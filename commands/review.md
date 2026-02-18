@@ -31,10 +31,12 @@ AskUserQuestion:
   question: "What kind of review would you like to run?"
   header: "Review"
   options:
+    - label: "Smart review (Recommended)"
+      description: "Assess diff and recommend appropriate depth — lite, standard, or full"
     - label: "Fresh eyes review (full)"
       description: "11-agent smart selection review with adversarial validation"
     - label: "Fresh eyes review (lite)"
-      description: "Quick 3-agent review (Security + Edge Case + Supervisor)"
+      description: "Quick 4-agent review (Security + Code Quality + Edge Case + Supervisor)"
     - label: "Review protocol compliance"
       description: "Check protocol compliance and generate status report"
 ```
@@ -45,8 +47,9 @@ AskUserQuestion:
 
 **Based on selection:**
 
+- **"Smart review"** → Invoke `Skill(skill="godmode:fresh-eyes-review", args="smart mode — assess diff and recommend depth")`
 - **"Fresh eyes review (full)"** → Invoke `Skill(skill="godmode:fresh-eyes-review", args="full mode")`
-- **"Fresh eyes review (lite)"** → Invoke `Skill(skill="godmode:fresh-eyes-review", args="lite mode — Security + Edge Case + Supervisor only")`
+- **"Fresh eyes review (lite)"** → Invoke `Skill(skill="godmode:fresh-eyes-review", args="lite mode — Security + Code Quality + Edge Case + Supervisor only")`
 - **"Review protocol compliance"** → Invoke `Skill(skill="godmode:review-protocol")`
 
 ---

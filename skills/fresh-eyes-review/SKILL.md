@@ -76,7 +76,7 @@ Before running the smart selection algorithm, check for a per-project config fil
 1. Read `godmode.local.md` from the project root (the working directory). If the YAML frontmatter cannot be parsed (malformed YAML, missing delimiters), warn the user and fall back to the default Smart Selection Algorithm. Suggest running `/setup` to regenerate the config file.
 2. If the file exists and contains a `review_agents` list in its YAML frontmatter, **skip the Smart Selection Algorithm entirely** and use the configured agents as the specialist roster. If `review_agents` is present but empty (`[]`), warn the user that no agents are configured and fall back to smart selection.
 3. If the file contains a `review_depth` field, adjust behavior:
-   - `fast` — equivalent to `--lite` mode (Security + Edge Case + Supervisor only). Note: fast mode drops Code Quality Reviewer compared to the standard core set.
+   - `fast` — equivalent to `--lite` mode (Security + Code Quality + Edge Case + Supervisor only). Skips Adversarial Validator and all conditional agents.
    - `thorough` — default smart selection (no change)
    - `comprehensive` — run ALL conditional agents regardless of trigger detection
    - Any other value — warn the user and default to `thorough`
@@ -163,9 +163,12 @@ Scan file list for dependency files:
 
 Present recommendation to user with option to override.
 
-If Lite accepted: skip Step 3, run Security + Edge Case + Supervisor only.
+If Lite accepted: skip Step 3, run Security + Code Quality + Edge Case + Supervisor only.
 
-Skip this gate when the user explicitly chose `--lite` or Full from `commands/review.md`.
+**Gate activation rules:**
+- **Smart mode** (from `commands/review.md` "Smart review"): Always run this gate — this is the intended path.
+- **Explicit Full or Lite** (from `commands/review.md`): Skip this gate — user already chose.
+- **Direct `/fresh-eyes-review` invocation** (no mode specified): Run this gate.
 
 ### Step 2.6: Hunk Extraction (Conditional Agents)
 
@@ -490,10 +493,13 @@ AskUserQuestion:
 
 For quick reviews (`--lite`), run only:
 - Security Reviewer
+- Code Quality Reviewer
 - Edge Case Reviewer
 - Supervisor
 
 Skip: Adversarial Validator, all conditional agents.
+
+**Why Code Quality is included:** Code Quality catches naming, structure, and SOLID violations that are common even in small diffs. Dropping it creates a coverage gap where structural issues go entirely unreviewed.
 
 **Auto-routing:** The LOC gate (Step 2.5) automatically recommends Lite review for small changesets (<= 50 LOC added, no security-sensitive patterns). Users can override at the gate prompt.
 

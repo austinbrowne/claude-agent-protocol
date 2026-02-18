@@ -127,9 +127,12 @@ Scan file list for dependency files:
 
 Present recommendation to user with option to override.
 
-If Lite accepted: skip Step 3, run Security + Edge Case + Supervisor only.
+If Lite accepted: skip Step 3, run Security + Code Quality + Edge Case + Supervisor only.
 
-Skip this gate when the user explicitly chose `--lite` or Full from `commands/review.md`.
+**Gate activation rules:**
+- **Smart mode** (from `commands/review.md` "Smart review"): Always run this gate — this is the intended path.
+- **Explicit Full or Lite** (from `commands/review.md`): Skip this gate — user already chose.
+- **Direct `/fresh-eyes-review` invocation** (no mode specified): Run this gate.
 
 ### Step 2.6: Hunk Extraction (Conditional Agents)
 
@@ -262,10 +265,13 @@ Create both file-based todos AND GitHub issues.
 
 For quick reviews (`--lite` flag), run only:
 - Security Reviewer
+- Code Quality Reviewer
 - Edge Case Reviewer
 - Supervisor
 
 Skip: Adversarial Validator, all conditional agents.
+
+**Why Code Quality is included:** Code Quality catches naming, structure, and SOLID violations that are common even in small diffs. Dropping it creates a coverage gap where structural issues go entirely unreviewed.
 
 **Auto-routing:** The LOC gate (Step 2.5) automatically recommends Lite review for small changesets (<= 50 LOC added, no security-sensitive patterns). Users can override at the gate prompt.
 
@@ -295,7 +301,7 @@ Skip: Adversarial Validator, all conditional agents.
 
 | Review Type | Agents | Estimated Cost |
 |-------------|--------|---------------|
-| Lite | 3 (Security + Edge Case + Supervisor) | ~$0.05-0.10 |
+| Lite | 4 (Security + Code Quality + Edge Case + Supervisor) | ~$0.08-0.15 |
 | Standard (3-5 triggered) | 6-8 total | ~$0.15-0.30 |
 | Full (all triggered) | 12 total | ~$0.30-0.50 |
 

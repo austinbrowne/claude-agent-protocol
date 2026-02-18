@@ -236,6 +236,12 @@ IF review_round >= review_max_rounds AND NOT review_clean:
 
 Each review worker is a `general-purpose` Task subagent spawned with `mode: bypassPermissions`. It acts as team lead, spawning review agents as parallel teammates via Agent Teams.
 
+**Agent Teams fallback:** If TeamCreate is not available or fails, the review worker should fall back to running the fresh-eyes-review skill pattern using sequential Task subagents instead. Skip Phase 2 below and let the skill manage the full review flow:
+
+```
+Skill(skill="fresh-eyes-review", args="full mode")
+```
+
 ```
 You are running a FULL fresh-eyes code review using Agent Teams for parallel
 execution. You have ZERO memory of previous work — read files for ALL context.
@@ -255,7 +261,7 @@ You are the TEAM LEAD — you coordinate specialists, consolidate, and validate.
 
 ## Phase 2: Spawn Review Team (Parallel)
 
-1. Create a team with TeamCreate
+1. Attempt to create a team with TeamCreate. If TeamCreate fails or is unavailable, fall back to Skill('fresh-eyes-review') and skip to Phase 3.
 2. For EACH selected specialist, spawn a teammate (general-purpose Task, mode: bypassPermissions)
    with this prompt template:
 

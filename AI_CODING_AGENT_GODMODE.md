@@ -1,10 +1,10 @@
 # AI Coding Agent Standard Operating Protocol (SOP)
 
-**Version:** 5.3.0-experimental
+**Version:** 5.14.0-experimental
 **Last Updated:** February 2026
 **Purpose:** Safe, effective AI-assisted software development
 
-**Current:** 7 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`, `/loop`), 26 reusable skill packages, flat `godmode:` namespace, natural workflow chaining via `AskUserQuestion`, Agent Teams integration, per-project review configuration, and autonomous development loops.
+**Current:** 7 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`, `/loop`), 27 reusable skill packages, flat `godmode:` namespace, natural workflow chaining via `AskUserQuestion`, Agent Teams integration, per-project review configuration, and autonomous development loops.
 
 ---
 
@@ -930,7 +930,7 @@ After completing a feature or fixing a tricky bug:
 - `templates/ADR_TEMPLATE.md` - Architecture decisions
 - `agents/review/*.md` - 15 review agent definitions
 - `agents/research/*.md` - 4 research agent definitions
-- `skills/*/SKILL.md` - 26 reusable skill packages
+- `skills/*/SKILL.md` - 27 reusable skill packages
 - `commands/*.md` - 7 workflow commands
 - `guides/CONTEXT_OPTIMIZATION.md` - Advanced context techniques
 - `guides/MULTI_AGENT_PATTERNS.md` - Complex coordination
@@ -940,4 +940,4 @@ After completing a feature or fixing a tricky bug:
 
 ---
 
-*Last Updated: February 2026 | Version: 5.3.0-experimental | Next Review: Quarterly*
+*Last Updated: February 2026 | Version: 5.14.0-experimental | Next Review: Quarterly*

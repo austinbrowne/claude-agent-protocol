@@ -29,6 +29,8 @@ Methodology for enriching a plan with parallel research, multi-agent review, and
 
 ### Phase 2: Research Layer
 
+<!-- Research agent config — canonical source: agents/research/DISPATCH_TABLE.md -->
+
 **CRITICAL: Launch ALL research agents IN PARALLEL.**
 
 **Before launching:** The orchestrator reads each agent's definition file and inlines the content into the prompt. Research agents still need file access (Grep, Read, Glob) to explore the codebase — that's their job. But they should NOT need to read their own definition file.

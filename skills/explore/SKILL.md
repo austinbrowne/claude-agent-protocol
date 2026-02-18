@@ -65,6 +65,8 @@ AskUserQuestion:
 
 ## Step 2: Launch Research Agents in Parallel
 
+<!-- Research agent config — canonical source: agents/research/DISPATCH_TABLE.md -->
+
 **CRITICAL:** Launch all applicable research agents simultaneously via Task tool in a single message.
 
 **Smart research decision (for agents 3 & 4):**

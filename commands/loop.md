@@ -244,7 +244,7 @@ You are the TEAM LEAD — you coordinate specialists, consolidate, and validate.
 ## Phase 1: Setup
 
 1. Read `.claude/loop-context.md` for start_commit
-2. Generate the diff: run `git diff {start_commit}..HEAD` and save to /tmp/review-diff.txt
+2. Generate the diff: run `git diff {start_commit}..HEAD` and save to .review/review-diff.txt
 3. Generate the file list: run `git diff --name-only {start_commit}..HEAD`
 4. Read `guides/FRESH_EYES_REVIEW.md` for the smart selection algorithm
 5. Run SMART SELECTION: check trigger patterns against diff content and file list

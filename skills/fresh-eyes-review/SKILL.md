@@ -108,8 +108,9 @@ This is a Rails API. Focus on N+1 queries and mass assignment.
 ### Step 1: Generate Diff
 
 ```bash
-git diff --staged -U5 -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-diff.txt
-git diff --staged --name-only -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > /tmp/review-files.txt
+mkdir -p .review
+git diff --staged -U5 -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > .review/review-diff.txt
+git diff --staged --name-only -- . ':!*lock*' ':!*.lock' ':!*-lock.*' ':!go.sum' > .review/review-files.txt
 ```
 
 **Excluded from review diff:** Lock and auto-generated files (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `Gemfile.lock`, `go.sum`, `Cargo.lock`, `composer.lock`, `poetry.lock`, etc.). These are machine-generated and inflate diffs by thousands of lines without reviewable content. The Dependency Reviewer evaluates manifest files (`package.json`, `Gemfile`, etc.) — not lock files.
@@ -188,9 +189,9 @@ For each triggered conditional agent, extract only the diff hunks relevant to th
 
 5. **Full-diff fallback:** If the filtered diff contains >80% of the full diff's total hunks, pass the full diff instead (filtering provides negligible savings).
 
-6. **Write filtered diff** to `/tmp/review-diff-{agent-name}.txt` (e.g., `/tmp/review-diff-performance.txt`).
+6. **Write filtered diff** to `.review/review-diff-{agent-name}.txt` (e.g., `.review/review-diff-performance.txt`).
 
-**Agents that read the full diff (`/tmp/review-diff.txt`):**
+**Agents that read the full diff (`.review/review-diff.txt`):**
 - Core agents: Security Reviewer, Code Quality Reviewer, Edge Case Reviewer
 - Adversarial Validator (Phase 3)
 
@@ -260,7 +261,7 @@ SECURITY CHECKLIST:
 [inline content from checklists/AI_CODE_SECURITY_REVIEW.md]
 
 STEP 1 — Read the diff:
-Use the Read tool to read: /tmp/review-diff.txt
+Use the Read tool to read: .review/review-diff.txt
 
 STEP 2 — Review the diff using your review process above.
 
@@ -290,7 +291,7 @@ YOUR REVIEW PROCESS:
 [inline content from agents/review/[agent].md]
 
 STEP 1 — Read the diff:
-Use the Read tool to read: /tmp/review-diff-[agent-name].txt
+Use the Read tool to read: .review/review-diff-[agent-name].txt
 This diff contains only hunks relevant to your review domain.
 
 STEP 2 — Review the diff using your review process above.
@@ -355,7 +356,7 @@ Launch Supervisor as a Task tool call with the **Phase 1.5 summarized findings**
 
 **Phase 3: Adversarial Validation (Sequential, after Phase 2)**
 
-Launch Adversarial Validator as a Task tool call with the Supervisor report. Include the diff file path (`/tmp/review-diff.txt`) — the AV reads it to verify claims against actual code.
+Launch Adversarial Validator as a Task tool call with the Supervisor report. Include the diff file path (`.review/review-diff.txt`) — the AV reads it to verify claims against actual code.
 - Inventories every claim in the Supervisor report
 - Reads the diff to demand evidence for each claim
 - Challenges review findings

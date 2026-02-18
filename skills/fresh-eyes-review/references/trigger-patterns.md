@@ -111,8 +111,8 @@ The patterns defined above serve two purposes in the review pipeline:
 
 Patterns determine **whether an agent should run** — a binary yes/no decision.
 
-- Grep the entire staged diff (`/tmp/review-diff.txt`) for **diff content patterns**
-- Grep the changed file list (`/tmp/review-files.txt`) for **file path patterns**
+- Grep the entire staged diff (`.review/review-diff.txt`) for **diff content patterns**
+- Grep the changed file list (`.review/review-files.txt`) for **file path patterns**
 - Check **LOC thresholds** where applicable
 - If any pattern matches, add the agent to the roster
 

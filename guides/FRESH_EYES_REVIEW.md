@@ -154,10 +154,12 @@ For each triggered conditional agent, extract only the diff hunks relevant to th
 
 6. **Write filtered diff** to `/tmp/review-diff-{agent-name}.txt` (e.g., `/tmp/review-diff-performance.txt`).
 
-**Agents that always receive the full diff (`/tmp/review-diff.txt`):**
+**Agents that read the full diff (`/tmp/review-diff.txt`):**
 - Core agents: Security Reviewer, Code Quality Reviewer, Edge Case Reviewer
-- Supervisor (Phase 2)
 - Adversarial Validator (Phase 3)
+
+**Agents that do NOT read the diff:**
+- Supervisor (Phase 2) — receives Phase 1.5 summarized findings only
 
 ### Step 3: Build Agent Roster
 
@@ -177,12 +179,15 @@ Show user which agents will run and why, with option to customize.
 
 Launch ALL specialist agents simultaneously in a single message with multiple Task tool calls.
 
-**Each agent receives:**
+**Each agent receives in its prompt:**
 - Zero conversation context (fresh eyes)
-- Agent definition file (from `agents/review/`)
-- Relevant checklist file (security → `checklists/AI_CODE_SECURITY_REVIEW.md`, etc.)
-- **Core agents** receive the full diff: `/tmp/review-diff.txt`
-- **Conditional agents** receive their filtered diff: `/tmp/review-diff-{agent-name}.txt` (produced by Step 2.6)
+- Agent review process (inlined from `agents/review/`)
+- Security checklist (inlined, security agent only)
+- File path to diff — agent reads it via the Read tool:
+  - **Core agents** read: `/tmp/review-diff.txt`
+  - **Conditional agents** read: `/tmp/review-diff-{agent-name}.txt` (produced by Step 2.6)
+
+**Why agents read the diff themselves:** Inlining the diff into every agent prompt stores N copies in the orchestrator's context window. With 8+ agents on a large diff, this exceeds context limits before Phase 2 can run. Agents reading from `/tmp/` keeps the diff in their own context only.
 
 **Compact output format:** All agents use a structured format — max 8 findings, no preamble/philosophy, `NO_FINDINGS` for empty results. See SKILL.md for exact template.
 
@@ -200,7 +205,8 @@ After ALL specialists complete, launch Supervisor:
 ### Phase 3: Adversarial Validation (Sequential)
 
 After Supervisor completes, launch Adversarial Validator:
-- Receives: supervisor's consolidated report + original diff
+- Receives: Supervisor's consolidated report + diff file path (`/tmp/review-diff.txt`)
+- AV reads the diff itself to verify claims against actual code
 - Tasks: inventory claims, demand evidence, challenge findings, classify claims
 - Output: claim verification (VERIFIED / UNVERIFIED / DISPROVED / INCOMPLETE)
 

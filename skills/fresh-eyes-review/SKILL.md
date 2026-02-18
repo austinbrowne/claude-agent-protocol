@@ -190,10 +190,12 @@ For each triggered conditional agent, extract only the diff hunks relevant to th
 
 6. **Write filtered diff** to `/tmp/review-diff-{agent-name}.txt` (e.g., `/tmp/review-diff-performance.txt`).
 
-**Agents that always receive the full diff (`/tmp/review-diff.txt`):**
+**Agents that read the full diff (`/tmp/review-diff.txt`):**
 - Core agents: Security Reviewer, Code Quality Reviewer, Edge Case Reviewer
-- Supervisor (Phase 2)
 - Adversarial Validator (Phase 3)
+
+**Agents that do NOT read the diff:**
+- Supervisor (Phase 2) — receives Phase 1.5 summarized findings only
 
 ### Step 3: Build Roster
 
@@ -234,18 +236,15 @@ Proceed with this selection? (yes / customize): ___
 
 Launch ALL specialist agents in a **single message** with multiple Task tool calls.
 
-**Before launching:** The orchestrator reads all needed files and inlines their content into each agent prompt:
-- Read each agent's definition file (`agents/review/[agent].md`)
-- Read the diff (`/tmp/review-diff.txt`)
-- Read the security checklist (`checklists/AI_CODE_SECURITY_REVIEW.md`) for the security agent
+**Before launching:** The orchestrator reads each agent's definition file (`agents/review/[agent].md`) and inlines it into the prompt. The diff is NOT inlined — agents read it themselves from `/tmp/`.
 
-**Each agent receives (all inline, zero file reads needed):**
+**Each agent receives in its prompt:**
 - Zero conversation context
 - Agent review process (inlined from definition file)
-- Diff content (inlined from `/tmp/review-diff.txt`)
 - Security checklist (inlined, security agent only)
+- File path to its diff (agent reads it via the Read tool)
 
-**CRITICAL — Zero file reads by agents:** Agents reading files triggers permission prompts on mobile clients (33 prompts across 11 agents is unacceptable UX). The orchestrator MUST inline all content. Agents should not need to use Read, Grep, or Glob tools.
+**Why agents read the diff themselves:** Inlining the diff into every agent prompt puts N copies of the diff into the orchestrator's context (once per Task tool call). With 8+ agents on a large diff, this blows up the main context window before Phase 2 can run. Having each agent read from `/tmp/` keeps the diff in the agent's context only — the orchestrator never sees it. Tradeoff: 1 permission prompt per agent on mobile (~8-12 taps).
 
 **Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the roster tables above (e.g., `model: "opus"` for Security Reviewer, `model: "sonnet"` for Code Quality Reviewer, `model: "haiku"` for Documentation Reviewer). The `Explore` subagent type manages its own model internally — do not pass `model` for it. Each agent's definition file also declares its tier in YAML frontmatter for reference.
 
@@ -260,8 +259,10 @@ YOUR REVIEW PROCESS:
 SECURITY CHECKLIST:
 [inline content from checklists/AI_CODE_SECURITY_REVIEW.md]
 
-CODE CHANGES TO REVIEW:
-[inline content from /tmp/review-diff.txt]
+STEP 1 — Read the diff:
+Use the Read tool to read: /tmp/review-diff.txt
+
+STEP 2 — Review the diff using your review process above.
 
 OUTPUT FORMAT:
 - Start DIRECTLY with findings. No preamble, philosophy, or methodology.
@@ -276,10 +277,9 @@ OUTPUT FORMAT:
 - Do NOT include passed checks, summaries, or recommendations sections.
 
 CRITICAL RULES:
-- Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
-- Everything you need is in this prompt. Do NOT read additional files for "context."
+- Read ONLY the diff file specified above. Do NOT read any other files.
+- Do NOT use Bash, Grep, Glob, Write, or Edit tools.
 - Return ALL findings as text in your response. Do NOT write findings to files.
-- No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
 ```
 
 **Agent prompt template (conditional agents — filtered diff):**
@@ -289,9 +289,11 @@ You are a [specialist type] with zero context about this project.
 YOUR REVIEW PROCESS:
 [inline content from agents/review/[agent].md]
 
-CODE CHANGES TO REVIEW:
-[inline content from /tmp/review-diff-[agent-name].txt]
+STEP 1 — Read the diff:
+Use the Read tool to read: /tmp/review-diff-[agent-name].txt
 This diff contains only hunks relevant to your review domain.
+
+STEP 2 — Review the diff using your review process above.
 
 OUTPUT FORMAT:
 - Start DIRECTLY with findings. No preamble, philosophy, or methodology.
@@ -306,10 +308,9 @@ OUTPUT FORMAT:
 - Do NOT include passed checks, summaries, or recommendations sections.
 
 CRITICAL RULES:
-- Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
-- Everything you need is in this prompt. Do NOT read additional files for "context."
+- Read ONLY the diff file specified above. Do NOT read any other files.
+- Do NOT use Bash, Grep, Glob, Write, or Edit tools.
 - Return ALL findings as text in your response. Do NOT write findings to files.
-- No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
 ```
 
 **Agent definitions referenced:**
@@ -354,9 +355,9 @@ Launch Supervisor as a Task tool call with the **Phase 1.5 summarized findings**
 
 **Phase 3: Adversarial Validation (Sequential, after Phase 2)**
 
-Launch Adversarial Validator as a Task tool call with all specialist outputs + Supervisor report:
-- Inventories every claim in the implementation
-- Demands evidence for each claim
+Launch Adversarial Validator as a Task tool call with the Supervisor report. Include the diff file path (`/tmp/review-diff.txt`) — the AV reads it to verify claims against actual code.
+- Inventories every claim in the Supervisor report
+- Reads the diff to demand evidence for each claim
 - Challenges review findings
 - Classifies claims: VERIFIED | UNVERIFIED | DISPROVED | INCOMPLETE
 - DISPROVED claims escalate to BLOCK verdict

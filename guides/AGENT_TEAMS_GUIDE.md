@@ -374,7 +374,7 @@ Three-tier model assignment reduces token cost by ~35-40% while preserving quali
 | Tier | Model | Cost | Agent Count | Criteria |
 |------|-------|------|-------------|----------|
 | **Haiku** | claude-haiku-4-5 | $1/$5 per MTok | 7 | Retrieval, search, pure pattern matching |
-| **Sonnet** | claude-sonnet-4-5 | $3/$15 per MTok | 12 | Judgment-based review, flow analysis, implementation |
+| **Sonnet** | claude-sonnet-4-6 | $3/$15 per MTok | 12 | Judgment-based review, flow analysis, implementation |
 | **Opus** | claude-opus-4-6 | $5/$25 per MTok | 5 | Deep reasoning, security, architecture, adversarial, orchestration |
 
 ### Assignments

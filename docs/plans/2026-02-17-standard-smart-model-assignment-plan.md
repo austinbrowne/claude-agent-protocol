@@ -26,7 +26,7 @@ All 24 agents inherit Opus 4.6 ($5/$25 per MTok). Most agent tasks don't require
 | Tier | Model | Pricing | Agent Count | Criteria |
 |------|-------|---------|-------------|----------|
 | **Haiku** | claude-haiku-4-5 | $1/$5 per MTok | **7** | Retrieval, search, pure pattern matching |
-| **Sonnet** | claude-sonnet-4-5 | $3/$15 per MTok | **12** | Judgment-based review, flow analysis, implementation |
+| **Sonnet** | claude-sonnet-4-6 | $3/$15 per MTok | **12** | Judgment-based review, flow analysis, implementation |
 | **Opus** | claude-opus-4-6 | $5/$25 per MTok | **5** | Deep reasoning, security, architecture, adversarial, orchestration |
 
 ### Model Mechanism

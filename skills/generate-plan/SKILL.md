@@ -38,6 +38,8 @@ Methodology for creating plans with integrated multi-agent research, brainstorm 
 
 ### 1. Parallel Research (Self-Sufficient)
 
+<!-- Research agent config — canonical source: agents/research/DISPATCH_TABLE.md -->
+
 **CRITICAL:** Launch all applicable research agents simultaneously via Task tool in a single message. This skill runs its own research — no prior `/explore` required.
 
 **Smart research decision (for agents 3 & 4):**

@@ -6,7 +6,6 @@ referenced_by:
   - skills/fresh-eyes-review/SKILL.md
   - skills/commit-and-pr/SKILL.md
   - skills/start-issue/SKILL.md
-  - commands/start-issue.md
 ---
 
 # File-Based Todo Tracking Skill
@@ -18,6 +17,15 @@ System for tracking review findings and tasks using committed markdown files.
 ## Directory Convention
 
 All todo files live in `.todos/` at the project root. This directory is committed to git for persistence across sessions.
+
+---
+
+## Reserved Filenames
+
+The following files in `.todos/` are managed by other skills and should not be manually created or modified:
+
+- `review-verdict.md` — Written by `fresh-eyes-review`, read by `review-gate.sh` hook and `/ship`
+- `review-report.md` — Written by `fresh-eyes-review`, contains full consolidated review findings
 
 ---
 

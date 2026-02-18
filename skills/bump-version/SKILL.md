@@ -31,6 +31,11 @@ Bump version in plugin.json + marketplace.json on the feature branch, then updat
 
 ## Process
 
+### Step 0: Project Guard
+
+1. **Check for plugin structure:** Verify `.claude-plugin/plugin.json` exists and contains valid JSON with a `version` field
+2. **If absent or malformed:** Display "Cannot bump version: `.claude-plugin/plugin.json` not found or invalid. This skill is for GODMODE plugin releases only." and **STOP** — do not proceed to Step 1.
+
 ### Step 1: Detect Context
 
 1. **Current branch:** `git branch --show-current`

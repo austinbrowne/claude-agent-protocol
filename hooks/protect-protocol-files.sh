@@ -15,7 +15,10 @@ fi
 INPUT=$(cat)
 
 # Extract file path from the tool input JSON
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.content // empty' 2>/dev/null)
+# Both Edit and Write tools use .tool_input.file_path as the path key.
+# The .tool_input.content fallback was removed intentionally — it matched
+# file content, not file paths, creating a security bypass.
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 
 if [ -z "$FILE_PATH" ]; then
   exit 0

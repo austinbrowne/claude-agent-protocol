@@ -168,12 +168,13 @@ AskUserQuestion:
       description: "Race conditions, deadlocks, async patterns"
     - label: "Error Handling Reviewer"
       description: "Try/catch coverage, external call resilience"
-    - label: "Data Validation Reviewer"
-      description: "Input validation, parsing, sanitization"
+      # Note: Data Validation coverage is provided by Edge Case Reviewer (input validation,
+      # schema validation, allowlist checks) and Security Reviewer (injection, sanitization).
+      # Config & Secrets coverage is provided by Security Reviewer (secrets exposure,
+      # config file safety, credential management). Separate agents were removed to reduce
+      # review overhead without coverage gaps.
     - label: "Dependency Reviewer"
       description: "Package updates, supply chain, license compliance"
-    - label: "Config & Secrets Reviewer"
-      description: "Env vars, hardcoded secrets, config hygiene"
     - label: "Testing Adequacy Reviewer"
       description: "Test coverage, test quality, missing tests"
     - label: "Documentation Reviewer"

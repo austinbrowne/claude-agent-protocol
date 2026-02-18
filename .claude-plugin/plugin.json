@@ -1,6 +1,6 @@
 {
   "name": "godmode",
-  "version": "5.13.0-experimental",
+  "version": "5.14.0-experimental",
   "description": "AI-powered development workflow with Agent Teams. 7 workflow commands, 27 skill packages, 22 agents (15 review + 4 research + 3 team roles), Agent Teams integration with defined implementation team roles (Lead, Analyst, Implementer) and autodetection-based routing, autonomous development loops, per-project review configuration, document quality review, knowledge compounding, and structured phases for planning, execution, and finalization.",
   "author": {
     "name": "Austin Browne",

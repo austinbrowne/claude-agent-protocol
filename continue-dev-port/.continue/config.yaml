@@ -1,0 +1,33 @@
+name: GODMODE Protocol
+version: 1.0.0
+schema: v1
+
+# Users configure their own models
+# models:
+#   - name: Claude
+#     provider: anthropic
+#     model: claude-sonnet-4-20250514
+
+rules:
+  - uses: file://rules/00-core-protocol.md
+  - uses: file://rules/01-ai-blind-spots.md
+  - uses: file://rules/02-workflow-reference.md
+  - uses: file://rules/03-project-conventions.md
+  - uses: file://rules/04-godmode-protocol.md
+  - uses: file://rules/guides/cross-platform-shell.md
+  - uses: file://rules/guides/fresh-eyes-review.md
+  - uses: file://rules/guides/failure-recovery.md
+  - uses: file://rules/guides/context-optimization.md
+  - uses: file://rules/guides/multi-agent-patterns.md
+  - uses: file://rules/guides/agent-teams.md
+  - uses: file://rules/checklists/security-review.md
+  - uses: file://rules/checklists/code-review.md
+
+# Workflow prompts
+prompts:
+  - uses: file://prompts/workflows/explore.md
+  - uses: file://prompts/workflows/plan.md
+  - uses: file://prompts/workflows/implement.md
+  - uses: file://prompts/workflows/review.md
+  - uses: file://prompts/workflows/learn.md
+  - uses: file://prompts/workflows/ship.md

@@ -171,29 +171,7 @@ If Lite accepted: skip Step 3, run Security + Code Quality + Edge Case + Supervi
 - **Explicit Full or Lite** (from `commands/review.md`): Skip this gate — user already chose.
 - **Direct `/fresh-eyes-review` invocation** (no mode specified): Run this gate.
 
-### Step 2.6: Hunk Extraction (Conditional Agents)
-
-For each triggered conditional agent, extract only the diff hunks relevant to that agent's domain. This reduces token consumption by sending each agent only the code relevant to its review focus.
-
-**Algorithm:**
-
-1. **Parse the unified diff** into file-level blocks, each containing one or more hunks (sections starting with `@@`).
-
-2. **For each conditional agent**, apply its trigger patterns from `skills/fresh-eyes-review/references/trigger-patterns.md`:
-   - **Diff content patterns:** Include hunks where added lines (`+`) or removed lines (`-`) match the agent's content patterns.
-   - **File path patterns:** Include ALL hunks from files whose path matches the agent's file path patterns.
-
-3. **LOC-threshold-only agents** (triggered by LOC > N without a content or file path match): pass the full diff -- no filtering.
-
-4. **Merge adjacent hunks** within 10 lines of each other in the same file to preserve context continuity.
-
-5. **Full-diff fallback:** If the filtered diff contains >80% of the full diff's total hunks, pass the full diff instead (filtering provides negligible savings).
-
-6. **Write filtered diff** to `.review/review-diff-{agent-name}.txt` (e.g., `.review/review-diff-performance.txt`).
-
-**Agents that read the full diff (`.review/review-diff.txt`):**
-- Core agents: Security Reviewer, Code Quality Reviewer, Edge Case Reviewer
-- Adversarial Validator (Phase 3)
+**All specialist agents read the same full diff (`.review/review-diff.txt`).** Each agent focuses on its own domain — no per-agent diff filtering needed.
 
 **Agents that do NOT read the diff:**
 - Supervisor (Phase 2) — receives Phase 1.5 summarized findings only
@@ -237,7 +215,7 @@ Proceed with this selection? (yes / customize): ___
 
 Launch ALL specialist agents in a **single message** with multiple Task tool calls.
 
-**Before launching:** The orchestrator reads each agent's definition file (`agents/review/[agent].md`) and inlines it into the prompt. The diff is NOT inlined — agents read it themselves from `/tmp/`.
+**Before launching:** The orchestrator reads each agent's definition file (`agents/review/[agent].md`) and inlines it into the prompt. The diff is NOT inlined — agents read it themselves from `.review/`.
 
 **Each agent receives in its prompt:**
 - Zero conversation context
@@ -245,7 +223,7 @@ Launch ALL specialist agents in a **single message** with multiple Task tool cal
 - Security checklist (inlined, security agent only)
 - File path to its diff (agent reads it via the Read tool)
 
-**Why agents read the diff themselves:** Inlining the diff into every agent prompt puts N copies of the diff into the orchestrator's context (once per Task tool call). With 8+ agents on a large diff, this blows up the main context window before Phase 2 can run. Having each agent read from `/tmp/` keeps the diff in the agent's context only — the orchestrator never sees it. Tradeoff: 1 permission prompt per agent on mobile (~8-12 taps).
+**Why agents read the diff themselves:** Inlining the diff into every agent prompt puts N copies of the diff into the orchestrator's context (once per Task tool call). With 8+ agents on a large diff, this blows up the main context window before Phase 2 can run. Having each agent read from `.review/` keeps the diff in the agent's context only — the orchestrator never sees it.
 
 **Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the roster tables above (e.g., `model: "opus"` for Security Reviewer, `model: "sonnet"` for Code Quality Reviewer, `model: "haiku"` for Documentation Reviewer). The `Explore` subagent type manages its own model internally — do not pass `model` for it. Each agent's definition file also declares its tier in YAML frontmatter for reference.
 
@@ -283,7 +261,7 @@ CRITICAL RULES:
 - Return ALL findings as text in your response. Do NOT write findings to files.
 ```
 
-**Agent prompt template (conditional agents — filtered diff):**
+**Agent prompt template (conditional agents):**
 ```
 You are a [specialist type] with zero context about this project.
 
@@ -291,8 +269,8 @@ YOUR REVIEW PROCESS:
 [inline content from agents/review/[agent].md]
 
 STEP 1 — Read the diff:
-Use the Read tool to read: .review/review-diff-[agent-name].txt
-This diff contains only hunks relevant to your review domain.
+Use the Read tool to read: .review/review-diff.txt
+Focus only on changes relevant to your review domain.
 
 STEP 2 — Review the diff using your review process above.
 

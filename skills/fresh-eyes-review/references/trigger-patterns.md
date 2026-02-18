@@ -116,12 +116,4 @@ Patterns determine **whether an agent should run** — a binary yes/no decision.
 - Check **LOC thresholds** where applicable
 - If any pattern matches, add the agent to the roster
 
-### 2. Hunk Extraction (Step 2.6)
-
-The same patterns determine **what each triggered agent should see** — filtering the diff to relevant hunks only.
-
-- **Diff content patterns** filter at the **hunk level**: grep added/removed lines within each hunk. Only hunks containing matching content are included in that agent's filtered diff.
-- **File path patterns** filter at the **file level**: all hunks from files whose path matches the pattern are included, regardless of hunk content.
-- **LOC thresholds** (agents triggered solely by LOC count without a content or file path match) receive the **full diff** — no hunk filtering is applied.
-
-Core agents (Security, Code Quality, Edge Case), Supervisor, and Adversarial Validator always receive the full diff and are not subject to hunk extraction.
+All agents read the full diff (`.review/review-diff.txt`). Each agent focuses on its own domain — no per-agent diff filtering is performed.

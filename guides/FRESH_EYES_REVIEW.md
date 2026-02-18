@@ -3,7 +3,7 @@
 **Status:** MANDATORY for ALL code changes
 **Purpose:** Unbiased code review using specialized agents with zero conversation context
 **When:** Phase 1, Step 6 - After implementation and testing, before commit
-**Version:** 5.0 — Smart agent selection with 11 specialists, LOC gate, hunk extraction, output summarization
+**Version:** 6.0 — Smart agent selection, LOC gate, agents read diff from file, compact output
 
 ---
 
@@ -135,29 +135,7 @@ If Lite accepted: skip Step 3, run Security + Code Quality + Edge Case + Supervi
 - **Explicit Full or Lite** (from `commands/review.md`): Skip this gate — user already chose.
 - **Direct `/fresh-eyes-review` invocation** (no mode specified): Run this gate.
 
-### Step 2.6: Hunk Extraction (Conditional Agents)
-
-For each triggered conditional agent, extract only the diff hunks relevant to that agent's domain. This reduces token consumption by sending each agent only the code relevant to its review focus.
-
-**Algorithm:**
-
-1. **Parse the unified diff** into file-level blocks, each containing one or more hunks (sections starting with `@@`).
-
-2. **For each conditional agent**, apply its trigger patterns from `skills/fresh-eyes-review/references/trigger-patterns.md`:
-   - **Diff content patterns:** Include hunks where added lines (`+`) or removed lines (`-`) match the agent's content patterns.
-   - **File path patterns:** Include ALL hunks from files whose path matches the agent's file path patterns.
-
-3. **LOC-threshold-only agents** (triggered by LOC > N without a content or file path match): pass the full diff -- no filtering.
-
-4. **Merge adjacent hunks** within 10 lines of each other in the same file to preserve context continuity.
-
-5. **Full-diff fallback:** If the filtered diff contains >80% of the full diff's total hunks, pass the full diff instead (filtering provides negligible savings).
-
-6. **Write filtered diff** to `.review/review-diff-{agent-name}.txt` (e.g., `.review/review-diff-performance.txt`).
-
-**Agents that read the full diff (`.review/review-diff.txt`):**
-- Core agents: Security Reviewer, Code Quality Reviewer, Edge Case Reviewer
-- Adversarial Validator (Phase 3)
+**All specialist agents read the same full diff (`.review/review-diff.txt`).** Each agent focuses on its own domain — no per-agent diff filtering needed.
 
 **Agents that do NOT read the diff:**
 - Supervisor (Phase 2) — receives Phase 1.5 summarized findings only
@@ -184,11 +162,9 @@ Launch ALL specialist agents simultaneously in a single message with multiple Ta
 - Zero conversation context (fresh eyes)
 - Agent review process (inlined from `agents/review/`)
 - Security checklist (inlined, security agent only)
-- File path to diff — agent reads it via the Read tool:
-  - **Core agents** read: `.review/review-diff.txt`
-  - **Conditional agents** read: `.review/review-diff-{agent-name}.txt` (produced by Step 2.6)
+- File path to diff (`.review/review-diff.txt`) — agent reads it via the Read tool
 
-**Why agents read the diff themselves:** Inlining the diff into every agent prompt stores N copies in the orchestrator's context window. With 8+ agents on a large diff, this exceeds context limits before Phase 2 can run. Agents reading from `/tmp/` keeps the diff in their own context only.
+**Why agents read the diff themselves:** Inlining the diff into every agent prompt stores N copies in the orchestrator's context window. With 8+ agents on a large diff, this exceeds context limits before Phase 2 can run. Agents reading from `.review/` keeps the diff in their own context only.
 
 **Compact output format:** All agents use a structured format — max 8 findings, no preamble/philosophy, `NO_FINDINGS` for empty results. See SKILL.md for exact template.
 

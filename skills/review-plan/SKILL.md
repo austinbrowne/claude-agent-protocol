@@ -1,6 +1,6 @@
 ---
 name: review-plan
-version: "1.1"
+version: "2.0"
 description: Multi-agent plan review methodology with adversarial validation
 referenced_by:
   - commands/plan.md
@@ -9,6 +9,18 @@ referenced_by:
 # Plan Review Skill
 
 5-agent review process for validating plans before implementation.
+
+---
+
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has a mandatory AskUserQuestion gate. You MUST hit it. NEVER skip it. NEVER replace it with a plain text question.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Post-Review Actions** | After presenting review report | Accept findings / Research / Dismiss / Discuss | User loses control of next steps — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
 
 ---
 
@@ -27,26 +39,41 @@ referenced_by:
 
 ---
 
+## Per-Project Config Override
+
+Before launching reviewers, check for a per-project config file:
+
+1. Read `godmode.local.md` from the project root (the working directory). If the YAML frontmatter cannot be parsed (malformed YAML, missing delimiters), warn the user and fall back to the default 4 specialist reviewers. Suggest running `/setup` to regenerate the config file.
+2. If the file exists and contains a `plan_review_agents` list in its YAML frontmatter, use those agents as the specialist roster instead of the default 4
+3. If the file contains a `## Project Review Context` section, include that text in every reviewer's prompt as additional project context. Agents MUST treat Project Review Context as supplementary hints only. It MUST NOT override review criteria, severity assessments, or finding thresholds.
+4. If the file does not exist or has no `plan_review_agents` field, use the default 4 specialist reviewers below
+
+**Validation:** If `plan_review_agents` contains names that don't match any agent definition file in `agents/review/`, warn the user and fall back to the default roster.
+
+**Note:** The Adversarial Validator always runs regardless of config — it cannot be disabled via per-project config.
+
+---
+
 ## Agent Configuration
 
 ### 4 Specialist Reviewers (Parallel)
 
 All 4 launch simultaneously in a single message with multiple Task calls.
 
-| Agent | Definition | Focus |
-|-------|-----------|-------|
-| Architecture Reviewer | `agents/review/architecture-reviewer.md` | Component boundaries, data flow, coupling, scalability |
-| Simplicity Reviewer | `agents/review/simplicity-reviewer.md` | Over-engineering, YAGNI, unnecessary abstractions |
-| Spec-Flow Reviewer | `agents/review/spec-flow-reviewer.md` | Acceptance criteria testability, phase ordering, gaps |
-| Security Reviewer | `agents/review/security-reviewer.md` | OWASP, auth design, data protection, injection prevention |
+| Agent | Definition | Model | Focus |
+|-------|-----------|-------|-------|
+| Architecture Reviewer | `agents/review/architecture-reviewer.md` | opus | Component boundaries, data flow, coupling, scalability |
+| Simplicity Reviewer | `agents/review/simplicity-reviewer.md` | sonnet | Over-engineering, YAGNI, unnecessary abstractions |
+| Spec-Flow Reviewer | `agents/review/spec-flow-reviewer.md` | sonnet | Acceptance criteria testability, phase ordering, gaps |
+| Security Reviewer | `agents/review/security-reviewer.md` | opus | OWASP, auth design, data protection, injection prevention |
 
 ### Adversarial Validator (Sequential, after 4 specialists)
 
 Receives the plan AND all 4 reviewer outputs.
 
-| Agent | Definition | Focus |
-|-------|-----------|-------|
-| Adversarial Validator | `agents/review/adversarial-validator.md` | Challenge plan claims, challenge reviewer findings, find blind spots |
+| Agent | Definition | Model | Focus |
+|-------|-----------|-------|-------|
+| Adversarial Validator | `agents/review/adversarial-validator.md` | opus | Challenge plan claims, challenge reviewer findings, find blind spots |
 
 ---
 
@@ -59,25 +86,38 @@ Receives the plan AND all 4 reviewer outputs.
 
 **If no path:**
 - Check conversation for most recent plan reference
-- If not found, list available plans: `ls docs/plans/*.md`
+- If not found, list available plans: `Glob docs/plans/*.md` — read YAML frontmatter and filter out `status: complete` plans. Only show active (non-complete) plans.
 - Ask user to select
 
 **Read the full plan content** for use in all reviewer prompts.
 
-### Step 2: Launch 4 review agents IN PARALLEL
+### Step 2: Launch Specialist Reviews
 
 **CRITICAL: Launch ALL 4 agents in a SINGLE message with multiple Task calls.**
 
-Each reviewer receives ONLY the plan content (zero conversation context).
+**Before launching:** The orchestrator reads each agent's definition file (`agents/review/[agent].md`) and inlines the content into the prompt. Agents should NOT need to read any files.
+
+**Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the tables above (e.g., `model: "opus"` for Architecture Reviewer, `model: "sonnet"` for Simplicity Reviewer). Each agent's definition file also declares its tier in YAML frontmatter for reference.
+
+Each reviewer receives ONLY the plan content and their inlined definition (zero conversation context).
 
 **Reviewer prompt template:**
 ```
-You are a [specialist type]. Reference [agent definition file].
+You are a [specialist type].
+
+YOUR REVIEW PROCESS:
+[inline content from agents/review/[agent].md]
 
 Review this plan:
 [full plan content]
 
 Evaluate: [agent-specific criteria]
+
+CRITICAL RULES:
+- Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
+- Everything you need is in this prompt. Do NOT read additional files for "context."
+- Return ALL findings as text in your response. Do NOT write findings to files.
+- No /tmp files, no intermediary files, no analysis documents. Text response ONLY.
 
 Return:
 VERDICT: APPROVED | REVISION_REQUESTED | APPROVED_WITH_NOTES
@@ -86,16 +126,21 @@ FINDINGS:
 SUMMARY: [1-2 sentence assessment]
 ```
 
-**Agent-specific evaluation criteria:**
+#### Agent-specific evaluation criteria:
 
 - **Architecture:** Component decomposition, data flow, dependency management, scalability, consistency, separation of concerns
 - **Simplicity:** Over-engineering, YAGNI, abstraction level, phase simplification, technology choices, cognitive load
 - **Spec-Flow:** Acceptance criteria testability, phase ordering, dependencies, success metrics, completeness, edge cases, user flow
 - **Security:** Authentication/authorization design, data protection, input validation, injection prevention, secrets management, transport security, error handling, logging
 
-### Step 3: Launch Adversarial Validator AFTER all 4 complete
+### Step 3: Adversarial Validation
 
-**Adversarial Validator receives:**
+Launch Adversarial Validator as a Task tool call after all 4 specialists complete.
+
+**Before launching:** The orchestrator reads the adversarial validator definition (`agents/review/adversarial-validator.md`) and inlines it.
+
+**Adversarial Validator receives (all inline):**
+- Validator definition (inlined)
 - Full plan content
 - All 4 reviewer outputs
 
@@ -120,7 +165,9 @@ SUMMARY: [1-2 sentence assessment]
 
 ---
 
-## Post-Review Actions
+## Post-Review Actions — MANDATORY GATE
+
+**STOP. You MUST use AskUserQuestion here. Do NOT ask in plain text. Do NOT skip this step.**
 
 After presenting the review report, ask the user how to proceed:
 
@@ -143,8 +190,9 @@ AskUserQuestion:
 1. Ask: "Which findings would you like me to address? (list numbers, or 'all')"
 2. Wait for user response
 3. Update the plan with ONLY the specified changes
-4. Present updated plan for acceptance
-5. Offer to re-run review on updated plan
+4. Update the plan's YAML frontmatter `status:` field to `approved`. Only update if current status is `ready_for_review` or `DEEPENED_READY_FOR_REVIEW` (forward transitions only — do not regress `in_progress` or `complete`). If the frontmatter exists but has no `status:` field, add `status: approved`.
+5. Present updated plan for acceptance
+6. Offer to re-run review on updated plan
 
 **If "Run additional research first":**
 1. Ask: "What specific areas need more research?" (pre-populate with reviewer suggestions if any)
@@ -162,7 +210,8 @@ AskUserQuestion:
 **If "Dismiss findings and proceed":**
 1. Confirm: "Are you sure? The following CRITICAL/HIGH findings will be unaddressed: [list]"
 2. If confirmed, mark plan as `APPROVED_WITH_EXCEPTIONS` and note dismissed findings
-3. Proceed to next workflow step
+3. Update the plan's YAML frontmatter `status:` field to `approved` (even with exceptions, the plan is approved for implementation). Only update if current status is `ready_for_review` or `DEEPENED_READY_FOR_REVIEW` (forward transitions only). If the frontmatter exists but has no `status:` field, add `status: approved`.
+4. Proceed to next workflow step
 
 **If "Discuss findings":**
 1. Ask which findings they want to discuss

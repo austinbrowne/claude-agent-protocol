@@ -1,6 +1,6 @@
 ---
 name: codebase-researcher
-model: inherit
+model: sonnet
 description: Explore repo structure, patterns, key files, dependencies, and conventions.
 ---
 

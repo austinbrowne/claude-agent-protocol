@@ -1,6 +1,6 @@
 ---
 name: testing-adequacy-reviewer
-model: inherit
+model: haiku
 description: Review test coverage for new code, test quality, mock appropriateness, assertion specificity, edge case test coverage, and test naming clarity.
 ---
 

@@ -15,7 +15,7 @@ Grep patterns used to determine which conditional agents should participate in a
 
 **Diff content patterns:**
 - `SELECT|INSERT|UPDATE|DELETE|\.find|\.where|\.query|ORM|prisma|sequelize|knex|typeorm`
-- Nested loops: `for|while|\.map.*\.map|\.forEach.*\.forEach`
+- Nested iterations: `\.find\(.*\.find\(|\.filter\(.*\.filter\(|\.map\(.*\.map\(|\.forEach\(.*\.forEach\(`
 
 **LOC threshold:** > 200 lines changed
 
@@ -36,24 +36,17 @@ Grep patterns used to determine which conditional agents should participate in a
 ## Concurrency Reviewer
 
 **Diff content patterns:**
-- `async|await|Promise|Thread|Lock|Mutex|goroutine|channel|atomic|volatile|Semaphore|\.lock\(\)|synchronized|actor|spawn`
+- `Promise\.all|Promise\.race|Promise\.allSettled|new Promise|\.lock\(|\.unlock\(|Mutex|Semaphore|goroutine|channel|atomic\.|volatile |synchronized |Thread\(|spawn\(|actor |worker_threads|SharedArrayBuffer|Atomics\.|concurrent\.|parallelStream`
 
 ---
 
 ## Error Handling Reviewer
 
 **Diff content patterns:**
-- External calls: `fetch\(|axios\.|http\.|request\(|\.get\(|\.post\(|fs\.|readFile|writeFile|open\(`
+- External calls: `fetch\(|axios\.|http\.(get|post|put|delete)|request\(|fs\.(readFile|writeFile|access|mkdir|unlink|stat)|open\(.*O_|createReadStream|createWriteStream`
 - Error patterns: `try|catch|except|rescue|recover`
 
 **LOC threshold:** > 300 lines changed
-
----
-
-## Data Validation Reviewer
-
-**Diff content patterns:**
-- `req\.body|req\.params|req\.query|request\.form|request\.data|params\[|FormData|multipart|upload|parse|decode|JSON\.parse|parseInt|parseFloat`
 
 ---
 
@@ -74,20 +67,10 @@ Grep patterns used to determine which conditional agents should participate in a
 
 ---
 
-## Config & Secrets Reviewer
-
-**Diff content patterns (non-test files only):**
-- `env|secret|key|token|password|credential|api_key|API_KEY`
-
-**File path patterns:**
-- `\.env|config\.|settings\.|\.config\.|\.yaml|\.yml|\.toml`
-
----
-
 ## Documentation Reviewer
 
 **Diff content patterns:**
-- Public API: `export|public|module\.exports|__all__`
+- Public API: `export (default |function |class |const |interface |type )|module\.exports\s*=|__all__\s*=`
 - Magic numbers: bare numeric literals > 1
 
 **LOC threshold:** > 300 lines changed
@@ -96,10 +79,41 @@ Grep patterns used to determine which conditional agents should participate in a
 
 ---
 
-## Usage
+## LOC Gate Patterns
 
-For each conditional agent:
-1. Grep `/tmp/review-diff.txt` for diff content patterns
-2. Grep `/tmp/review-files.txt` for file path patterns
-3. Check LOC thresholds where applicable
-4. If any pattern matches, add agent to roster
+Used by Step 2.5 (LOC Gate & Mode Recommendation) to decide Full vs Lite review.
+
+**LOC threshold:** <= 50 lines added (non-test files) recommends Lite review.
+
+**Test file exclusion patterns (excluded from LOC count):**
+- `test|spec|__tests__`
+
+**Security-sensitive content overrides (grep diff content, non-test files):**
+- `process\.env|os\.environ|API_KEY|SECRET_KEY|password|credential`
+
+If any content override matches, the LOC gate recommends Full even for small changesets.
+
+**Security-sensitive file path overrides (grep file list):**
+- `\.env|config\.|settings\.|auth|middleware|permission`
+
+**Dependency file overrides (grep file list):**
+- `package\.json|Cargo\.toml|go\.mod|requirements\.txt|Gemfile|pyproject\.toml`
+
+Any file path or dependency override also forces Full recommendation.
+
+---
+
+## Usage: Triggering and Filtering
+
+The patterns defined above serve two purposes in the review pipeline:
+
+### 1. Trigger Detection (Step 2)
+
+Patterns determine **whether an agent should run** — a binary yes/no decision.
+
+- Grep the entire staged diff (`.review/review-diff.txt`) for **diff content patterns**
+- Grep the changed file list (`.review/review-files.txt`) for **file path patterns**
+- Check **LOC thresholds** where applicable
+- If any pattern matches, add the agent to the roster
+
+All agents read the full diff (`.review/review-diff.txt`). Each agent focuses on its own domain — no per-agent diff filtering is performed.

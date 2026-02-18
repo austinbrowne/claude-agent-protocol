@@ -10,6 +10,20 @@ Rapid-fire issue filing for capturing bugs and feature requests quickly. Uses sp
 
 ---
 
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has mandatory AskUserQuestion gates. You MUST hit them. NEVER skip them. NEVER replace them with plain text questions.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Issue Type** | Step 1 | Bug / Feature | Wrong template used — UNACCEPTABLE |
+| **Confirm Before Creating** | Step 3 | Looks good / Add more details | Issue created without consent — UNACCEPTABLE |
+| **Loop or Done** | Step 5 | File another bug / File another feature / Done | User loses control of filing loop — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
+
+---
+
 ## When to Apply
 
 - Brain-dumping multiple bugs or feature ideas
@@ -70,23 +84,29 @@ AskUserQuestion:
 
 ### 4. Create GitHub Issue
 
-**For bugs** — load `templates/BUG_ISSUE_TEMPLATE.md` and fill sparsely:
+**For bugs** — load `templates/BUG_ISSUE_TEMPLATE.md` and fill sparsely. Use `--body` with a heredoc — do NOT write to `/tmp`:
 
 ```bash
 gh issue create \
   --title "[Bug title]" \
-  --body-file /tmp/issue-body.md \
+  --body "$(cat <<'EOF'
+[filled bug template content]
+EOF
+)" \
   --label "type: bug,needs_refinement"
 ```
 
 Fill only: Title, Bug Description, Steps to Reproduce (if provided), Expected/Actual (if provided), Severity. Leave all other sections as TBD or template defaults.
 
-**For features** — load `templates/GITHUB_ISSUE_TEMPLATE.md` and fill sparsely:
+**For features** — load `templates/GITHUB_ISSUE_TEMPLATE.md` and fill sparsely. Use `--body` with a heredoc — do NOT write to `/tmp`:
 
 ```bash
 gh issue create \
   --title "[Feature title]" \
-  --body-file /tmp/issue-body.md \
+  --body "$(cat <<'EOF'
+[filled feature template content]
+EOF
+)" \
   --label "type: feature,needs_refinement"
 ```
 
@@ -140,4 +160,4 @@ All labeled needs_refinement. Run /enhance-issue to add details and mark ready_f
 
 - **Templates**: `templates/BUG_ISSUE_TEMPLATE.md`, `templates/GITHUB_ISSUE_TEMPLATE.md`
 - **Output**: GitHub issues with `needs_refinement` label
-- **Next step**: `/enhance-issue` to refine, or `/workflows:plan` for full planning
+- **Next step**: `/enhance-issue` to refine, or `/plan` for full planning

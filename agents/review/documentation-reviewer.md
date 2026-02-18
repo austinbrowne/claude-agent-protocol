@@ -1,6 +1,6 @@
 ---
 name: documentation-reviewer
-model: inherit
+model: haiku
 description: Review code for public API documentation, naming clarity, magic number explanation, comment quality, and README accuracy.
 ---
 

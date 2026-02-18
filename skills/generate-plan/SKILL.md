@@ -12,6 +12,19 @@ Methodology for creating plans with integrated multi-agent research, brainstorm 
 
 ---
 
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has TWO mandatory AskUserQuestion gates. You MUST hit both. NEVER skip them. NEVER replace them with plain text questions.**
+
+| Gate | Step | AskUserQuestion | What Happens If Skipped |
+|------|------|-----------------|------------------------|
+| **Plan Acceptance** | Step 6 | Accept / Request Changes / Reject | Plan gets saved without user approval — UNACCEPTABLE |
+| **Next Steps** | Handled by calling workflow (`commands/plan.md` Step 3) | Deepen / Review / Create Issues / Implement | User loses control of workflow — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
+
+---
+
 ## When to Apply
 
 - Ready to formalize requirements for a feature, fix, or change
@@ -32,12 +45,12 @@ Methodology for creating plans with integrated multi-agent research, brainstorm 
 - Strong local context (good patterns, CLAUDE.md has guidance) → skip external
 - Uncertainty or unfamiliar territory → research
 
-| # | Agent | Condition | Task Tool Config |
-|---|-------|-----------|-----------------|
-| 1 | **Codebase Research Agent** | Always runs | `subagent_type: "Explore"`, reads `agents/research/codebase-researcher.md` for process |
-| 2 | **Learnings Research Agent** | Always runs (if `docs/solutions/` has files) | `subagent_type: "general-purpose"`, searches `docs/solutions/` per `agents/research/learnings-researcher.md` |
-| 3 | **Best Practices Research Agent** | Conditional: unfamiliar technology, external APIs, or user explicitly asks | `subagent_type: "general-purpose"`, web search per `agents/research/best-practices-researcher.md` |
-| 4 | **Framework Docs Research Agent** | Conditional: known framework detected in package.json/Gemfile/requirements.txt/go.mod/Cargo.toml | `subagent_type: "general-purpose"`, queries Context7 MCP per `agents/research/framework-docs-researcher.md` |
+| # | Agent | Condition | Model | Task Tool Config |
+|---|-------|-----------|-------|-----------------|
+| 1 | **Codebase Research Agent** | Always runs | (built-in) | `subagent_type: "Explore"`, reads `agents/research/codebase-researcher.md` for process |
+| 2 | **Learnings Research Agent** | Always runs (if `docs/solutions/` has files) | haiku | `subagent_type: "general-purpose"`, `model: "haiku"`, searches `docs/solutions/` per `agents/research/learnings-researcher.md` |
+| 3 | **Best Practices Research Agent** | Conditional: unfamiliar technology, external APIs, or user explicitly asks | haiku | `subagent_type: "general-purpose"`, `model: "haiku"`, web search per `agents/research/best-practices-researcher.md` |
+| 4 | **Framework Docs Research Agent** | Conditional: known framework detected in package.json/Gemfile/requirements.txt/go.mod/Cargo.toml | haiku | `subagent_type: "general-purpose"`, `model: "haiku"`, queries Context7 MCP per `agents/research/framework-docs-researcher.md` |
 
 **Codebase Research Agent prompt:**
 ```
@@ -48,6 +61,10 @@ Explore the [target] in this codebase. Identify:
 4. Dependencies and relationships
 5. Potential areas of concern
 
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
+
 Provide a structured summary suitable for planning new work.
 ```
 
@@ -56,6 +73,10 @@ Provide a structured summary suitable for planning new work.
 Search docs/solutions/ for past solutions relevant to [target].
 Use multi-pass Grep strategy: tags → category → keywords → full-text.
 Return relevant findings with applicability assessment.
+
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
 ```
 
 **Thoroughness level for Codebase Research Agent:**
@@ -112,7 +133,9 @@ After generating initial plan content:
 5. **Offer to add gaps to Acceptance Criteria**
 6. **Add Spec-Flow Analysis section to plan output** (Comprehensive tier includes this in template; Standard tier appends if significant flows exist)
 
-### 6. Present Plan for Acceptance
+### 6. Present Plan for Acceptance — MANDATORY GATE
+
+**STOP. Do NOT save the plan yet. Do NOT proceed to Step 7. You MUST present the plan and get explicit acceptance via AskUserQuestion FIRST.**
 
 **After generating the plan content, present it to the user and ask for explicit acceptance:**
 
@@ -147,6 +170,8 @@ AskUserQuestion:
 
 **CRITICAL:** Never make autonomous changes based on vague feedback like "do more research" or "make it better". Always ask for specifics first.
 
+**CRITICAL:** Do NOT proceed to Step 7 until the user selects "Accept plan". No exceptions.
+
 ### 7. Save Plan
 
 **Filename format:** `docs/plans/YYYY-MM-DD-type-name-plan.md`
@@ -159,6 +184,8 @@ AskUserQuestion:
 - `docs/plans/2026-02-04-comprehensive-api-redesign-plan.md`
 
 **Status:** `READY_FOR_REVIEW`
+
+**Plan status lifecycle:** After saving the plan file, ensure its YAML frontmatter contains `status: ready_for_review`. If the frontmatter does not already have a `status` field, add one. This status is used by downstream skills (review-plan, start-issue, team-implement) to track plan progression through the lifecycle: `ready_for_review` → `approved` → `in_progress` → `complete`.
 
 ---
 

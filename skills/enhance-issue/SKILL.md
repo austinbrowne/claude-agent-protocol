@@ -2,11 +2,27 @@
 name: enhance-issue
 version: "1.0"
 description: Refine needs_refinement issues with exploration, planning, and enriched details — then mark ready_for_dev
+referenced_by:
+  - skills/triage-issues/SKILL.md
+  - skills/start-issue/SKILL.md
 ---
 
 # Enhance Issue Skill
 
 Takes a sparse `needs_refinement` issue, explores the codebase, runs through planning, enriches the issue with full details, and marks it `ready_for_dev`.
+
+---
+
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has mandatory AskUserQuestion gates. You MUST hit them. NEVER skip them. NEVER replace them with plain text questions.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Issue Selection** | Step 1 | Dynamically generated from issue list | Wrong issue enhanced — UNACCEPTABLE |
+| **Next Steps** | Step 7 | Enhance another / Start implementing / Done | User loses control of workflow — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
 
 ---
 
@@ -21,7 +37,6 @@ Takes a sparse `needs_refinement` issue, explores the codebase, runs through pla
 ## Skills Referenced
 
 - `skills/explore/SKILL.md` — Codebase exploration to understand the problem
-- `commands/plan.md` — Full planning workflow (plan generation, deepen, review, create sub-issues)
 
 ---
 
@@ -60,7 +75,7 @@ Read the issue body. Identify what's already filled vs TBD.
 
 ### 3. Explore the Codebase
 
-Load and follow `skills/explore/SKILL.md` scoped to the issue:
+Invoke `Skill(skill="godmode:explore")` scoped to the issue:
 
 - Identify affected files and modules
 - Understand current behavior and patterns
@@ -69,63 +84,61 @@ Load and follow `skills/explore/SKILL.md` scoped to the issue:
 
 Present findings to the user before proceeding.
 
-### 4. Run Planning Workflow
+### 4. Synthesize Findings into Issue
 
-Chain into `/workflows:plan` with the issue as context:
+Update the GitHub issue with enriched content based on exploration:
 
-- **For bugs:** Generate a Minimal plan covering the fix approach, affected areas, and testing strategy
-- **For features:** Generate a Minimal, Standard, or Comprehensive plan depending on scope
-- Deepen the plan if needed (user's choice via workflow)
-- Review the plan if needed (user's choice via workflow)
-
-The planning workflow handles sub-step selection internally.
-
-### 5. Update the Issue
-
-After planning is complete, update the GitHub issue with enriched content:
+Use `--body` with a heredoc — do NOT write to `/tmp`:
 
 ```bash
-gh issue edit NNN --body-file /tmp/enhanced-issue-body.md
+gh issue edit NNN --body "$(cat <<'EOF'
+[enhanced issue content]
+EOF
+)"
 ```
 
 **For bugs**, fill in all TBD sections:
 - Root Cause Hypothesis (from exploration)
 - Affected Files (from exploration)
-- Acceptance Criteria (from plan)
-- Technical Requirements (from plan)
-- Testing Notes / Edge Cases (from plan)
+- Acceptance Criteria (what "fixed" looks like — from exploration context)
+- Technical Notes (patterns to follow, existing code to reference — from exploration)
+- Testing Notes / Edge Cases (from exploration)
 - Security Considerations (if applicable)
 
 **For features**, fill in all template sections:
-- Acceptance Criteria (from plan)
-- Technical Requirements (from plan)
-- Testing Notes (from plan)
+- Acceptance Criteria (what "done" looks like — concrete, testable)
+- Affected Files (from exploration)
+- Technical Notes (patterns to follow, utilities to use — from exploration)
+- Testing Notes (edge cases to cover)
 - Developer Notes (from exploration)
-- Performance / Security Considerations (from plan)
+- Performance / Security Considerations (if applicable)
 
-### 6. Swap Labels
+### 5. Swap Labels
 
 ```bash
 gh issue edit NNN --remove-label "needs_refinement" --add-label "ready_for_dev"
 ```
 
-### 7. Next Steps
+### 6. Next Steps
 
 ```
 AskUserQuestion:
   question: "Issue #NNN enhanced and marked ready_for_dev. What's next?"
   header: "Next"
   options:
+    - label: "Start implementing this issue"
+      description: "Move to /implement with issue #NNN"
+    - label: "Create a plan first"
+      description: "This issue needs design work before implementation — route to /plan"
     - label: "Enhance another issue"
       description: "Pick another needs_refinement issue to refine"
-    - label: "Start implementing this issue"
-      description: "Move to /workflows:implement with issue #NNN"
     - label: "Done"
       description: "End workflow"
 ```
 
+**If "Start implementing":** Invoke `Skill(skill="godmode:implement")`. Execute from Step 0. Do NOT skip any steps.
+**If "Create a plan first":** Invoke `Skill(skill="godmode:plan")`. End this skill.
 **If "Enhance another":** Return to Step 1.
-**If "Start implementing":** Suggest user invoke `/workflows:implement`.
 **If "Done":** End workflow.
 
 ---
@@ -134,8 +147,9 @@ AskUserQuestion:
 
 - **Preserve user's original description.** Don't overwrite what they wrote — enrich around it.
 - **Root cause is a hypothesis.** Mark it clearly as such until implementation confirms it.
-- **Planning depth scales with issue complexity.** Small bugs get Minimal plan. Large features may get Comprehensive plan + deepen.
-- **The user controls planning depth** via `/workflows:plan` sub-step selection. Don't force full planning on a trivial bug.
+- **Enhanced issue = "what" to build.** Fill in requirements, acceptance criteria, affected files, technical notes. This is sufficient for implementation when the approach is obvious.
+- **Planning is separate.** If the issue needs design work ("how" is unclear), the user routes to `/plan` via the next-steps gate. Don't force planning on every issue.
+- **Exploration drives enrichment.** The codebase exploration in Step 3 provides all the context needed to fill in acceptance criteria, affected files, and technical notes.
 
 ---
 
@@ -143,7 +157,6 @@ AskUserQuestion:
 
 - **Input**: GitHub issue number or `needs_refinement` label query
 - **Exploration**: `skills/explore/SKILL.md`
-- **Planning**: `commands/plan.md` (full workflow with sub-step selection)
 - **Templates**: `templates/BUG_ISSUE_TEMPLATE.md`, `templates/GITHUB_ISSUE_TEMPLATE.md`
 - **Output**: Enriched GitHub issue with `ready_for_dev` label
-- **Next step**: `/workflows:implement` or another `/enhance-issue`
+- **Next step**: `/implement` or another `/enhance-issue`

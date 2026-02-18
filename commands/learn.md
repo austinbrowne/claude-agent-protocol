@@ -7,6 +7,8 @@ description: "Knowledge capture — save solved problems as searchable, reusable
 
 **Workflow command.** Captures solved problems, gotchas, and insights as searchable solution documents in `docs/solutions/`.
 
+> **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
+
 ---
 
 ## Auto-Trigger Detection
@@ -43,7 +45,7 @@ Run `/learn` to capture, or ignore to skip.
 
 ## Step 2: Execute Knowledge Capture
 
-**Load and follow:** `skills/learn/SKILL.md`
+Invoke `Skill(skill="godmode:capture-learning")`
 
 This handles:
 - Learning extraction and confirmation
@@ -67,5 +69,5 @@ AskUserQuestion:
       description: "End workflow — solution saved to docs/solutions/"
 ```
 
-**If "Ship it":** Suggest user invoke `/ship`.
+**If "Ship it":** Invoke `Skill(skill="godmode:ship")`. Execute from Step 0. Do NOT skip any steps.
 **If "Done":** End workflow.

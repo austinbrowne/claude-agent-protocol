@@ -1,3 +1,9 @@
+---
+title: "Learning Loop & Metrics"
+date: 2025-11-30
+status: complete
+---
+
 # Product Requirements Document: Learning Loop & Metrics
 
 ## Document Info

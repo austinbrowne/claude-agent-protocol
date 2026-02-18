@@ -1,14 +1,27 @@
 ---
 name: explore
-version: "1.0"
-description: Multi-agent codebase exploration and context gathering methodology
-referenced_by:
-  - commands/explore.md
+version: "1.1"
+description: "Reconnaissance & ideation — codebase exploration, context gathering, and brainstorming"
 ---
 
-# Codebase Exploration Skill
+# Codebase Exploration
 
-Multi-agent exploration methodology for gathering comprehensive codebase context.
+Workflow entry point for understanding a codebase before planning or implementing. Multi-agent exploration with optional brainstorming.
+
+> **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
+
+---
+
+## Mandatory Interaction Gates
+
+**CRITICAL: This skill has mandatory AskUserQuestion gates. You MUST hit them. NEVER skip them. NEVER replace them with plain text questions.**
+
+| Gate | Location | AskUserQuestion | What Happens If Skipped |
+|------|----------|-----------------|------------------------|
+| **Exploration Scope** | Step 1 | Full codebase overview / Specific area | Wrong scope explored — UNACCEPTABLE |
+| **Next Steps** | Step 5 | Brainstorm / Start planning / Done | User loses control of workflow — UNACCEPTABLE |
+
+**If you find yourself asking the user what to do next in plain text, STOP. You are violating the protocol. Use AskUserQuestion.**
 
 ---
 
@@ -21,9 +34,36 @@ Multi-agent exploration methodology for gathering comprehensive codebase context
 
 ---
 
-## Process
+## Step 0: State Detection
 
-### 1. Launch Research Agents in Parallel
+Before presenting the menu, detect what exists:
+
+1. **Check if `CODEBASE_MAP.md` exists** — has the codebase already been explored?
+2. **Glob `docs/brainstorms/*.md`** — do any brainstorm docs exist?
+
+Use these signals to inform Step 1. If a codebase map already exists, note it in the exploration step (update rather than create from scratch).
+
+---
+
+## Step 1: Determine Exploration Scope
+
+```
+AskUserQuestion:
+  question: "What would you like to explore?"
+  header: "Explore"
+  options:
+    - label: "Full codebase overview"
+      description: "Multi-agent exploration of the entire codebase structure and patterns"
+    - label: "Specific area"
+      description: "Focused exploration of a particular module, feature, or concern"
+```
+
+**If "Full codebase overview":** Proceed with broad exploration.
+**If "Specific area":** Ask user to describe the target area, then proceed with focused exploration.
+
+---
+
+## Step 2: Launch Research Agents in Parallel
 
 **CRITICAL:** Launch all applicable research agents simultaneously via Task tool in a single message.
 
@@ -32,12 +72,12 @@ Multi-agent exploration methodology for gathering comprehensive codebase context
 - Strong local context (good patterns, CLAUDE.md has guidance) → skip external
 - Uncertainty or unfamiliar territory → research
 
-| # | Agent | Condition | Task Tool Config |
-|---|-------|-----------|-----------------|
-| 1 | **Codebase Research Agent** | Always runs | `subagent_type: "Explore"`, reads `agents/research/codebase-researcher.md` for process |
-| 2 | **Learnings Research Agent** | Always runs (if `docs/solutions/` has files) | `subagent_type: "general-purpose"`, searches `docs/solutions/` per `agents/research/learnings-researcher.md` |
-| 3 | **Best Practices Research Agent** | Conditional: unfamiliar technology, external APIs, or user explicitly asks | `subagent_type: "general-purpose"`, web search per `agents/research/best-practices-researcher.md` |
-| 4 | **Framework Docs Research Agent** | Conditional: known framework detected in package.json/Gemfile/requirements.txt/go.mod/Cargo.toml | `subagent_type: "general-purpose"`, queries Context7 MCP per `agents/research/framework-docs-researcher.md` |
+| # | Agent | Condition | Model | Task Tool Config |
+|---|-------|-----------|-------|-----------------|
+| 1 | **Codebase Research Agent** | Always runs | (built-in) | `subagent_type: "Explore"`, reads `agents/research/codebase-researcher.md` for process |
+| 2 | **Learnings Research Agent** | Always runs (if `docs/solutions/` has files) | haiku | `subagent_type: "general-purpose"`, `model: "haiku"`, searches `docs/solutions/` per `agents/research/learnings-researcher.md` |
+| 3 | **Best Practices Research Agent** | Conditional: unfamiliar technology, external APIs, or user explicitly asks | haiku | `subagent_type: "general-purpose"`, `model: "haiku"`, web search per `agents/research/best-practices-researcher.md` |
+| 4 | **Framework Docs Research Agent** | Conditional: known framework detected in package.json/Gemfile/requirements.txt/go.mod/Cargo.toml | haiku | `subagent_type: "general-purpose"`, `model: "haiku"`, queries Context7 MCP per `agents/research/framework-docs-researcher.md` |
 
 **Codebase Research Agent prompt:**
 ```
@@ -48,6 +88,10 @@ Explore the [target] in this codebase. Identify:
 4. Dependencies and relationships
 5. Potential areas of concern
 
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
+
 Provide a structured summary suitable for planning new work.
 ```
 
@@ -56,6 +100,10 @@ Provide a structured summary suitable for planning new work.
 Search docs/solutions/ for past solutions relevant to [target].
 Use multi-pass Grep strategy: tags → category → keywords → full-text.
 Return relevant findings with applicability assessment.
+
+CRITICAL: Do NOT write any files. Return your findings as text in your response.
+Do NOT create intermediary files, analysis documents, or temp files.
+The orchestrator handles all file writes.
 ```
 
 **Thoroughness level for Codebase Research Agent:**
@@ -63,7 +111,9 @@ Return relevant findings with applicability assessment.
 - Feature areas: "medium"
 - Full codebase: "very thorough"
 
-### 2. Generate Consolidated Exploration Summary
+---
+
+## Step 3: Generate Consolidated Exploration Summary
 
 From all agent outputs, create structured summary containing:
 
@@ -109,7 +159,9 @@ From all agent outputs, create structured summary containing:
    - Performance bottlenecks
    - Missing tests
 
-### 3. Optionally Create/Update Codebase Map
+---
+
+## Step 4: Optionally Create/Update Codebase Map
 
 If exploration is "full" codebase overview:
 - Create or update `.claude/CODEBASE_MAP.md`
@@ -118,10 +170,53 @@ If exploration is "full" codebase overview:
 
 ---
 
+## Step 5: Next Steps — MANDATORY GATE
+
+**CRITICAL: You MUST present the AskUserQuestion below. NEVER ask "what would you like to do next?" in plain text. NEVER skip this step.**
+
+```
+AskUserQuestion:
+  question: "Exploration complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Brainstorm approaches"
+      description: "Structured divergent thinking to compare solution strategies"
+    - label: "Start planning"
+      description: "Move to /plan to create a plan and prepare for implementation"
+    - label: "Done"
+      description: "End workflow — exploration findings available in conversation"
+```
+
+**If "Brainstorm approaches":** Invoke `Skill(skill="godmode:brainstorm")`. After brainstorm completes, present the post-brainstorm menu below.
+**If "Start planning":** Invoke `Skill(skill="godmode:plan")`. Execute from Step 0. Do NOT skip any steps.
+**If "Done":** End workflow.
+
+---
+
+### After Brainstorm Completes
+
+```
+AskUserQuestion:
+  question: "Brainstorm complete. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Review brainstorm"
+      description: "Run structured quality review on the brainstorm output"
+    - label: "Start planning"
+      description: "Move to /plan to create a plan from brainstorm insights"
+    - label: "Done"
+      description: "End workflow — brainstorm findings available in conversation"
+```
+
+**If "Review brainstorm":** Invoke `Skill(skill="godmode:document-review")`. After document-review completes, re-present the "After Brainstorm Completes" AskUserQuestion above.
+**If "Start planning":** Invoke `Skill(skill="godmode:plan")`. Execute from Step 0. Do NOT skip any steps.
+**If "Done":** End workflow.
+
+---
+
 ## Integration Points
 
 - **Input from user**: Target area, path, pattern, or "full"
 - **Output**: Structured exploration summary
 - **Agent definitions**: `agents/research/*.md`
-- **Consumed by**: `/explore` workflow command, `/plan` workflow
 - **Feeds into**: Brainstorming, plan generation, issue creation

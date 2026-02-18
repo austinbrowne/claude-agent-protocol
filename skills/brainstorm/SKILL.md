@@ -46,6 +46,7 @@ Before brainstorming, search `docs/solutions/` for relevant past decisions:
 **Launch Learnings Research Agent via Task tool:**
 ```
 subagent_type: "general-purpose"
+model: "haiku"
 description: "Search past learnings for brainstorm on [topic]"
 prompt: "Follow agents/research/learnings-researcher.md.
   Search docs/solutions/ for past solutions relevant to: [topic]

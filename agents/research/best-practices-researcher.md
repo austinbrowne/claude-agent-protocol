@@ -1,6 +1,6 @@
 ---
 name: best-practices-researcher
-model: inherit
+model: haiku
 description: Web search for current best practices related to the target technology or pattern.
 ---
 

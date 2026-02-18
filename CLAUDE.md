@@ -33,144 +33,35 @@ The goal is a productive working relationship, not a comfortable one. Uncomforta
 
 ---
 
-## AI Blind Spots (You SYSTEMATICALLY Miss These)
+## Context Efficiency
 
-### Edge Cases You ALWAYS Forget:
-- **Null/undefined/None** - Check EVERY function parameter
-- **Empty collections** - [], {}, ""
-- **Boundary values** - 0, -1, MAX_INT, empty string
-- **Special characters** - Unicode, emoji, quotes in strings
-- **Timezones/DST** - Date handling across timezones
+### Subagent Discipline
+- Prefer inline work for tasks under ~5 tool calls. Subagents have overhead — don't delegate trivially.
+- When using subagents, include output rules: "Final response under 2000 characters. List outcomes, not process."
+- Never call TaskOutput twice for the same subagent. If it times out, increase the timeout — don't re-read.
 
-### Security Vulnerabilities (45% of AI Code):
-- **SQL injection** - NEVER concatenate strings in SQL (use parameterized queries)
-- **XSS** - ALWAYS encode output in HTML context
-- **Missing auth** - Check user can access THIS resource
-- **Hardcoded secrets** - NEVER put API keys in code (use env vars)
-- **No input validation** - Validate ALL user input (allowlist > blocklist)
+### File Reading
+- Read files with purpose. Before reading a file, know what you're looking for.
+- Use Grep to locate relevant sections before reading entire large files.
+- Avoid redundant re-reads unless the file may have been modified by edits, hooks, or branch operations.
+- For files over 500 lines, use offset/limit to read only the relevant section.
 
-### Error Handling You Skip:
-- Try/catch around ALL external calls (API, DB, file I/O)
-- Handle network failures, timeouts, permission errors
-- Error messages MUST NOT leak sensitive data
-
-### Performance Mistakes:
-- N+1 query problems (use joins or batch queries)
-- Loading entire datasets (use pagination)
-- Missing database indexes
-
-**REMEMBER: You are optimistic. Humans are paranoid. Be paranoid.**
+### Responses
+- Don't echo back file contents you just read — the user can see them.
+- Don't narrate tool calls ("Let me read the file..." / "Now I'll edit..."). Just do it.
+- Keep explanations proportional to complexity. Simple changes need one sentence, not three paragraphs.
 
 ---
 
-# Workflow
-
-## 6 Workflow Commands
-
-Use workflow commands as entry points. Each workflow offers sub-step selection via `AskUserQuestion` and chains to the next workflow after completion.
-
-| Command | Purpose |
-|---------|---------|
-| `/explore` | Reconnaissance & ideation — codebase exploration + brainstorming |
-| `/plan` | Planning & requirements — plan generation, deepen, review, issues, ADR |
-| `/implement` | Implementation — start issue, tests, validation, security, recovery |
-| `/review` | Code review — fresh eyes review (full/lite), protocol compliance |
-| `/learn` | Knowledge capture — save solved problems as reusable solution docs |
-| `/ship` | Ship — commit/PR, finalize, refactor |
-
-### Quick Workflows
-
-**Full feature:**
-`/explore` → `/plan` → `/implement` → `/review` → `/learn` → `/ship`
-
-**Bug fix:**
-`/explore` → `/implement` → `/review` → `/learn` → `/ship`
-
-**Quick fix:**
-`/implement` → `/review` → `/ship`
-
-**Just review:**
-`/review` → `/ship`
-
-### Individual Skills (Also User-Invocable)
-
-Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly invocable as slash commands:
-
-**Planning skills:** `explore`, `brainstorm`, `generate-plan`, `deepen-plan`, `review-plan`, `create-adr`, `create-issues`
-
-**Issue skills:** `file-issues`, `file-issue`, `enhance-issue`
-
-**Execution skills:** `start-issue`, `generate-tests`, `run-validation`, `security-review`, `recovery`, `refactor`
-
-**Review skills:** `fresh-eyes-review`, `review-protocol`
-
-**Shipping skills:** `commit-and-pr`, `finalize`
-
-**Knowledge skills:** `learn`, `todos`
+@guides/AI_BLIND_SPOTS.md
 
 ---
 
-## Full Protocol (Complex Tasks)
-For comprehensive guidance, see `AI_CODING_AGENT_GODMODE.md`
+@guides/WORKFLOW_REFERENCE.md
 
 ---
 
-## Project Conventions
-
-| Directory | Purpose |
-|-----------|---------|
-| `commands/` | 6 workflow entry points |
-| `skills/` | 22 reusable skill packages (also user-invocable) |
-| `agents/review/` | 17 review agent definitions |
-| `agents/research/` | 4 research agent definitions |
-| `docs/solutions/` | Knowledge compounding — captured solved problems |
-| `docs/brainstorms/` | Brainstorm session records |
-| `.todos/` | File-based todo tracking (committed to git) |
-| `docs/plans/` | Plans (Minimal, Standard, Comprehensive) |
-
----
-
-## Status Indicators
-
-Use in responses:
-- `READY_FOR_REVIEW` - Phase complete, awaiting feedback
-- `APPROVED_NEXT_PHASE` - Cleared to continue
-- `HALT_PENDING_DECISION` - Blocked on decision
-- `SECURITY_SENSITIVE` - Requires security review
-- `RECOVERY_MODE` - Implementation failed, evaluating options
-
-## Confidence Levels
-
-- `HIGH_CONFIDENCE` - Well-understood, low-risk
-- `MEDIUM_CONFIDENCE` - Some uncertainty, may need iteration
-- `LOW_CONFIDENCE` - Significant unknowns, discuss before proceeding
-
-## Risk Flags
-
-- `BREAKING_CHANGE` - May affect existing functionality
-- `SECURITY_SENSITIVE` - Touches auth, data, or external APIs
-- `PERFORMANCE_IMPACT` - May affect latency or resources
-- `DEPENDENCY_CHANGE` - Adds/removes/upgrades dependencies
-
----
-
-## Extended Thinking
-
-Users can request deeper reasoning:
-- "think" - standard reasoning for moderate complexity
-- "think hard" - multi-step problems, security architecture, debugging
-- "ultrathink" - critical architecture decisions, major refactors
-
-Claude should suggest extended thinking for security-sensitive or high-risk changes.
-
----
-
-## Code Style Defaults
-
-- Write tests for new code
-- Use type hints (Python) or TypeScript
-- Follow existing project conventions
-- Conventional commits (feat:, fix:, docs:, refactor:)
+@guides/PROJECT_CONVENTIONS.md
 
 ---
 
@@ -182,22 +73,10 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 - Modify dependency lock files without approval
 - **Skip fresh-eyes review before committing** - even if context was summarized, run it
 - Ignore edge cases (null, empty, boundaries)
+- **Carry over earlier execution mode decisions without re-checking** - each skill's Step 0 MUST check your tool list fresh. Conversation history is NEVER a valid signal. If `TeamCreate` is available NOW, use team mode. If not, use subagent mode. Re-evaluate EVERY invocation independently
+- **Replace AskUserQuestion gates with plain text** - skills and workflow commands define mandatory `AskUserQuestion` interaction points. ALWAYS use the AskUserQuestion tool with the exact options defined in the skill file. NEVER substitute with a prose question like "what would you like to do next?"
+- **Override HUMAN IN LOOP without `/loop`** — only `/loop` may bypass AskUserQuestion gates, and only because the user explicitly opted in
+- **Use EnterPlanMode when executing workflow commands or skills** — the protocol has its own planning layer (`/plan`, `generate-plan`, plan files). Claude Code's native plan mode is redundant and wastes a turn. When a user invokes a workflow command (e.g. `/implement`, `/review`, `/ship`) or any skill, execute it directly — NEVER call EnterPlanMode first
+- **Act as Team Lead when spawning Agent Teams** — always spawn the Team Lead as a dedicated agent via the Task tool (`godmode:team:team-lead`). The main agent's context window is reserved for user interaction, not team coordination overhead. See `guides/AGENT_TEAMS_GUIDE.md`
 
 **Context Summarization Warning:** If conversation was summarized, you may have lost track of protocol steps. When shipping, ALWAYS verify Fresh Eyes Review was completed. If uncertain, run `/review` again.
-
----
-
-## Reference Files
-
-| File | Purpose |
-|------|---------|
-| `AI_CODING_AGENT_GODMODE.md` | Full protocol documentation |
-| `QUICK_START.md` | Entry points and command reference |
-| `commands/*.md` | 6 workflow commands |
-| `skills/*/SKILL.md` | 22 reusable skill packages |
-| `agents/review/*.md` | 17 review agent definitions |
-| `agents/research/*.md` | 4 research agent definitions |
-| `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
-| `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
-| `guides/FAILURE_RECOVERY.md` | Recovery procedures |
-| `templates/*.md` | 10 reusable templates |

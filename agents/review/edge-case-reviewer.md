@@ -1,7 +1,7 @@
 ---
 name: edge-case-reviewer
-model: inherit
-description: Review code for null/undefined handling, empty collections, boundary values, unicode edge cases, off-by-one errors, and type coercion traps.
+model: sonnet
+description: Review code for null/undefined handling, empty collections, boundary values, unicode edge cases, off-by-one errors, type coercion traps, input validation completeness, and data sanitization.
 ---
 
 # Edge Case Reviewer
@@ -25,6 +25,12 @@ AI-generated code is systematically optimistic. It writes for the happy path and
 5. **Unicode and special characters** -- Multi-byte characters (emoji, CJK, combining). String length: code points vs grapheme clusters. Special chars in input: quotes, backslashes, angle brackets, newlines. Filename chars: spaces, dots, slashes, null bytes.
 6. **Concurrency edge cases** -- Race conditions on shared state. Zero or negative timeout values. Operations during clock changes (DST, leap seconds).
 7. **State transition edge cases** -- Uninitialized state before first init. Double initialization. Use after close/dispose. Rapid state toggles.
+8. **Input source inventory** -- Identify all external data sources: request body, path params, query params, headers/cookies, file uploads, external API responses, env vars as runtime input.
+9. **Validation completeness** -- For each input: is validation applied before use? Flag inputs used directly without validation. Verify server-side validation (not client-only). Check type, format, length, range, and required fields.
+10. **Allowlist vs blocklist** -- Flag blocklist patterns (strip bad chars). Verify allowlist where possible. Check for overly permissive regex. Verify enum/set validation uses defined allowlist.
+11. **Schema validation** -- If schema validator used (Zod, Joi, Pydantic): covers all fields? Rejects unknown properties? Friendly errors? If no schema: recommend for structured endpoints.
+12. **File upload validation** -- Verify type check (MIME AND magic bytes, not just extension). Check size limits. Verify filename sanitization (no path traversal, null bytes). Check storage outside web root.
+13. **Output context sanitization** -- Verify data sanitized for output context (HTML, SQL, shell, URL). Check sanitization at output time. Flag data stored unsanitized rendered in multiple contexts.
 
 ## Output Format
 

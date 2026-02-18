@@ -1,7 +1,7 @@
 {
   "name": "godmode",
-  "version": "4.2.0",
-  "description": "AI-powered development workflow. 6 workflow commands, 22 skill packages, 21 agents (17 review + 4 research), knowledge compounding, and structured phases for planning, execution, and finalization.",
+  "version": "5.14.0-experimental",
+  "description": "AI-powered development workflow with Agent Teams. 7 workflow commands, 27 skill packages, 22 agents (15 review + 4 research + 3 team roles), Agent Teams integration with defined implementation team roles (Lead, Analyst, Implementer) and autodetection-based routing, autonomous development loops, per-project review configuration, document quality review, knowledge compounding, and structured phases for planning, execution, and finalization.",
   "author": {
     "name": "Austin Browne",
     "url": "https://github.com/austinbrowne"
@@ -19,6 +19,9 @@
     "multi-agent",
     "knowledge-compounding",
     "brainstorm",
-    "adversarial-validation"
+    "adversarial-validation",
+    "agent-teams",
+    "swarm",
+    "autonomous-loop"
   ]
 }

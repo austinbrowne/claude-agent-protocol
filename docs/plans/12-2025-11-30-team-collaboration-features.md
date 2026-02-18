@@ -1,3 +1,9 @@
+---
+title: "Team Collaboration Features"
+date: 2025-11-30
+status: complete
+---
+
 # Product Requirements Document: Team Collaboration Features
 
 ## Document Info

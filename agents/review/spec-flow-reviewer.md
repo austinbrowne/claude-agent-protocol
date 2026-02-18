@@ -1,6 +1,6 @@
 ---
 name: spec-flow-reviewer
-model: inherit
+model: sonnet
 description: Review plans for user flow completeness, error states, empty states, edge cases in flows, permission states, accessibility, and onboarding/first-use states.
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: code-quality-reviewer
-model: inherit
+model: sonnet
 description: Review code changes for naming conventions, structure, complexity, SOLID principles, error handling completeness, and DRY violations.
 ---
 

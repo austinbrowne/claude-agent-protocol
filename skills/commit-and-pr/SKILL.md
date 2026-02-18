@@ -75,6 +75,18 @@ gh pr create --title "..." --body "..." --base [branch]
 
 **PR body includes:** Summary, Changes, Test Plan, Security status, Plan reference, Fresh Eyes verdict.
 
+### 5. Update Issue Status to Review
+
+**If working on a GitHub issue (issue number available from branch name pattern `issue-NNN-*` or commit messages `#NNN` / `Closes #NNN`):**
+
+```bash
+gh issue edit NNN --remove-label "status: in-progress" --add-label "status: review"
+```
+
+**Label transition:** `status: in-progress` → `status: review`. This marks the issue as having a PR open for review.
+
+**If no issue number can be determined, skip this step entirely.**
+
 ---
 
 ## Notes

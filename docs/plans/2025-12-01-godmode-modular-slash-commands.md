@@ -1,3 +1,9 @@
+---
+title: "GODMODE Modular Slash Commands"
+date: 2025-12-01
+status: complete
+---
+
 # Product Requirements Document: GODMODE Modular Slash Commands
 
 ## Document Info

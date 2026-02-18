@@ -1,6 +1,6 @@
 # GODMODE Quick Start Guide
 
-## 6 Workflow Commands
+## 7 Workflow Commands
 
 Use these as entry points. Each workflow offers sub-step selection and chains to the next workflow after completion.
 
@@ -8,10 +8,11 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 |---------|---------|-----------|
 | `/explore` | Reconnaissance & ideation | Codebase exploration, brainstorming |
 | `/plan` | Planning & requirements | Generate plan, deepen plan, review plan, create issues, ADR |
-| `/implement` | Implementation | Start issue, generate tests, run validation, security review, recovery |
+| `/implement` | Implementation | Start issue, team implementation, triage issues, generate tests, validation, security review, recovery |
 | `/review` | Code review | Fresh eyes review (full/lite), protocol compliance |
 | `/learn` | Knowledge capture | Save solved problems as reusable solution docs |
 | `/ship` | Ship | Commit/PR, finalize, refactor |
+| `/loop` | Autonomous loop | Plan, implement each task, review — all with Task subagent context rotation |
 
 ---
 
@@ -36,6 +37,15 @@ Use these as entry points. Each workflow offers sub-step selection and chains to
 ```
 /review → /ship
 ```
+
+### Autonomous
+```
+/loop <description>            Plan, implement each task, review, commit (all local)
+/loop --plan <path>            Iterate tasks from an existing plan
+/loop --issue 42               Enhance if needed, plan, implement, review
+```
+
+Cancel: Ctrl+C (re-run with `--plan` to resume)
 
 ---
 
@@ -99,6 +109,8 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 | Skill | Purpose |
 |-------|---------|
 | `start-issue` | Begin work with living plan and past learnings |
+| `team-implement` | Team-based implementation with defined roles (Lead, Analyst, Implementers) |
+| `triage-issues` | Batch-triage and plan open GitHub issues — get them ready_for_dev |
 | `generate-tests` | Generate comprehensive test suites |
 | `run-validation` | Tests + coverage + lint + security checks |
 | `security-review` | OWASP security checklist review |
@@ -108,8 +120,9 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 ### Review Skills
 | Skill | Purpose |
 |-------|---------|
-| `fresh-eyes-review` | 13-agent smart selection review with adversarial validation |
+| `fresh-eyes-review` | 14-agent smart selection review with adversarial validation |
 | `review-protocol` | Protocol compliance check and status report |
+| `document-review` | Document quality review for plans, brainstorms, ADRs (clarity, completeness, specificity, YAGNI) |
 
 ### Shipping Skills
 | Skill | Purpose |
@@ -121,6 +134,11 @@ Each workflow loads skills from `skills/*/SKILL.md`. All skills are also directl
 | Skill | Purpose |
 |-------|---------|
 | `learn` | Capture solved problems as searchable solution docs |
+
+### Configuration Skills
+| Skill | Purpose |
+|-------|---------|
+| `setup` | Per-project review configuration — auto-detects stack, selects review agents, writes godmode.local.md |
 
 ---
 
@@ -207,14 +225,16 @@ Use the recovery skill within `/implement`:
 | File | Purpose |
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
-| `commands/*.md` | **6 workflow commands** (explore, plan, implement, review, learn, ship) |
-| `skills/*/SKILL.md` | **22 reusable skill packages** |
-| `agents/review/*.md` | **17 review agents** |
+| `commands/*.md` | **7 workflow commands** (explore, plan, implement, review, learn, ship, loop) |
+| `skills/*/SKILL.md` | **26 reusable skill packages** |
+| `agents/review/*.md` | **15 review agents** |
 | `agents/research/*.md` | **4 research agents** |
+| `agents/team/*.md` | **3 team role definitions** (Lead, Implementer, Analyst) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | Security checklist (OWASP Top 10) |
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
+| `guides/AGENT_TEAMS_GUIDE.md` | Agent Teams patterns and best practices |
 | `templates/*.md` | 10 reusable templates |
 | `docs/solutions/` | Knowledge compounding storage |
 | `docs/brainstorms/` | Brainstorm session records |
@@ -232,6 +252,6 @@ Use the recovery skill within `/implement`:
 
 ---
 
-**Version:** 4.2
+**Version:** 5.4.0-experimental
 **Last Updated:** February 2026
 **Full docs:** See `README.md`

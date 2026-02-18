@@ -1,6 +1,6 @@
 ---
 name: performance-reviewer
-model: inherit
+model: sonnet
 description: Review code for N+1 queries, algorithmic complexity issues, memory leaks, missing pagination, caching gaps, index usage, and bundle size impact.
 ---
 

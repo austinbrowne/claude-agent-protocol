@@ -32,11 +32,14 @@ Methodology for generating GitHub issues from an approved plan, with auto-linkin
 
 **Load issue template:** `templates/GITHUB_ISSUE_TEMPLATE.md`
 
-**For each phase/task:**
+**For each phase/task — use `--body` with a heredoc, do NOT write to `/tmp`:**
 ```bash
 gh issue create \
   --title "Phase N: [Phase name]" \
-  --body-file /tmp/issue-body.md \
+  --body "$(cat <<'EOF'
+[filled issue template content]
+EOF
+)" \
   --label "type: feature,priority: high"
 ```
 
@@ -47,6 +50,8 @@ gh issue create \
 - `--backlog`: No assignee
 
 ### 3. Rename Plan with First Issue Number
+
+**Before renaming:** Read the plan file's YAML frontmatter `status:` field. Only proceed with the rename if the current status is `approved` (forward transitions only — do not rename `in_progress` or `complete` plans). If the frontmatter exists but has no `status:` field, proceed with the rename.
 
 **Current:** `docs/plans/YYYY-MM-DD-type-feature-name-plan.md`
 **New:** `docs/plans/NNN-YYYY-MM-DD-type-feature-name-plan.md`

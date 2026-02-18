@@ -3,8 +3,9 @@ name: todos
 version: "1.0"
 description: File-based todo tracking system using .todos/ directory
 referenced_by:
-  - commands/fresh-eyes-review.md
-  - commands/commit-and-pr.md
+  - skills/fresh-eyes-review/SKILL.md
+  - skills/commit-and-pr/SKILL.md
+  - skills/start-issue/SKILL.md
   - commands/start-issue.md
 ---
 

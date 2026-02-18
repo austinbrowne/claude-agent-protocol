@@ -1,6 +1,6 @@
 ---
 name: adversarial-validator
-model: inherit
+model: opus
 description: Challenge implementation claims and review findings through falsification, demanding evidence over assertions and classifying claims as VERIFIED, UNVERIFIED, DISPROVED, or INCOMPLETE.
 ---
 

@@ -263,8 +263,17 @@ SECURITY CHECKLIST:
 CODE CHANGES TO REVIEW:
 [inline content from /tmp/review-diff.txt]
 
-Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-Include file:line references and specific fixes.
+OUTPUT FORMAT:
+- Start DIRECTLY with findings. No preamble, philosophy, or methodology.
+- Maximum 8 findings. If you find more, keep only the highest severity.
+- One block per finding, exact format:
+
+  [ID] SEVERITY: Brief description — file:line
+    Evidence: code snippet or pattern (1-2 lines max)
+    Fix: specific remediation (1 line)
+
+- If no findings in your domain, return exactly: NO_FINDINGS
+- Do NOT include passed checks, summaries, or recommendations sections.
 
 CRITICAL RULES:
 - Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
@@ -284,8 +293,17 @@ CODE CHANGES TO REVIEW:
 [inline content from /tmp/review-diff-[agent-name].txt]
 This diff contains only hunks relevant to your review domain.
 
-Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-Include file:line references and specific fixes.
+OUTPUT FORMAT:
+- Start DIRECTLY with findings. No preamble, philosophy, or methodology.
+- Maximum 8 findings. If you find more, keep only the highest severity.
+- One block per finding, exact format:
+
+  [ID] SEVERITY: Brief description — file:line
+    Evidence: code snippet or pattern (1-2 lines max)
+    Fix: specific remediation (1 line)
+
+- If no findings in your domain, return exactly: NO_FINDINGS
+- Do NOT include passed checks, summaries, or recommendations sections.
 
 CRITICAL RULES:
 - Do NOT use Bash, Grep, Glob, Read, Write, or Edit tools. ZERO tool calls to access files.
@@ -370,6 +388,41 @@ branch: [current branch name]
 ```
 
 This file is read by `/ship` Step 0 to detect review status without relying on conversation context. Overwrite on each review run.
+
+### Write Full Review Report
+
+After writing the verdict marker, also write the full consolidated report to a persistent file:
+
+**File:** `.todos/review-report.md`
+
+```markdown
+---
+verdict: [APPROVED | APPROVED_WITH_NOTES | FIX_BEFORE_COMMIT | BLOCK]
+timestamp: YYYY-MM-DDTHH:MM:SS
+branch: [current branch name]
+agents: [list of agents that ran]
+findings_total: [N]
+findings_critical: [N]
+findings_high: [N]
+---
+
+# Review Report
+
+## MUST FIX (CRITICAL/HIGH)
+[CONS-001] HIGH: Description — file:line
+  Fix: action | Acceptance: verification
+
+## SHOULD FIX (MEDIUM)
+[CONS-002] MEDIUM: Description — file:line
+
+## CONSIDER (LOW)
+[CONS-003] LOW: Description — file:line
+
+## TODO SPECIFICATIONS
+- File: [path] | Lines: [range] | Action: [change] | Reason: [finding ID]
+```
+
+**Purpose:** Survives context compaction. Fix subagents read finding details from this file instead of relying on conversation context. `/ship` can use YAML frontmatter for commit message enrichment. Overwrite on each review run.
 
 ---
 

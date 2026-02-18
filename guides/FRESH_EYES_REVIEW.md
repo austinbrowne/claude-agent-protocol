@@ -184,24 +184,7 @@ Launch ALL specialist agents simultaneously in a single message with multiple Ta
 - **Core agents** receive the full diff: `/tmp/review-diff.txt`
 - **Conditional agents** receive their filtered diff: `/tmp/review-diff-{agent-name}.txt` (produced by Step 2.6)
 
-**Agent prompt template (core agents):**
-```
-You are a [specialist type] with zero context about this project.
-Read your review process from [agent definition file].
-Review the code changes in /tmp/review-diff.txt.
-Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-Include file:line references and specific fixes.
-```
-
-**Agent prompt template (conditional agents):**
-```
-You are a [specialist type] with zero context about this project.
-Read your review process from [agent definition file].
-Review the code changes in /tmp/review-diff-[agent-name].txt.
-This diff contains only hunks relevant to your review domain.
-Report findings with severity (CRITICAL, HIGH, MEDIUM, LOW).
-Include file:line references and specific fixes.
-```
+**Compact output format:** All agents use a structured format — max 8 findings, no preamble/philosophy, `NO_FINDINGS` for empty results. See SKILL.md for exact template.
 
 **CRITICAL:** All specialist agents MUST run in parallel (single message).
 
@@ -235,6 +218,14 @@ After Supervisor completes, launch Adversarial Validator:
 | **FIX_BEFORE_COMMIT** | 1+ HIGH issues | Fix issues, re-run review |
 | **APPROVED_WITH_NOTES** | MEDIUM/LOW only | Proceed, address notes later |
 | **APPROVED** | No issues | Proceed to commit |
+
+### Post-Verdict: Persist Results
+
+After determining the verdict:
+1. Write verdict to `.todos/review-verdict.md` (read by `/ship` Step 0)
+2. Write full report to `.todos/review-report.md` — includes YAML frontmatter (verdict, timestamp, branch, agents, finding counts) and all findings with todo specifications. Survives context compaction. Fix subagents read from this file.
+
+Both files are overwritten on each review run.
 
 ---
 

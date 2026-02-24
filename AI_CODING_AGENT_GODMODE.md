@@ -25,7 +25,7 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 - Critical safety rules → `CLAUDE.md` (auto-loaded with highest priority)
 - Workflow commands → `commands/*.md` (7 workflows)
 - Reusable skills → `skills/*/SKILL.md` (27 skill packages)
-- Agent definitions → `agents/review/*.md` (15 review agents) + `agents/research/*.md` (4 research agents) + `agents/team/*.md` (3 team roles)
+- Agent definitions → `agents/review/*.md` (16 review agents) + `agents/research/*.md` (4 research agents) + `agents/team/*.md` (3 team roles)
 - Quick reference → `QUICK_START.md`
 
 **Use this document when:**
@@ -928,7 +928,7 @@ After completing a feature or fixing a tricky bug:
 - `checklists/AI_CODE_REVIEW.md` - Code quality review
 - `templates/TEST_STRATEGY.md` - Comprehensive testing guide
 - `templates/ADR_TEMPLATE.md` - Architecture decisions
-- `agents/review/*.md` - 15 review agent definitions
+- `agents/review/*.md` - 16 review agent definitions
 - `agents/research/*.md` - 4 research agent definitions
 - `skills/*/SKILL.md` - 26 reusable skill packages
 - `commands/*.md` - 7 workflow commands

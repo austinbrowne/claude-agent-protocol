@@ -1,7 +1,7 @@
 ---
 name: fresh-eyes-review
 version: "2.1"
-description: 11-agent smart selection code review system with zero-context methodology
+description: 12-agent smart selection code review system with zero-context methodology
 referenced_by:
   - commands/review.md
   - guides/FRESH_EYES_REVIEW.md
@@ -66,6 +66,7 @@ See `skills/fresh-eyes-review/references/trigger-patterns.md` for detailed patte
 | 10 | Dependency | haiku | Modified dependency files, >3 new imports |
 | 11 | Testing Adequacy | haiku | Test files changed, OR code without tests |
 | 12 | Documentation | haiku | Public API changes, magic numbers, LOC > 300 |
+| 13 | UI Reviewer | sonnet | Frontend file patterns (.tsx/.jsx/.vue/.svelte/.css), DOM/JSX elements, UI attributes, component/page/view paths |
 
 ---
 
@@ -132,6 +133,7 @@ For each conditional agent, Grep the diff content AND file list for trigger patt
 | Dependency | Modified `package\.json\|Cargo\.toml\|go\.mod\|requirements\.txt\|Gemfile`, >3 new imports |
 | Testing Adequacy | test/spec files changed, OR >50 LOC non-test code with NO test changes |
 | Documentation | `export (default \|function \|class \|const \|interface \|type )\|module\.exports\s*=\|__all__\s*=`, magic numbers, LOC > 300 |
+| UI | `className\|class=\|style=\|styled\|aria-\|role=\|tabIndex\|onClick\|onChange\|useRef\|useState\|<div\|<button\|<input\|<form\|<img`, component/page/view/layout/screen paths, .tsx/.jsx/.vue/.svelte/.css files |
 
 ### Step 2.5: LOC Gate & Mode Recommendation
 
@@ -303,6 +305,7 @@ CRITICAL RULES:
 - `agents/review/dependency-reviewer.md` (if triggered)
 - `agents/review/testing-adequacy-reviewer.md` (if triggered)
 - `agents/review/documentation-reviewer.md` (if triggered)
+- `agents/review/ui-reviewer.md` (if triggered)
 
 **Phase 1.5: Summarize Specialist Output**
 

@@ -84,7 +84,7 @@ Add: `api-contract-reviewer`, `error-handling-reviewer`
 
 ### Frontend (React/Vue/Angular/Svelte detected)
 
-Add: `testing-adequacy-reviewer`, `performance-reviewer`
+Add: `testing-adequacy-reviewer`, `performance-reviewer`, `ui-reviewer`
 
 ### Database-Heavy (ORM/migration files detected)
 
@@ -178,6 +178,8 @@ AskUserQuestion:
       description: "Test coverage, test quality, missing tests"
     - label: "Documentation Reviewer"
       description: "Public API docs, magic numbers, code clarity"
+    - label: "UI Reviewer"
+      description: "Accessibility, responsive design, component quality, form UX, i18n readiness"
 ```
 
 After agent selection, ask for plan review agents:
@@ -306,6 +308,7 @@ All agents are defined in `agents/review/`:
 | Supervisor | `agents/review/supervisor.md` | Consolidation, deduplication |
 | Adversarial Validator | `agents/review/adversarial-validator.md` | Falsification, evidence demands |
 | Spec Flow Reviewer | `agents/review/spec-flow-reviewer.md` | Specification compliance |
+| UI Reviewer | `agents/review/ui-reviewer.md` | Accessibility, responsive design, component quality, form UX, i18n |
 
 ---
 

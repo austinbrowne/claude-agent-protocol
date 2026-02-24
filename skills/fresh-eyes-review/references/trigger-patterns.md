@@ -79,6 +79,21 @@ Grep patterns used to determine which conditional agents should participate in a
 
 ---
 
+## UI Reviewer
+
+**File path patterns:**
+- `component|page|view|layout|screen|modal|dialog|form|widget`
+
+**File extension patterns (in changed file list):**
+- `\.tsx|\.jsx|\.vue|\.svelte|\.html|\.css|\.scss|\.less|\.styled`
+
+**Diff content patterns:**
+- DOM/JSX elements: `<div|<span|<button|<input|<form|<select|<textarea|<img|<a\s|<nav|<header|<footer|<section|<main|<dialog`
+- UI attributes: `className|class=|style=|styled\(|css\`|aria-|role=|tabIndex|htmlFor`
+- Event/state patterns: `onClick|onChange|onSubmit|onKeyDown|onFocus|onBlur|useRef|useState|useEffect|v-model|v-bind|v-on|@click|\$emit`
+
+---
+
 ## LOC Gate Patterns
 
 Used by Step 2.5 (LOC Gate & Mode Recommendation) to decide Full vs Lite review.

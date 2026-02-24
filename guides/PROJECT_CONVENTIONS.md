@@ -6,7 +6,7 @@
 |-----------|---------|
 | `commands/` | 6 workflow entry points (`/explore` merged into its skill) |
 | `skills/` | 27 reusable skill packages (also user-invocable) |
-| `agents/review/` | 15 review agent definitions |
+| `agents/review/` | 16 review agent definitions |
 | `agents/research/` | 4 research agent definitions |
 | `agents/team/` | 3 team role definitions (Lead, Implementer, Analyst) |
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
@@ -60,7 +60,7 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 | `QUICK_START.md` | Entry points and command reference |
 | `commands/*.md` | 7 workflow commands |
 | `skills/*/SKILL.md` | 27 reusable skill packages |
-| `agents/review/*.md` | 15 review agent definitions |
+| `agents/review/*.md` | 16 review agent definitions |
 | `agents/research/*.md` | 4 research agent definitions |
 | `agents/team/*.md` | 3 team role definitions (Lead, Implementer, Analyst) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |

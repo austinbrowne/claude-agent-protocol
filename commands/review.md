@@ -34,7 +34,7 @@ AskUserQuestion:
     - label: "Smart review (Recommended)"
       description: "Assess diff and recommend appropriate depth — lite, standard, or full"
     - label: "Fresh eyes review (full)"
-      description: "11-agent smart selection review with adversarial validation"
+      description: "12-agent smart selection review with adversarial validation"
     - label: "Fresh eyes review (lite)"
       description: "Quick 4-agent review (Security + Code Quality + Edge Case + Supervisor)"
     - label: "Review protocol compliance"

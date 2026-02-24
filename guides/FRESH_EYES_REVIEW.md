@@ -47,6 +47,7 @@
 | 10 | Dependency Reviewer | `agents/review/dependency-reviewer.md` | Modified dependency files, >3 new imports |
 | 11 | Testing Adequacy Reviewer | `agents/review/testing-adequacy-reviewer.md` | Test files changed, OR implementation without tests, >50 LOC non-test |
 | 12 | Documentation Reviewer | `agents/review/documentation-reviewer.md` | Public API changes, magic numbers, LOC > 300, README/docs changes |
+| 13 | UI Reviewer | `agents/review/ui-reviewer.md` | Frontend file patterns (.tsx/.jsx/.vue/.svelte/.css), DOM/JSX elements, UI attributes, component/page/view paths |
 
 ---
 

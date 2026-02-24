@@ -227,7 +227,7 @@ Use the recovery skill within `/implement`:
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
 | `commands/*.md` | **7 workflow commands** (explore, plan, implement, review, learn, ship, loop) |
 | `skills/*/SKILL.md` | **26 reusable skill packages** |
-| `agents/review/*.md` | **15 review agents** |
+| `agents/review/*.md` | **16 review agents** |
 | `agents/research/*.md` | **4 research agents** |
 | `agents/team/*.md` | **3 team role definitions** (Lead, Implementer, Analyst) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | Security checklist (OWASP Top 10) |

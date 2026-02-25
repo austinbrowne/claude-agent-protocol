@@ -4,7 +4,7 @@
 **Last Updated:** February 2026
 **Purpose:** Safe, effective AI-assisted software development
 
-**Current:** 7 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`, `/loop`), 26 reusable skill packages, flat `godmode:` namespace, natural workflow chaining via `AskUserQuestion`, Agent Teams integration, per-project review configuration, and autonomous development loops.
+**Current:** 7 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`, `/loop`), 29 reusable skill packages, flat `godmode:` namespace, natural workflow chaining via `AskUserQuestion`, Agent Teams integration, per-project review configuration, product planning (roadmap + backlog), and autonomous development loops.
 
 ---
 
@@ -24,8 +24,8 @@ This is the **comprehensive reference document** for the GODMODE protocol.
 **For quick access:**
 - Critical safety rules → `CLAUDE.md` (auto-loaded with highest priority)
 - Workflow commands → `commands/*.md` (7 workflows)
-- Reusable skills → `skills/*/SKILL.md` (27 skill packages)
-- Agent definitions → `agents/review/*.md` (16 review agents) + `agents/research/*.md` (4 research agents) + `agents/team/*.md` (3 team roles)
+- Reusable skills → `skills/*/SKILL.md` (29 skill packages)
+- Agent definitions → `agents/review/*.md` (16 review agents) + `agents/research/*.md` (4 research agents) + `agents/team/*.md` (3 team roles) + `agents/product/*.md` (1 product agent)
 - Quick reference → `QUICK_START.md`
 
 **Use this document when:**
@@ -930,7 +930,7 @@ After completing a feature or fixing a tricky bug:
 - `templates/ADR_TEMPLATE.md` - Architecture decisions
 - `agents/review/*.md` - 16 review agent definitions
 - `agents/research/*.md` - 4 research agent definitions
-- `skills/*/SKILL.md` - 26 reusable skill packages
+- `skills/*/SKILL.md` - 29 reusable skill packages
 - `commands/*.md` - 7 workflow commands
 - `guides/CONTEXT_OPTIMIZATION.md` - Advanced context techniques
 - `guides/MULTI_AGENT_PATTERNS.md` - Complex coordination

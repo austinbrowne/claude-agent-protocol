@@ -3,7 +3,7 @@
 **Version:** 5.4.0-experimental
 **Status:** Experimental (Agent Teams integration)
 
-A Claude Code plugin for AI-assisted software development. 7 workflow commands, 27 skill packages, 23 specialized agents (16 review + 4 research + 3 team roles), Agent Teams integration with defined implementation team roles and autodetection routing, knowledge compounding, and structured phases for planning, execution, and finalization.
+A Claude Code plugin for AI-assisted software development. 7 workflow commands, 29 skill packages, 24 specialized agents (16 review + 4 research + 3 team + 1 product), Agent Teams integration with defined implementation team roles and autodetection routing, product planning (roadmap + backlog), knowledge compounding, and structured phases for planning, execution, and finalization.
 
 ---
 
@@ -218,7 +218,7 @@ Reusable methodology packages, each directly invocable:
 If you used the protocol before workflow commands existed (v3.x), here's what changed:
 
 - **Workflow commands replace individual commands.** Instead of 21 separate slash commands, 7 workflow commands (`/explore`, `/plan`, `/implement`, `/review`, `/learn`, `/ship`, `/loop`) orchestrate the full development lifecycle. Each workflow chains to the next naturally.
-- **Every sub-step is still directly invocable.** All 26 skills work as standalone slash commands — `/brainstorm`, `/fresh-eyes-review`, `/security-review`, `/generate-tests`, etc. Workflows compose them; you can still call them individually.
+- **Every sub-step is still directly invocable.** All 29 skills work as standalone slash commands — `/brainstorm`, `/fresh-eyes-review`, `/security-review`, `/generate-tests`, etc. Workflows compose them; you can still call them individually.
 - **Agent Teams.** With `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, multi-agent features use real teams with inter-agent communication. Parallel code reviews where agents discuss findings. Implementation teams where a Lead coordinates Implementers and an Analyst broadcasts research in real-time. Without the flag, everything falls back to subagent mode automatically.
 - **Team-based implementation.** `/implement` now autodetects whether your task benefits from a team (complex plan with independent tasks) or solo execution (small issue). It recommends the best approach and lets you override.
 - **Autonomous mode.** `/loop` runs plan-implement-review cycles autonomously with context rotation. Each task gets a fresh context window. Cancel anytime.
@@ -268,7 +268,7 @@ commands/                              # 7 workflow entry points
 ├── ship.md
 └── loop.md
 
-skills/                                # 26 reusable skill packages
+skills/                                # 29 reusable skill packages
 ├── brainstorm/SKILL.md
 ├── explore/SKILL.md
 ├── generate-plan/SKILL.md
@@ -294,21 +294,26 @@ skills/                                # 26 reusable skill packages
 ├── finalize/SKILL.md
 ├── learn/SKILL.md
 ├── todos/SKILL.md
+├── roadmap/SKILL.md                   # Product roadmap generation
+├── backlog/SKILL.md                   # Backlog grooming and decomposition
 └── setup/SKILL.md                     # Per-project review configuration
 
 agents/
 ├── review/                            # 16 review agent definitions
 ├── research/                          # 4 research agent definitions
-└── team/                              # 3 team role definitions (Lead, Implementer, Analyst)
+├── team/                              # 3 team role definitions (Lead, Implementer, Analyst)
+└── product/                           # 1 product agent definition (Product Owner)
 
 checklists/                            # Security + code review checklists
-templates/                             # 10 reusable templates
+templates/                             # 11 reusable templates
 guides/                                # Process guides
 
 docs/
 ├── solutions/                         # Knowledge compounding storage
 ├── brainstorms/                       # Brainstorm session records
-└── plans/                             # Plans (Minimal, Standard, Comprehensive)
+├── plans/                             # Plans (Minimal, Standard, Comprehensive)
+├── roadmaps/                          # Product roadmaps
+└── backlogs/                          # Product backlogs
 ```
 
 ---

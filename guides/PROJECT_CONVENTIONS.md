@@ -5,14 +5,17 @@
 | Directory | Purpose |
 |-----------|---------|
 | `commands/` | 6 workflow entry points (`/explore` merged into its skill) |
-| `skills/` | 27 reusable skill packages (also user-invocable) |
+| `skills/` | 29 reusable skill packages (also user-invocable) |
 | `agents/review/` | 16 review agent definitions |
 | `agents/research/` | 4 research agent definitions |
 | `agents/team/` | 3 team role definitions (Lead, Implementer, Analyst) |
+| `agents/product/` | 1 product agent definition (Product Owner) |
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
 | `docs/brainstorms/` | Brainstorm session records |
 | `.todos/` | File-based todo tracking (committed to git) |
 | `docs/plans/` | Plans (Minimal, Standard, Comprehensive) |
+| `docs/roadmaps/` | Product roadmaps (Minimal, Standard) |
+| `docs/backlogs/` | Product backlogs (epics, user stories) |
 
 ## Status Indicators
 
@@ -59,12 +62,13 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 | `AI_CODING_AGENT_GODMODE.md` | Full protocol documentation |
 | `QUICK_START.md` | Entry points and command reference |
 | `commands/*.md` | 7 workflow commands |
-| `skills/*/SKILL.md` | 27 reusable skill packages |
+| `skills/*/SKILL.md` | 29 reusable skill packages |
 | `agents/review/*.md` | 16 review agent definitions |
 | `agents/research/*.md` | 4 research agent definitions |
 | `agents/team/*.md` | 3 team role definitions (Lead, Implementer, Analyst) |
+| `agents/product/*.md` | 1 product agent definition (Product Owner) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | OWASP security checklist |
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
 | `guides/AGENT_TEAMS_GUIDE.md` | Agent Teams formation patterns and best practices |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
-| `templates/*.md` | 10 reusable templates |
+| `templates/*.md` | 11 reusable templates |

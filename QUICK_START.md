@@ -226,16 +226,17 @@ Use the recovery skill within `/implement`:
 |------|---------|
 | `AI_CODING_AGENT_GODMODE.md` | Main protocol (start here) |
 | `commands/*.md` | **7 workflow commands** (explore, plan, implement, review, learn, ship, loop) |
-| `skills/*/SKILL.md` | **26 reusable skill packages** |
+| `skills/*/SKILL.md` | **29 reusable skill packages** |
 | `agents/review/*.md` | **16 review agents** |
 | `agents/research/*.md` | **4 research agents** |
 | `agents/team/*.md` | **3 team role definitions** (Lead, Implementer, Analyst) |
+| `agents/product/*.md` | **1 product agent** (Product Owner) |
 | `checklists/AI_CODE_SECURITY_REVIEW.md` | Security checklist (OWASP Top 10) |
 | `checklists/AI_CODE_REVIEW.md` | Code review checklist |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
 | `guides/AGENT_TEAMS_GUIDE.md` | Agent Teams patterns and best practices |
-| `templates/*.md` | 10 reusable templates |
+| `templates/*.md` | 11 reusable templates |
 | `docs/solutions/` | Knowledge compounding storage |
 | `docs/brainstorms/` | Brainstorm session records |
 | `.todos/` | File-based todo tracking |

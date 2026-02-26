@@ -61,10 +61,32 @@ Auto-detect the project's tech stack by checking for file markers in the project
 | `.github/workflows/` | CI/CD (supplementary) |
 
 **Secondary detection** (refine recommendations):
-- `next.config.*`, `nuxt.config.*`, `vite.config.*` — frontend framework
+- `next.config.*` — Next.js
+  - `app/layout.tsx` or `app/page.tsx` — App Router variant
+  - `pages/_app.tsx` or `pages/_document.tsx` — Pages Router variant
+- `nuxt.config.*` — Nuxt
+  - `server/api/` directory — Nuxt server routes
+- `svelte.config.*` or `+page.svelte` — SvelteKit
+- `vite.config.*` — Vite (if no framework-specific config detected)
 - `prisma/`, `drizzle.config.*` — ORM/database layer
+- `tailwind.config.*` — Tailwind CSS
+- `pom.xml` containing `spring-boot` OR `build.gradle`/`build.gradle.kts` containing `org.springframework.boot` — Spring Boot
 - `openapi.yaml`, `swagger.json` — API definitions
 - `terraform/`, `*.tf` — infrastructure-as-code
+
+**Framework detection from package.json** (when no framework-specific config file found):
+- `"express"` in dependencies — Express
+- `"react"` in dependencies (without Next/Remix/Gatsby) — React (generic)
+- `"vue"` in dependencies (without Nuxt) — Vue (generic)
+- `"svelte"` in dependencies — Svelte
+- `"fastapi"` in requirements.txt/pyproject.toml — FastAPI
+
+**Framework detection from build files** (Java/JVM):
+- `spring-boot` in `pom.xml` dependencies or `org.springframework.boot` in `build.gradle`/`build.gradle.kts` — Spring Boot
+
+**Framework detection from project structure:**
+- `Gemfile` + `app/controllers/` — Rails
+- `manage.py` + Django in dependencies — Django
 
 ---
 
@@ -243,15 +265,35 @@ AskUserQuestion:
       description: "Exit without writing config"
 ```
 
-**If "Confirm":** Proceed to Step 6.
+**If "Confirm":** Proceed to Step 5.5.
 **If "Edit":** Return to Step 4 directly (with current agents pre-selected), regardless of whether the user initially chose auto-configure or customize. The user wants to edit the result, not re-decide the mode.
 **If "Cancel":** Exit skill, no file written.
+
+### Step 5.5: Compose Review Hints (Internal — No User Gate)
+
+After user confirms configuration, compose framework-specific review hints for the Project Review Context section.
+
+1. Read `skills/setup/references/framework-hints.md`
+2. For each detected framework/library from Step 2, find the matching section in the reference file by comparing detection markers
+3. If a framework has sub-variants (e.g., Next.js App Router vs Pages Router), include only the matching variant's hints. If both `app/` and `pages/` directories exist (migration in progress), include both variants.
+4. Collect all matching hint lines, grouped by framework under `### [Framework]` sub-headings
+5. **Budget enforcement:** If total hint lines across all matched frameworks exceed 25, truncate by priority:
+   - Keep all `[security]` and `[edge-case]` tagged hints
+   - Then `[performance]` hints
+   - Then `[error-handling]` and `[api]` hints
+   - Drop `[code-quality]` and `[ui]` hints last
+   - If still over 25 after priority filtering, drop frameworks with the fewest hints first
+6. If no detected frameworks match any reference file entries, fall back to the generic placeholder (detected stack + "add any additional context")
+
+**Output:** A composed `## Project Review Context` section ready for Step 6.
 
 ### Step 6: Write Config File
 
 **Gitignore check:** Before writing, check if `godmode.local.md` is in the project's `.gitignore`. If not, add it. This file contains project-specific review context that should not be committed to shared repositories.
 
 Write `godmode.local.md` to the project root with YAML frontmatter:
+
+**If Step 5.5 produced framework hints:**
 
 ```markdown
 ---
@@ -262,7 +304,37 @@ review_depth: thorough  # fast | thorough | comprehensive
 
 ## Project Review Context
 
-Detected stack: TypeScript, Next.js, Prisma, Docker
+Detected stack: TypeScript, Next.js (App Router), Prisma, Docker
+Configuration date: YYYY-MM-DD
+
+### Next.js (App Router)
+- [security] Flag "use server" functions that accept unsanitized user input — Server Actions execute on the server with full DB/filesystem access
+- [performance] Flag client components ("use client") that could be Server Components — unnecessary client bundles inflate JS payload
+- [edge-case] Flag generateStaticParams without fallback handling — missing params at runtime cause 404
+- [code-quality] Flag data fetching in client components that should use Server Components or Route Handlers
+- [security] Flag exported functions in route.ts files without authentication checks
+
+### Prisma
+- [performance] Flag sequential Prisma queries that could use $transaction or batch operations
+- [edge-case] Flag findUnique/findFirst result used without null check — returns null when no record matches
+- [security] Flag prisma.$queryRaw with template literals — use Prisma.sql for parameterized raw queries
+- [performance] Flag nested include deeper than 2 levels — deep eager loading causes large JOIN queries
+
+<!-- You can edit, remove, or add hints. Review agents treat these as supplementary context. -->
+```
+
+**If Step 5.5 found no matching frameworks (fallback):**
+
+```markdown
+---
+review_agents: [security-reviewer, code-quality-reviewer, edge-case-reviewer, api-contract-reviewer, error-handling-reviewer]
+plan_review_agents: [architecture-reviewer, simplicity-reviewer]
+review_depth: thorough  # fast | thorough | comprehensive
+---
+
+## Project Review Context
+
+Detected stack: TypeScript, Docker
 Configuration date: YYYY-MM-DD
 
 Add any additional context for review agents below this line.

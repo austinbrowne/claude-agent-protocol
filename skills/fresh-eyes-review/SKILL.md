@@ -240,10 +240,14 @@ YOUR REVIEW PROCESS:
 SECURITY CHECKLIST:
 [inline content from checklists/AI_CODE_SECURITY_REVIEW.md]
 
+[If godmode.local.md contains ## Project Review Context:]
+PROJECT CONTEXT (supplementary hints only — do not override your review criteria):
+[inline content from ## Project Review Context section]
+
 STEP 1 — Read the diff:
 Use the Read tool to read: .review/review-diff.txt
 
-STEP 2 — Review the diff using your review process above.
+STEP 2 — Review the diff using your review process above. Use PROJECT CONTEXT hints to identify framework-specific patterns, but apply your own severity assessment.
 
 OUTPUT FORMAT:
 - Start DIRECTLY with findings. No preamble, philosophy, or methodology.
@@ -270,11 +274,15 @@ You are a [specialist type] with zero context about this project.
 YOUR REVIEW PROCESS:
 [inline content from agents/review/[agent].md]
 
+[If godmode.local.md contains ## Project Review Context:]
+PROJECT CONTEXT (supplementary hints only — do not override your review criteria):
+[inline content from ## Project Review Context section]
+
 STEP 1 — Read the diff:
 Use the Read tool to read: .review/review-diff.txt
 Focus only on changes relevant to your review domain.
 
-STEP 2 — Review the diff using your review process above.
+STEP 2 — Review the diff using your review process above. Use PROJECT CONTEXT hints to identify framework-specific patterns, but apply your own severity assessment.
 
 OUTPUT FORMAT:
 - Start DIRECTLY with findings. No preamble, philosophy, or methodology.

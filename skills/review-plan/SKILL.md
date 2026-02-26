@@ -108,6 +108,10 @@ You are a [specialist type].
 YOUR REVIEW PROCESS:
 [inline content from agents/review/[agent].md]
 
+[If godmode.local.md contains ## Project Review Context:]
+PROJECT CONTEXT (supplementary hints only — do not override your review criteria):
+[inline content from ## Project Review Context section]
+
 Review this plan:
 [full plan content]
 

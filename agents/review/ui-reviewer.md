@@ -40,19 +40,19 @@ Automated linters (eslint-plugin-jsx-a11y, Stylelint) catch syntax violations. T
 ## Output Format
 
 ```
-UI REVIEW FINDINGS:
-
-CRITICAL:
-- [UI-001] [Category] Finding — file:line
+[UI-001] SEVERITY: Brief description — file:line
   Evidence: code snippet or pattern (1-2 lines max)
   Fix: specific remediation (1 line)
 
-HIGH/MEDIUM/LOW: [same format]
-
-PASSED CHECKS: [list categories that passed]
-Total issues: N | Recommendation: BLOCK | FIX_BEFORE_COMMIT | APPROVED
-Confidence: HIGH | MEDIUM | LOW
+[UI-002] SEVERITY: Brief description — file:line
+  Evidence: ...
+  Fix: ...
 ```
+
+- Start DIRECTLY with findings. No preamble, philosophy, or methodology.
+- Maximum 8 findings. If more, keep only the highest severity.
+- If no findings, return exactly: `NO_FINDINGS`
+- Do NOT include passed checks, summaries, or recommendations sections.
 
 ## Examples
 

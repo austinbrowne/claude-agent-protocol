@@ -142,6 +142,29 @@ If total hints for a project exceed 25 lines, the setup skill truncates by prior
 
 ---
 
+## Java (Generic)
+
+**Detection:** `pom.xml` OR `build.gradle` OR `build.gradle.kts` (and no Spring Boot detected)
+
+- [error-handling] Flag empty catch blocks or catch blocks that only log and continue — swallowed exceptions hide bugs in production. Re-throw as domain-specific exceptions or handle explicitly.
+- [security] Flag `Runtime.exec()` or `ProcessBuilder` with string concatenation from user input — command injection. Use parameterized argument lists, never shell interpolation.
+- [edge-case] Flag `equals()` called on a potentially null reference — `null.equals(x)` throws `NullPointerException`. Use `Objects.equals()` or null-safe comparison order.
+- [performance] Flag string concatenation in loops using `+` operator — creates a new `String` object per iteration. Use `StringBuilder` for loop-based assembly.
+
+---
+
+## Spring Boot
+
+**Detection:** (`pom.xml` containing `spring-boot` OR `build.gradle`/`build.gradle.kts` containing `org.springframework.boot`)
+
+- [security] Flag `@RequestMapping` without explicit HTTP method — maps all methods (GET, POST, DELETE, etc.) to the same handler. Use `@GetMapping`, `@PostMapping`, etc. to restrict methods.
+- [security] Flag `@RequestParam` or `@PathVariable` values used in SQL via string concatenation or `EntityManager.createQuery()` — SQL injection. Use parameterized queries, `@Query` with named parameters, or JPA Criteria API.
+- [edge-case] Flag `@Transactional` on private methods or self-invocations — Spring AOP proxies cannot intercept these calls, so the transaction annotation is silently ignored.
+- [security] Flag REST endpoints without `@PreAuthorize`, `@Secured`, or explicit security configuration — Spring Security secures nothing by default in newer versions; endpoints are open unless explicitly protected.
+- [error-handling] Flag `@RestController` methods without `@ExceptionHandler` or global `@ControllerAdvice` — unhandled exceptions leak stack traces and internal details in the HTTP response.
+
+---
+
 ## Prisma
 
 **Detection:** `prisma/` directory OR `prisma` in `package.json` dependencies

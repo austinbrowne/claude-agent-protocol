@@ -70,6 +70,7 @@ Auto-detect the project's tech stack by checking for file markers in the project
 - `vite.config.*` — Vite (if no framework-specific config detected)
 - `prisma/`, `drizzle.config.*` — ORM/database layer
 - `tailwind.config.*` — Tailwind CSS
+- `pom.xml` containing `spring-boot` OR `build.gradle`/`build.gradle.kts` containing `org.springframework.boot` — Spring Boot
 - `openapi.yaml`, `swagger.json` — API definitions
 - `terraform/`, `*.tf` — infrastructure-as-code
 
@@ -79,6 +80,9 @@ Auto-detect the project's tech stack by checking for file markers in the project
 - `"vue"` in dependencies (without Nuxt) — Vue (generic)
 - `"svelte"` in dependencies — Svelte
 - `"fastapi"` in requirements.txt/pyproject.toml — FastAPI
+
+**Framework detection from build files** (Java/JVM):
+- `spring-boot` in `pom.xml` dependencies or `org.springframework.boot` in `build.gradle`/`build.gradle.kts` — Spring Boot
 
 **Framework detection from project structure:**
 - `Gemfile` + `app/controllers/` — Rails

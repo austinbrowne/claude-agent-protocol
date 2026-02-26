@@ -114,19 +114,38 @@ Decompose an approved product roadmap into a fully groomed backlog of epics, use
 
 ### Step 2: Run Product Owner Agent
 
-Invoke the Product Owner agent via Task tool:
+Invoke the Product Owner agent via Task tool. **If the roadmap was loaded from a file**, pass the file path — the agent reads it itself (keeps roadmap content out of the orchestrator's context). **If the user pasted/described content directly**, inline it in the prompt (no file exists to read).
 
+**Template (roadmap from file):**
 ```
 Task(
   subagent_type="general-purpose",
-  model="sonnet",  # The `model` parameter here is authoritative; the agent definition's YAML `model` field is for reference only.
+  model="sonnet",
+  prompt="""You are a Product Owner agent.
+
+YOUR ROLE DEFINITION:
+[inline content from agents/product/PRODUCT_OWNER.md]
+
+STEP 1 — Read the roadmap:
+Use the Read tool to read: [path to roadmap file, e.g. docs/roadmaps/2026-02-25-roadmap-taskflow.md]
+
+STEP 2 — Generate the backlog using the instructions below.
+
+INSTRUCTIONS:
+```
+
+**Template (user-provided text, no file):**
+```
+Task(
+  subagent_type="general-purpose",
+  model="sonnet",
   prompt="""You are a Product Owner agent.
 
 YOUR ROLE DEFINITION:
 [inline content from agents/product/PRODUCT_OWNER.md]
 
 ROADMAP CONTEXT:
-[roadmap content — either from file or user-provided text]
+[user-provided text — inlined because no file exists]
 
 INSTRUCTIONS:
 For each Epic in the roadmap, generate:

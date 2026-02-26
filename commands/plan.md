@@ -1,11 +1,11 @@
 ---
 name: workflows:plan
-description: "Planning & requirements — plan generation, deepening, review, issues, and ADR"
+description: "Planning & requirements — plan generation, deepening, review, issues, product roadmaps, backlog grooming, and ADR"
 ---
 
 # /plan — Planning & Requirements
 
-**Workflow command.** Hub for all planning activities: plan creation, plan enrichment, plan review, issue creation, and architecture decision records.
+**Workflow command.** Hub for all planning activities: plan creation, plan enrichment, plan review, issue creation, product roadmaps, backlog grooming, and architecture decision records.
 
 > **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning via `generate-plan`, not Claude Code's native plan mode.
 
@@ -28,11 +28,13 @@ Use these signals to build the menu in Step 1. **Only show options whose precond
 **If NO active plans exist** (first time, all complete, or plans directory empty):
 ```
 AskUserQuestion:
-  question: "No active plans found. Let's create one."
+  question: "No active plans found. What would you like to do?"
   header: "Plan"
   options:
     - label: "Generate plan"
       description: "Create a plan (Minimal, Standard, or Comprehensive) with integrated research"
+    - label: "Product planning"
+      description: "Generate a product roadmap or decompose into a backlog"
     - label: "Create ADR"
       description: "Document an architecture decision record"
 ```
@@ -45,6 +47,34 @@ AskUserQuestion:
   options:
     - label: "Generate plan"
       description: "Create a new plan (Minimal, Standard, or Comprehensive) with integrated research"
+    - label: "Product planning"
+      description: "Generate a product roadmap or decompose into a backlog"
+    - label: "Work on existing plan"
+      description: "Deepen, review, or create issues from an existing plan"
+    - label: "Create ADR"
+      description: "Document an architecture decision record"
+```
+
+#### Sub-Menu Dispatch
+
+**If "Product planning" selected:**
+```
+AskUserQuestion:
+  question: "Which product planning activity?"
+  header: "Product"
+  options:
+    - label: "Generate roadmap"
+      description: "Create a product roadmap from vision and goals"
+    - label: "Generate backlog"
+      description: "Decompose a roadmap into epics, user stories, and acceptance criteria"
+```
+
+**If "Work on existing plan" selected:**
+```
+AskUserQuestion:
+  question: "What would you like to do with the existing plan?"
+  header: "Plan"
+  options:
     - label: "Deepen existing plan"
       description: "Enrich a plan with parallel research and review agents"
     - label: "Review plan"
@@ -60,6 +90,8 @@ AskUserQuestion:
 **Based on selection:**
 
 - **"Generate plan"** → Invoke `Skill(skill="godmode:generate-plan")` with the task description as arguments
+- **"Generate roadmap"** → Invoke `Skill(skill="godmode:roadmap")`
+- **"Generate backlog"** → Invoke `Skill(skill="godmode:backlog")`
 - **"Deepen existing plan"** → Invoke `Skill(skill="godmode:deepen-plan")` with the plan path as arguments
 - **"Review plan"** → Invoke `Skill(skill="godmode:review-plan")` with the plan path as arguments
 - **"Create GitHub issues"** → Invoke `Skill(skill="godmode:create-issues")` with the plan path as arguments
@@ -134,11 +166,43 @@ AskUserQuestion:
       description: "End workflow"
 ```
 
+**After "Generate roadmap":**
+```
+AskUserQuestion:
+  question: "Roadmap generated. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Generate backlog"
+      description: "Decompose this roadmap into epics and user stories"
+    - label: "Return to plan menu"
+      description: "Go back to planning options"
+    - label: "Done"
+      description: "End workflow"
+```
+
+**After "Generate backlog":**
+```
+AskUserQuestion:
+  question: "Backlog generated. What would you like to do next?"
+  header: "Next step"
+  options:
+    - label: "Create GitHub issues"
+      description: "Convert backlog epics into GitHub issues (note: uses `/create-issues` skill — manual format adaptation may be needed)"
+    - label: "Return to plan menu"
+      description: "Go back to planning options"
+    - label: "Done"
+      description: "End workflow"
+```
+
+**Known limitation:** The `/create-issues` skill expects plan format. When invoked after backlog generation, the orchestrator should pass the backlog file path and note the format difference. A dedicated backlog-to-issues skill is planned for a future release.
+
 **Routing:**
 - **"Review document quality"** → Invoke `Skill(skill="godmode:document-review")` with the plan path as arguments. After document-review completes, re-present the "After Generate plan" AskUserQuestion above.
 - **"Deepen this plan"** → Invoke `Skill(skill="godmode:deepen-plan")` with the plan path as arguments
 - **"Review this plan"** → Invoke `Skill(skill="godmode:review-plan")` with the plan path as arguments
 - **"Create GitHub issues"** → Invoke `Skill(skill="godmode:create-issues")` with the plan path as arguments
+- **"Generate backlog"** → Invoke `Skill(skill="godmode:backlog")`
+- **"Return to plan menu"** → Return to Step 1
 - **"Start implementing"** → Invoke `Skill(skill="godmode:implement")`. Execute from Step 0. Do NOT skip any steps.
 - **"Revise the plan"** → Return to Step 1 with "Generate plan" pre-selected
 - **"Create another plan"** → Return to Step 1
@@ -152,5 +216,7 @@ These can be invoked before planning or when explicitly requested:
 
 - **Create ADR** — `skills/create-adr/SKILL.md` — Document architecture decisions
 - **Brainstorm** — `skills/brainstorm/SKILL.md` — Structured divergent thinking (use BEFORE generating a plan, not after)
+- **Roadmap** — `skills/roadmap/SKILL.md` — Generate product roadmaps from vision and goals
+- **Backlog** — `skills/backlog/SKILL.md` — Decompose roadmaps into groomed backlogs
 
-If the user mentions architecture decisions, offer ADR. If they want to explore approaches before committing, offer brainstorm.
+If the user mentions architecture decisions, offer ADR. If they want to explore approaches before committing, offer brainstorm. If they want product-level planning (roadmap, backlog), offer product planning.

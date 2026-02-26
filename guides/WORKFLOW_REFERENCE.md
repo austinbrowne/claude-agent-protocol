@@ -37,7 +37,7 @@ Use workflow commands as entry points. Each workflow offers sub-step selection v
 
 Each workflow loads skills from `skills/*/SKILL.md`. Skills are also directly invocable as slash commands:
 
-**Planning skills:** `explore`, `brainstorm`, `generate-plan`, `deepen-plan`, `review-plan`, `create-adr`, `create-issues`
+**Planning skills:** `explore`, `brainstorm`, `generate-plan`, `deepen-plan`, `review-plan`, `create-adr`, `create-issues`, `roadmap`, `backlog`
 
 **Issue skills:** `file-issues`, `file-issue`, `enhance-issue`
 

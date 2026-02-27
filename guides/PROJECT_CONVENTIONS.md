@@ -73,4 +73,5 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
 | `guides/AGENT_TEAMS_GUIDE.md` | Agent Teams formation patterns and best practices |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
+| `guides/KNOWLEDGE_SYSTEM.md` | Two-tier knowledge architecture (auto memory + solution library) |
 | `templates/*.md` | 11 reusable templates |

@@ -20,6 +20,14 @@ Learn from the past to avoid repeating mistakes. This agent mines the project's 
 
 ## Research Process
 
+### Two-Tier Search Strategy
+
+This agent searches both knowledge tiers:
+- **Tier 1 (Primary)**: `docs/solutions/` — structured solutions with enum-validated YAML frontmatter (7-pass Grep)
+- **Tier 2 (Secondary)**: `~/.claude/projects/<project>/memory/*.md` — informal auto memory notes (keyword Grep)
+
+Tier 1 results take priority. Tier 2 catches informal insights that were never promoted to full solutions.
+
 ### Step 1: Category Narrowing
 
 If the problem domain is clear, narrow search to the specific category subdirectory first:
@@ -74,7 +82,21 @@ Run multiple parallel Grep passes to maximize recall:
    - Grep for domain-specific terms in solution body content
    - Example: `Grep pattern="race condition|deadlock|concurrent" path="docs/solutions/"`
 
-### Step 3: Relevance Scoring
+### Step 3: Auto Memory Search (Tier 2)
+
+After the structured search, perform a secondary keyword Grep against auto memory topic files:
+
+1. **Locate auto memory directory**: `~/.claude/projects/<project>/memory/`
+   - If directory doesn't exist, skip this step
+2. **Search topic files** (exclude MEMORY.md index):
+   - `Grep pattern="keyword1|keyword2|keyword3" path="<memory-dir>" glob="*.md"`
+   - Use the same domain-specific keywords from Pass 7
+3. **Check solutions-index.md**: If it exists, scan for cross-references to solutions already found in Tier 1 (avoid duplicates)
+4. **Extract informal insights**: Auto memory notes are unstructured — extract any problem/solution/gotcha patterns found
+
+Auto memory results are supplementary. They appear in a separate section of the output and are scored lower than structured Tier 1 matches unless they contain unique information not in `docs/solutions/`.
+
+### Step 4: Relevance Scoring
 
 For each matched solution file:
 1. Read the full file
@@ -82,10 +104,11 @@ For each matched solution file:
 3. Assess relevance to the current task (HIGH / MEDIUM / LOW)
 4. Extract applicable gotchas and recommendations
 5. Note if the solution's context matches (same language, framework, component)
+6. For auto memory matches: note as `(from auto memory)` and suggest promotion via `/learn` if the insight is substantial
 
-### Step 4: Deduplication
+### Step 5: Deduplication
 
-If multiple passes find the same file, count it once but note which passes matched.
+If multiple passes find the same file, count it once but note which passes matched. If an auto memory note covers the same ground as a Tier 1 solution, prefer the Tier 1 result and discard the auto memory duplicate.
 
 ## Output Format
 
@@ -93,6 +116,9 @@ If multiple passes find the same file, count it once but note which passes match
 LEARNINGS RESEARCH FINDINGS:
 
 Solutions Found: N files matched across M search passes
+Auto Memory Notes: N notes checked
+
+--- TIER 1: STRUCTURED SOLUTIONS ---
 
 HIGH RELEVANCE:
 1. [category/filename] — [problem summary from title]
@@ -110,13 +136,23 @@ MEDIUM RELEVANCE:
 1. [category/filename] — [problem summary]
    - Why partially relevant: [explanation]
 
-NO RELEVANT SOLUTIONS FOUND:
-[If nothing matched — state this clearly, don't force irrelevant matches]
+--- TIER 2: AUTO MEMORY INSIGHTS ---
+
+[Only include if auto memory had relevant notes not already covered by Tier 1]
+
+1. [memory/topic-file.md] — [insight summary]
+   - Context: [what was noted]
+   - Relevance: [how it applies to current task]
+   - Promote?: [Yes — substantial enough for /learn | No — quick note only]
+
+NO RELEVANT LEARNINGS FOUND:
+[If nothing matched in either tier — state this clearly, don't force irrelevant matches]
 
 Summary:
-- [N] directly applicable learnings
+- [N] directly applicable learnings ([X] structured, [Y] from auto memory)
 - Key themes: [common patterns across solutions]
 - Recommended actions: [specific things to do/avoid based on learnings]
+- Promotion candidates: [auto memory notes worth running /learn on]
 ```
 
 ## Examples
@@ -159,8 +195,8 @@ Consider running `/learn` after implementation to capture learnings.
 
 ## Compatibility
 
-This agent's search strategy is compatible with solution docs created by:
-- The `/learn` command (this project)
-- The compound-engineering plugin's `compound-docs` skill
+This agent's search strategy is compatible with:
+- Solution docs from `/learn` and the compound-engineering plugin's `compound-docs` skill (both use `docs/solutions/{category}/` with the same YAML frontmatter)
+- Anthropic's auto memory system (`~/.claude/projects/<project>/memory/*.md`)
 
-Both produce docs in `docs/solutions/{category}/` with the same YAML frontmatter fields.
+See `guides/KNOWLEDGE_SYSTEM.md` for the full two-tier architecture.

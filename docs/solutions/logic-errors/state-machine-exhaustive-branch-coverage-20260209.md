@@ -77,6 +77,12 @@ Two changes to the state machine prompt in `commands/loop.md`:
 - **Autonomous agents need explicit constraints.** Without file modification boundaries, an autonomous agent could modify its own control files, disable safety checks, or alter CI/CD configuration. List what the agent must NOT touch.
 - **Review custom markers end-to-end.** When introducing a non-standard marker (`[!]`, `[?]`, etc.), grep for every conditional that checks standard markers (`[ ]`, `[x]`) and verify the new marker is handled.
 
+## Follow-Up Fix (2026-02-26)
+
+A second instance of the same meta-pattern was found: the thin shell loop's status field (`running`, `review`, `complete`) had no catch-all handler. If `loop-context.md` was corrupted or had an unexpected status value, the loop would spawn workers indefinitely with no exit condition. Fix: added an explicit else clause that halts with an error message naming the unexpected status value.
+
+This confirms the prevention rule: **natural-language state machines need explicit else clauses for every conditional**.
+
 ## Related Issues
 
 - See also: [Label Definition vs Usage Mismatch](label-definition-usage-mismatch-20260206.md) -- same meta-pattern: definitions in one place diverging from usage in another, only visible when cross-referenced

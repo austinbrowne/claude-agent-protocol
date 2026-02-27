@@ -13,6 +13,8 @@
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
 | `docs/brainstorms/` | Brainstorm session records |
 | `.todos/` | File-based todo tracking (committed to git) |
+| `.claude/loop-context.md` | Autonomous loop state (status, counts, timing, task commits) |
+| `.claude/loop-notes.md` | Inter-task knowledge passing for `/loop` workers |
 | `docs/plans/` | Plans (Minimal, Standard, Comprehensive) |
 | `docs/roadmaps/` | Product roadmaps (Minimal, Standard) |
 | `docs/backlogs/` | Product backlogs (epics, user stories) |

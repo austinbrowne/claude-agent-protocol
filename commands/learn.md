@@ -48,10 +48,11 @@ Run `/learn` to capture, or ignore to skip.
 Invoke `Skill(skill="godmode:capture-learning")`
 
 This handles:
-- Learning extraction and confirmation
+- Learning extraction and confirmation (including pre-population from auto memory if relevant)
 - Deduplication search against existing `docs/solutions/`
 - Solution document generation with enum-validated YAML frontmatter
 - File creation in the appropriate category subdirectory
+- Cross-reference entry in auto memory `solutions-index.md`
 - Searchability confirmation
 
 ---

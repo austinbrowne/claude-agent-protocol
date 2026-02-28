@@ -239,9 +239,32 @@ Search `docs/solutions/` using multi-pass Grep:
 3. Check for collisions (append number if needed)
 4. Save file
 
-### Step 6: Confirm with searchability note
+### Step 6: Cross-reference in auto memory
 
-Report: file location, searchable fields (module, problem_type, component, tags, symptoms, root_cause), and which commands will auto-discover this solution.
+After saving the solution, append a one-line reference to the auto memory solutions index so it's visible at session start:
+
+1. **Locate auto memory directory:** `~/.claude/projects/<project>/memory/`
+   - The `<project>` path is derived from the git repository root (e.g., `-home-cyngex-Projects-myapp`)
+   - Create the directory if it doesn't exist
+2. **Create `solutions-index.md` if missing** with header:
+   ```markdown
+   # Solution Library Index
+
+   Cross-references to structured solutions in `docs/solutions/`. Auto-maintained by `/learn`.
+
+   ```
+3. **Append entry** in format:
+   ```
+   - [YYYY-MM-DD] [severity] Title → docs/solutions/{category}/{filename} (tags: tag1, tag2)
+   ```
+4. **Ensure MEMORY.md references the index.** If `solutions-index.md` is not mentioned in MEMORY.md, add a line:
+   ```
+   - Solution library index: see [solutions-index.md](solutions-index.md)
+   ```
+
+### Step 7: Confirm with searchability note
+
+Report: file location, searchable fields (module, problem_type, component, tags, symptoms, root_cause), auto memory cross-reference status, and which commands will auto-discover this solution.
 
 ---
 
@@ -279,9 +302,30 @@ Docs created by either system are searchable by both.
 
 ---
 
+## Promoting Auto Memory Notes
+
+When `/learn` is invoked and the problem context exists in auto memory (e.g., a debugging insight Claude previously saved to `memory/debugging.md`):
+
+1. **Check auto memory first**: Search `~/.claude/projects/<project>/memory/*.md` for notes matching the current topic
+2. **Pre-populate from memory**: If a relevant auto memory note exists, use it to pre-fill the problem, root cause, and solution fields
+3. **Present for confirmation**: Show the pre-populated learning with source attribution: `(Pre-populated from auto memory: debugging.md)`
+4. **Optionally clean up**: After saving the full structured solution, offer to remove or mark the promoted note in auto memory to avoid staleness:
+   ```
+   AskUserQuestion:
+     question: "The auto memory note has been promoted to a full solution. Clean up the original note?"
+     header: "Cleanup"
+     options:
+       - label: "Remove note"
+         description: "Delete the promoted note from auto memory"
+       - label: "Keep both"
+         description: "Leave the auto memory note as-is"
+   ```
+
 ## Integration Points
 
 - **Input from conversation**: Trigger detection and context extraction
+- **Input from auto memory**: Pre-population of learnings from `memory/*.md` topic files
 - **Output to `docs/solutions/{category}/`**: Persisted solution document
+- **Output to `memory/solutions-index.md`**: Cross-reference for session-start visibility
 - **Consumed by**: learnings-researcher agent, `/explore`, `/plan`, `/implement`
 - **Template**: `templates/SOLUTION_TEMPLATE.md`

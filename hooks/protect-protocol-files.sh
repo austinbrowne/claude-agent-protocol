@@ -15,9 +15,16 @@ fi
 INPUT=$(cat)
 
 # Extract file path from the tool input JSON
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.content // empty' 2>/dev/null)
+# Only check file_path — the .content field contains file *content*, not the target path
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 
 if [ -z "$FILE_PATH" ]; then
+  # Write and Edit tools must have file_path — deny if missing
+  if [ "$TOOL_NAME" = "Write" ] || [ "$TOOL_NAME" = "Edit" ]; then
+    echo "BLOCKED: $TOOL_NAME tool call with no file_path detected"
+    exit 2
+  fi
   exit 0
 fi
 

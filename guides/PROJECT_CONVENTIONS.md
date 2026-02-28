@@ -13,6 +13,8 @@
 | `docs/solutions/` | Knowledge compounding — captured solved problems |
 | `docs/brainstorms/` | Brainstorm session records |
 | `.todos/` | File-based todo tracking (committed to git) |
+| `.claude/loop-context.md` | Autonomous loop state (status, counts, timing, task commits) |
+| `.claude/loop-notes.md` | Inter-task knowledge passing for `/loop` workers |
 | `docs/plans/` | Plans (Minimal, Standard, Comprehensive) |
 | `docs/roadmaps/` | Product roadmaps (Minimal, Standard) |
 | `docs/backlogs/` | Product backlogs (epics, user stories) |
@@ -71,4 +73,5 @@ Claude should suggest extended thinking for security-sensitive or high-risk chan
 | `guides/FRESH_EYES_REVIEW.md` | Smart selection review process |
 | `guides/AGENT_TEAMS_GUIDE.md` | Agent Teams formation patterns and best practices |
 | `guides/FAILURE_RECOVERY.md` | Recovery procedures |
+| `guides/KNOWLEDGE_SYSTEM.md` | Two-tier knowledge architecture (auto memory + solution library) |
 | `templates/*.md` | 11 reusable templates |

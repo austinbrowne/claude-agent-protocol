@@ -71,6 +71,17 @@ Extract `--max-iterations` if provided (default: 50).
 
 Runs ONCE before entering the thin shell loop.
 
+### Dirty Working Tree Detection
+
+Before anything else, check for uncommitted changes from a possibly crashed worker:
+1. Run `git status --porcelain` (excluding untracked files in `.claude/`)
+2. If output is non-empty, AskUserQuestion:
+   "Uncommitted changes detected in working tree. These may be from a crashed loop worker."
+   Options:
+   - **Stash and continue** → `git stash push -m "loop-recovery-$(date -u +%Y%m%dT%H%M%SZ)"`
+   - **Commit and continue** → `git add -u && git commit -m "chore: recover uncommitted loop worker changes"`
+   - **Abort** → halt with message "Clean up working tree before running /loop."
+
 ### Stale Loop Detection
 
 If `.claude/loop-context.md` exists with `status: running`:
@@ -106,6 +117,7 @@ If `.claude/loop-context.md` exists with `status: running`:
 mode: feature | plan | issue
 task: "<description>"
 plan_path: "<path>"
+loop_notes_path: ".claude/loop-notes.md"
 tasks_total: 0
 tasks_completed: 0
 tasks_blocked: 0
@@ -113,9 +125,21 @@ max_iterations: 50
 review_round: 0
 review_max_rounds: 3
 review_clean: false
+last_reviewed_commit: ""
 status: running
 started_at: "<ISO timestamp>"
 start_commit: "<current HEAD sha>"
+worker_log: ""  # Overwritten (not appended) at each worker status update
+timing:
+  loop_started: "<ISO timestamp>"
+  last_task_started: ""
+  last_task_duration_s: 0
+  total_elapsed_s: 0
+task_commits: []
+# task_commits entries:
+#   - task: "<task text>"
+#     commit: "<short SHA>"
+#     status: done | blocked
 ---
 ```
 
@@ -132,10 +156,17 @@ WHILE true:
   1. Read .claude/loop-context.md (ONLY this file)
      → status == "complete"  → break to Step 5 (Completion)
      → status == "review"    → break to Step 4 (Review)
+     → status == "running"   → continue to step 2
+     → status is anything else → HALT with error:
+       "Unexpected loop status: '{status}'. loop-context.md may be corrupted.
+        Fix the status field to 'running', 'review', or 'complete', or delete
+        the file and restart."
      → (tasks_completed + tasks_blocked) >= tasks_total  → set status "review", break
      → iterations >= max_iterations  → set status "complete", break
 
-  2. Spawn Worker subagent (general-purpose, mode: bypassPermissions)
+  2. Record task start time. Update loop-context.md: timing.last_task_started = now
+     Spawn Worker subagent (general-purpose, mode: bypassPermissions)
+     (bypassPermissions is required because the worker needs to run git, edit files, and execute tests without per-tool approval gates that would stall the autonomous loop)
      with the WORKER PROMPT below
      Set env: CLAUDE_LOOP_WORKER=1 (enables protocol file protection hook)
 
@@ -145,8 +176,11 @@ WHILE true:
      → If stall_count >= 3: set status "complete", break
      → Continue loop
 
-  4. Read loop-context.md for updated counts
-     → Print: "Task {completed}/{total} complete ({blocked} blocked)"
+  4. Record task end time. Calculate duration_s = end - start.
+     Read loop-context.md for updated counts
+     Update: timing.last_task_duration_s = duration_s
+     Update: timing.total_elapsed_s = (now - timing.loop_started) in seconds  # Absolute calculation, idempotent on crash recovery
+     → Print: "Task {completed}/{total} complete ({blocked} blocked) — {duration_s}s — elapsed {total_elapsed_s}s"
      → Reset stall_count to 0
      → Continue loop
 ```
@@ -161,25 +195,50 @@ of previous work — read files for ALL context.
 
 ## Instructions
 
-1. Read `.claude/loop-context.md` for plan_path
+1. Read `.claude/loop-context.md` for plan_path and loop_notes_path
 2. Read the plan file at that path
-3. Find the FIRST unchecked task (marked with `[ ]`). Skip `[x]` and `[!]`.
-4. Implement ONLY that one task:
-   a. Read CLAUDE.md for project conventions
+3. If loop_notes_path exists, read it — it contains notes from previous workers
+   about what they built, key files created, and decisions made. Use this context.
+4. Find the FIRST eligible unchecked task (marked with `[ ]`). Skip `[x]` and `[!]`.
+   - If a task line contains `(depends: "...")`, check the plan for the named
+     dependency. If that dependency task is still `[ ]` or `[!]`, this task is
+     NOT eligible — skip it and try the next `[ ]` task.
+   - If ALL remaining `[ ]` tasks have unmet dependencies (circular or all
+     depend on blocked tasks), mark ALL of them `[!]` with reason
+     "unmet dependency", update tasks_blocked count, and output
+     "BLOCKED: all remaining tasks have unmet dependencies".
+5. Implement ONLY that one task:
+   a. Update `.claude/loop-context.md` worker_log: "Starting: <task name>"
+      Read CLAUDE.md for project conventions
    b. Search docs/solutions/ for relevant past learnings
-   c. Write the code changes
-   d. Write/update tests for changed code
+   c. Update worker_log: "Implementing: <task name>"
+      Write the code changes
+   d. Update worker_log: "Testing: <task name>"
+      Write/update tests for changed code
    e. Run tests. If tests fail, fix them (up to 3 attempts).
    f. If tests pass: stage specific files and commit:
       git add <specific files changed>
       git commit -m "feat: <concise task summary>"
-   g. ONLY AFTER commit succeeds: check off the task [x] in the plan file
+   g. Capture the commit SHA: run `git rev-parse --short HEAD`
+   h. ONLY AFTER commit succeeds: check off the task [x] in the plan file
       (Use Edit tool: old_string="- [ ] <full task text>" new_string="- [x] <full task text>")
-   h. Update `.claude/loop-context.md`: increment tasks_completed by 1
-5. If stuck after 3 test-fix attempts:
+   i. Update `.claude/loop-context.md`:
+      - Increment tasks_completed by 1
+      - Append to task_commits: `- task: "<task text>"\n    commit: "<SHA>"\n    status: done`
+   j. Append a brief note to `.claude/loop-notes.md` (create if missing):
+      ```
+      ## Task: <task name>
+      - Files: <key files created or modified>
+      - Decisions: <any non-obvious choices or patterns used>
+      - Exposes: <any new APIs, types, or interfaces other tasks may need>
+      ```
+6. If stuck after 3 test-fix attempts:
    a. Mark the task [!] (blocked) in the plan file
-   b. Update `.claude/loop-context.md`: increment tasks_blocked by 1
-6. Output a ONE-LINE summary: "DONE: <task>" or "BLOCKED: <task> — <reason>"
+   b. Update `.claude/loop-context.md`:
+      - Increment tasks_blocked by 1
+      - Append to task_commits: `- task: "<task text>"\n    commit: ""\n    status: blocked`
+   c. Append a note to `.claude/loop-notes.md`: "## Task: <task> — BLOCKED: <reason>"
+7. Output a ONE-LINE summary: "DONE: <task> (<SHA>)" or "BLOCKED: <task> — <reason>"
 
 ## Environment
 - CLAUDE_LOOP_WORKER=1 (set by the loop orchestrator — enables protocol file protection hook)
@@ -189,11 +248,13 @@ of previous work — read files for ALL context.
 - Commit BEFORE checking [x] — if commit fails, leave task as [ ].
 - Do NOT push to remote. Local commits only.
 - Do NOT create PRs or modify CI/CD configs.
-- Do NOT modify .claude/ directory except loop-context.md.
+- Do NOT modify .claude/ directory except loop-context.md and loop-notes.md.
 - Do NOT modify commands/*.md, agents/*.md, skills/*.md, guides/*.md, templates/*.md, checklists/*.md, or hooks/*.md.
 - Do NOT modify AI_CODING_AGENT_GODMODE.md, CLAUDE.md, QUICK_START.md, or settings.json.
 - Use the FULL task line text in Edit old_string to avoid "not unique" errors.
 - Read files BEFORE editing. Follow existing codebase patterns.
+- Tasks may have optional dependencies: `- [ ] Do X (depends: "Do Y")`.
+  Only implement a task if its dependency is `[x]` (completed).
 ```
 
 ---
@@ -223,7 +284,7 @@ WHILE review_round < review_max_rounds:
      with the FIX WORKER PROMPT below (includes the findings)
      → Returns: summary of fixes applied
 
-  5. Update loop-context.md: increment review_round
+  5. Update loop-context.md: increment review_round, set last_reviewed_commit to current HEAD
      Print: "Review round {round} fixes committed. Re-reviewing..."
      Continue loop
 
@@ -237,15 +298,38 @@ IF review_round >= review_max_rounds AND NOT review_clean:
 Each review worker is a `general-purpose` Task subagent spawned with `mode: bypassPermissions`. It acts as team lead, spawning review agents as parallel teammates via Agent Teams.
 
 ```
-You are running a FULL fresh-eyes code review using Agent Teams for parallel
-execution. You have ZERO memory of previous work — read files for ALL context.
-You are the TEAM LEAD — you coordinate specialists, consolidate, and validate.
+You are running a FULL fresh-eyes code review. You have ZERO memory of
+previous work — read files for ALL context. You coordinate specialists,
+consolidate findings, and validate.
+
+## Phase 0: Capability Detection
+
+1. Check if TeamCreate tool is available in your tool list.
+2. If YES → use AGENT TEAMS MODE (Phases 1-5 below as written).
+3. If NO → use SUBAGENT FALLBACK MODE:
+   - In Phase 2, spawn each specialist as a parallel `general-purpose` Task
+     subagent (NOT a teammate). Each subagent runs the same review prompt
+     and returns findings as its result.
+   - Skip Phase 3-4 teammate messaging — collect findings from subagent
+     return values instead.
+   - Skip Phase 5 team cleanup (no team to clean up).
+   - After collecting all subagent results, proceed directly to consolidation
+     and adversarial validation using your own context (you are the
+     supervisor and validator).
+   - Output in the same REVIEW_FINDINGS format.
 
 ## Phase 1: Setup
 
-1. Read `.claude/loop-context.md` for start_commit
-2. Generate the diff: run `git diff {start_commit}..HEAD` and save to .review/review-diff.txt
-3. Generate the file list: run `git diff --name-only {start_commit}..HEAD`
+1. Read `.claude/loop-context.md` for start_commit, review_round, and last_reviewed_commit
+2. Generate the diff:
+   - Validate that start_commit and last_reviewed_commit match `[a-f0-9]{7,40}` before using in commands. If invalid, fall back to full diff from start_commit.
+   - If review_round == 0 OR last_reviewed_commit is empty:
+     Full diff: `git diff {start_commit}..HEAD` → save to .review/review-diff.txt
+   - If review_round > 0 AND last_reviewed_commit is set:
+     Incremental diff: `git diff {last_reviewed_commit}..HEAD` → save to .review/review-diff.txt
+     (Only review changes since last review round — fixes applied in previous rounds)
+     Also generate file list from incremental diff for smart selection
+3. Generate the file list: `git diff --name-only {start_commit}..HEAD` (always full for context)
 4. Read `guides/FRESH_EYES_REVIEW.md` for the smart selection algorithm
 5. Run SMART SELECTION: check trigger patterns against diff content and file list
    - Core agents (always): Security, Code Quality, Edge Case
@@ -351,7 +435,7 @@ read files for ALL context.
 - Do NOT fix MEDIUM or LOW findings (defer to human review).
 - Do NOT push to remote. Local commits only.
 - Do NOT create PRs.
-- Do NOT modify .claude/ directory except loop-context.md.
+- Do NOT modify .claude/ directory except loop-context.md and loop-notes.md.
 - Do NOT modify commands/*.md or agents/*.md.
 - Read files BEFORE editing. Follow existing codebase patterns.
 - If a finding is a false positive, skip it and note: "SKIPPED: {ID} — false positive: {reason}"
@@ -367,13 +451,22 @@ Read loop-context.md and output:
 Loop Complete
 ━━━━━━━━━━━━
 Tasks: {completed}/{total} completed, {blocked} blocked
+Elapsed: {timing.total_elapsed_s}s
 Review: {review_round} round(s) — {review_clean ? "All clear" : "Max rounds reached, some findings may remain"}
-Commits: (git log --oneline {start_commit}..HEAD)
+
+Task Commits:
+{for each entry in task_commits}
+  {entry.status == "done" ? "✓" : "✗"} {entry.commit || "---"} {entry.task}
+{/for}
+
+Full diff: git log --oneline {start_commit}..HEAD
 
 {if blocked > 0}
 Blocked tasks (manual attention needed):
   - [!] task description
   ...
+
+To revert a specific task: git revert <SHA>
 {/if}
 
 {if review_clean}

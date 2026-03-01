@@ -1,0 +1,84 @@
+# Claude Ops: Manual dispatch via GitHub UI
+# Allows triggering any role with a custom task from the GitHub Actions tab.
+#
+# SECURITY: All workflow_dispatch inputs are passed via env: variables,
+# never directly in ${{ }} expressions inside run: blocks.
+# Direct interpolation is a shell injection vector.
+
+name: "Claude: Manual Dispatch"
+
+on:
+  workflow_dispatch:
+    inputs:
+      role:
+        description: "Role to dispatch"
+        required: true
+        type: choice
+        options:
+          - product-manager
+          - developer
+          - code-reviewer
+          - tech-lead
+      task:
+        description: "Task description"
+        required: true
+        type: string
+      timeout:
+        description: "Timeout in seconds (60-3600)"
+        required: false
+        default: "600"
+        type: string
+
+concurrency:
+  group: claude-manual-dispatch
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  dispatch:
+    runs-on: [self-hosted, claude-ops]
+    timeout-minutes: 60
+    steps:
+      - name: Validate inputs
+        env:
+          TIMEOUT_INPUT: ${{ github.event.inputs.timeout }}
+          TASK_INPUT: ${{ github.event.inputs.task }}
+        run: |
+          # Validate timeout is integer 60-3600
+          if ! [[ "$TIMEOUT_INPUT" =~ ^[0-9]+$ ]] || [ "$TIMEOUT_INPUT" -lt 60 ] || [ "$TIMEOUT_INPUT" -gt 3600 ]; then
+            echo "ERROR: timeout must be an integer between 60 and 3600, got: $TIMEOUT_INPUT"
+            exit 1
+          fi
+          # Validate task is non-empty after trimming whitespace
+          TASK_TRIMMED=$(echo "$TASK_INPUT" | xargs)
+          if [ -z "$TASK_TRIMMED" ]; then
+            echo "ERROR: task description is empty or whitespace-only"
+            exit 1
+          fi
+      - name: Run Dispatch
+        env:
+          CLAUDE_OPS_HOME: /Users/austin/Git_Repos/claude-ops
+          DISPATCH_ROLE: ${{ github.event.inputs.role }}
+          DISPATCH_TASK: ${{ github.event.inputs.task }}
+          DISPATCH_TIMEOUT: ${{ github.event.inputs.timeout }}
+          HOME: /Users/austin
+          PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
+        run: |
+          "$CLAUDE_OPS_HOME/scripts/dispatch.sh" \
+            --role "$DISPATCH_ROLE" \
+            --target claude-agent-protocol \
+            --timeout "$DISPATCH_TIMEOUT" \
+            --task "$DISPATCH_TASK"
+      - name: Notify on failure
+        if: failure()
+        env:
+          WORKFLOW_NAME: ${{ github.workflow }}
+          DISPATCH_ROLE: ${{ github.event.inputs.role }}
+        run: |
+          echo "::error::Claude job failed: ${WORKFLOW_NAME} (role: ${DISPATCH_ROLE}) on $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "### Failed: Manual Dispatch (${DISPATCH_ROLE})" >> "$GITHUB_STEP_SUMMARY"
+          echo "Check workflow run logs for details." >> "$GITHUB_STEP_SUMMARY"

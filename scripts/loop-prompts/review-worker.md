@@ -28,8 +28,8 @@ Run SMART SELECTION against the diff content and file list:
 
 ## Phase 3: Run Reviews
 
-For EACH selected specialist, spawn a parallel `general-purpose` Task subagent
-with mode: bypassPermissions. Each subagent runs:
+For EACH selected specialist, spawn a parallel Agent (subagent_type: `general-purpose`).
+Each subagent runs:
 
   You are a {specialist type} reviewer with ZERO context about this project.
   Read your review process from {agent definition file path from agents/review/*.md}.

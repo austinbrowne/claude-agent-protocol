@@ -252,6 +252,17 @@ preflight() {
   # gh check (deferred to issue mode)
   mkdir -p "${REPO_ROOT}/.claude"
   mkdir -p "$LOG_DIR"
+
+  # Warn about --dangerously-skip-permissions
+  if [[ -t 0 ]]; then
+    echo ""
+    log_warn "Workers run with --dangerously-skip-permissions (full file/shell access)."
+    read -rp "Continue? [y/N]: " confirm
+    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+      log_info "Aborted."
+      exit 0
+    fi
+  fi
 }
 
 # ============================================================================
@@ -435,6 +446,12 @@ check_dirty_tree() {
     echo ""
     log_warn "Uncommitted changes detected in working tree."
     echo "These may be from a crashed loop worker."
+
+    if [[ ! -t 0 ]]; then
+      log_error "Non-interactive shell — cannot prompt. Clean working tree before running."
+      exit 1
+    fi
+
     echo ""
     echo "Options:"
     echo "  1) Stash and continue"
@@ -478,6 +495,10 @@ check_stale_state() {
       if (( age < 1800 )); then
         echo ""
         log_warn "A loop appears to be running (started $(( age / 60 )) minutes ago)."
+        if [[ ! -t 0 ]]; then
+          log_error "Non-interactive shell — cannot prompt. Remove $STATE to force start."
+          exit 1
+        fi
         read -rp "Override and start fresh? [y/N]: " override
         if [[ "$override" != "y" && "$override" != "Y" ]]; then
           log_info "Aborting. Remove $STATE to force start."
@@ -590,10 +611,11 @@ PLANEOF
   # Extract plan path from worker output
   PLAN_PATH=$(echo "$result" | grep -oE 'PLAN_PATH: .+' | tail -1 | sed 's/PLAN_PATH: //')
 
-  # If PLAN_PATH not found in output, search for recently created plan files
+  # If PLAN_PATH not found in output, search for plan files created in the last 5 minutes (newest first)
   if [[ -z "$PLAN_PATH" || ! -f "$PLAN_PATH" ]]; then
     log_info "Searching for generated plan file..."
-    PLAN_PATH=$(find "${REPO_ROOT}/docs/plans" -name "*plan.md" -newer "$STATE" 2>/dev/null | head -1) || true
+    PLAN_PATH=$(find "${REPO_ROOT}/docs/plans" -name "*plan.md" -mmin -5 2>/dev/null \
+      | xargs ls -t 2>/dev/null | head -1) || true
   fi
 
   # Last resort: find any plan matching the description (use shorter slug for broader match)
@@ -1030,7 +1052,7 @@ run_task_loop() {
     log_info "Task #$task_id: $task_text"
 
     local result
-    result=$(invoke_claude "$(build_task_prompt "$task_id" "$task_text" "$plan_path")" "Read,Write,Edit,Bash,Grep,Glob,Task") || true
+    result=$(invoke_claude "$(build_task_prompt "$task_id" "$task_text" "$plan_path")" "Read,Write,Edit,Bash,Grep,Glob") || true
 
     local task_end
     task_end=$(epoch_now)
@@ -1061,9 +1083,14 @@ run_task_loop() {
       fi
     fi
 
-    # Update iteration and elapsed
+    # Update iteration and elapsed (use --argjson for safe parameterization)
     local elapsed=$(( task_end - started_epoch ))
-    update_state ".iteration = $(( iteration + 1 )) | .total_elapsed_s = $elapsed"
+    local next_iter=$(( iteration + 1 ))
+    jq --argjson iter "$next_iter" --argjson elapsed "$elapsed" \
+      '.iteration = $iter | .total_elapsed_s = $elapsed' "$STATE" > "${STATE}.tmp" \
+      && jq empty "${STATE}.tmp" 2>/dev/null \
+      && mv "${STATE}.tmp" "$STATE" \
+      || { log_error "Failed to update iteration state"; rm -f "${STATE}.tmp"; }
 
     # Re-read counts for progress line
     completed=$(read_state '.tasks_completed')
@@ -1112,7 +1139,7 @@ run_review_phase() {
     log_info "Review round $((review_round + 1))/$MAX_REVIEW_ROUNDS: spawning reviewer..."
 
     local review_result
-    review_result=$(invoke_claude "$review_prompt" "Read,Bash,Grep,Glob,Task" "900") || {
+    review_result=$(invoke_claude "$review_prompt" "Read,Bash,Grep,Glob,Agent" "900") || {
       log_warn "Review worker failed. Skipping review."
       break
     }
@@ -1151,7 +1178,11 @@ run_review_phase() {
     local current_head
     current_head=$(git rev-parse --short HEAD)
     review_round=$(( review_round + 1 ))
-    update_state ".review_round = $review_round | .last_reviewed_commit = \"$current_head\""
+    jq --argjson rr "$review_round" --arg lrc "$current_head" \
+      '.review_round = $rr | .last_reviewed_commit = $lrc' "$STATE" > "${STATE}.tmp" \
+      && jq empty "${STATE}.tmp" 2>/dev/null \
+      && mv "${STATE}.tmp" "$STATE" \
+      || { log_error "Failed to update review state"; rm -f "${STATE}.tmp"; }
     log_info "Review round $review_round fixes applied. Re-reviewing..."
   done
 

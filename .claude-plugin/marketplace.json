@@ -13,8 +13,8 @@
         "repo": "austinbrowne/claude-agent-protocol",
         "ref": "main"
       },
-      "description": "GODMODE v5.15.0-experimental — 7 workflow commands, 29 skill packages, 24 agents (16 review + 4 research + 3 team + 1 product), three-tier model assignment (Haiku/Sonnet/Opus), Agent Teams with defined implementation team roles and autodetection routing, autonomous development loops, per-project review configuration, product planning (roadmap + backlog), document quality review, knowledge compounding, fresh-eyes review token optimization (LOC gate, agents read diff from file, compact output, tightened triggers), smart review mode, modular CLAUDE.md with @imports, hook-based protocol enforcement, compact review output, review report persistence.",
-      "version": "5.15.0-experimental",
+      "description": "GODMODE v5.16.0-experimental — 7 workflow commands, 29 skill packages, 24 agents (16 review + 4 research + 3 team + 1 product), three-tier model assignment (Haiku/Sonnet/Opus), Agent Teams with defined implementation team roles and autodetection routing, autonomous development loops, per-project review configuration, product planning (roadmap + backlog), document quality review, knowledge compounding, fresh-eyes review token optimization (LOC gate, agents read diff from file, compact output, tightened triggers), smart review mode, modular CLAUDE.md with @imports, hook-based protocol enforcement, compact review output, review report persistence.",
+      "version": "5.16.0-experimental",
       "keywords": [
         "workflow",
         "ai-coding",

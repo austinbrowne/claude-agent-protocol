@@ -14,7 +14,10 @@
 | `docs/brainstorms/` | Brainstorm session records |
 | `.todos/` | File-based todo tracking (committed to git) |
 | `.claude/loop-context.md` | Autonomous loop state (status, counts, timing, task commits) |
+| `.claude/loop-state.json` | Autonomous loop state for `scripts/loop.sh` (JSON, parsed by `jq`) |
 | `.claude/loop-notes.md` | Inter-task knowledge passing for `/loop` workers |
+| `scripts/loop.sh` | Standalone autonomous loop orchestrator (bash script) |
+| `scripts/loop-prompts/` | Loop worker prompt templates for `scripts/loop.sh` |
 | `docs/plans/` | Plans (Minimal, Standard, Comprehensive) |
 | `docs/roadmaps/` | Product roadmaps (Minimal, Standard) |
 | `docs/backlogs/` | Product backlogs (epics, user stories) |

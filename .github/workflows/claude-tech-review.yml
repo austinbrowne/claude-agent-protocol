@@ -1,0 +1,36 @@
+# Claude Ops: Weekly architecture review via Tech Lead role
+# Schedule-only — no event trigger. Runs every Friday at 3 PM UTC.
+
+name: "Claude: Tech Lead Review"
+
+on:
+  schedule:
+    - cron: "0 15 * * 5"
+
+concurrency:
+  group: claude-tech-lead-review
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  tech-review:
+    runs-on: [self-hosted, claude-ops]
+    timeout-minutes: 45
+    env:
+      CLAUDE_OPS_HOME: /Users/austin/Git_Repos/claude-ops
+      HOME: /Users/austin
+      PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
+    steps:
+      - name: Run Tech Lead Review
+        run: "$CLAUDE_OPS_HOME/jobs/tech-lead-review.sh"
+      - name: Notify on failure
+        if: failure()
+        env:
+          WORKFLOW_NAME: ${{ github.workflow }}
+        run: |
+          echo "::error::Claude job failed: ${WORKFLOW_NAME} on $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "### Failed: Tech Lead Review" >> "$GITHUB_STEP_SUMMARY"
+          echo "Check workflow run logs for details." >> "$GITHUB_STEP_SUMMARY"

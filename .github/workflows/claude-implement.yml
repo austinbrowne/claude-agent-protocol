@@ -1,0 +1,42 @@
+# Claude Ops: Implement issues labeled ready_for_dev via Developer role
+# Triggers reactively when the ready_for_dev label is applied.
+# Skips if needs_refinement label is also present (enhancement not complete).
+# Cron fallback: daily 22:00 catches missed label events.
+
+name: "Claude: Implement Issue"
+
+on:
+  issues:
+    types: [labeled]
+
+concurrency:
+  group: claude-dev-implement
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  implement:
+    runs-on: [self-hosted, claude-ops]
+    if: >-
+      github.event.label.name == 'ready_for_dev' &&
+      !contains(toJSON(github.event.issue.labels.*.name), '"needs_refinement"')
+    timeout-minutes: 45
+    env:
+      CLAUDE_OPS_HOME: /Users/austin/Git_Repos/claude-ops
+      HOME: /Users/austin
+      PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
+    steps:
+      - name: Run Dev Implement
+        run: "$CLAUDE_OPS_HOME/jobs/dev-implement.sh"
+      - name: Notify on failure
+        if: failure()
+        env:
+          WORKFLOW_NAME: ${{ github.workflow }}
+        run: |
+          echo "::error::Claude job failed: ${WORKFLOW_NAME} on $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "### Failed: Dev Implement" >> "$GITHUB_STEP_SUMMARY"
+          echo "Check workflow run logs for details." >> "$GITHUB_STEP_SUMMARY"

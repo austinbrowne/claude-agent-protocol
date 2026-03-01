@@ -1,0 +1,38 @@
+# Claude Ops: Enhance issues labeled needs_refinement via PM role
+# Triggers reactively when the needs_refinement label is applied.
+# Cron fallback: daily 22:00 catches missed label events.
+
+name: "Claude: Enhance Issue"
+
+on:
+  issues:
+    types: [labeled]
+
+concurrency:
+  group: claude-pm-enhance
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  enhance:
+    runs-on: [self-hosted, claude-ops]
+    if: github.event.label.name == 'needs_refinement'
+    timeout-minutes: 45
+    env:
+      CLAUDE_OPS_HOME: /Users/austin/Git_Repos/claude-ops
+      HOME: /Users/austin
+      PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
+    steps:
+      - name: Run PM Enhance
+        run: "$CLAUDE_OPS_HOME/jobs/pm-enhance.sh"
+      - name: Notify on failure
+        if: failure()
+        env:
+          WORKFLOW_NAME: ${{ github.workflow }}
+        run: |
+          echo "::error::Claude job failed: ${WORKFLOW_NAME} on $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "### Failed: PM Enhance" >> "$GITHUB_STEP_SUMMARY"
+          echo "Check workflow run logs for details." >> "$GITHUB_STEP_SUMMARY"

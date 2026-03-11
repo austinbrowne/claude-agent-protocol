@@ -42,7 +42,7 @@ Generate a structured product roadmap from a vision statement, personas, and goa
 
 ## Skills Referenced
 
-- **Product Owner Agent** — `agents/product/PRODUCT_OWNER.md` — Invoked via Task tool for roadmap generation
+- **Product Owner Agent** — `agents/product/PRODUCT_OWNER.md` — Invoked via Agent tool for roadmap generation
 - **Roadmap Template** — `templates/ROADMAP_TEMPLATE.md` — Structure for output document
 
 ---
@@ -96,18 +96,18 @@ Load the appropriate tier from `templates/ROADMAP_TEMPLATE.md`.
 
 ### Step 3: Run Product Owner Agent
 
-Invoke the Product Owner agent via Task tool:
+Invoke the Product Owner agent via Agent tool:
 
-Note: The `model` parameter in the Task tool call is authoritative; the agent definition's YAML `model` field is for reference only.
+Note: The `model` parameter in the Agent tool call is authoritative; the agent definition's YAML `model` field is for reference only.
 
 ```
-Task(
-  subagent_type="general-purpose",
+Agent(
+  subagent_type="product-owner",
   model="sonnet",
   prompt="""You are a Product Owner agent.
 
 YOUR ROLE DEFINITION:
-[inline content from agents/product/PRODUCT_OWNER.md]
+The product-owner native type auto-loads the agent definition from agents/product/PRODUCT_OWNER.md.
 
 TEMPLATE TO FOLLOW:
 [inline content from templates/ROADMAP_TEMPLATE.md — selected tier]
@@ -219,7 +219,7 @@ Control returns to `commands/plan.md` Step 3, which presents the post-skill AskU
 ## Integration Points
 
 - **Input from**: User-provided vision, personas, constraints (via AskUserQuestion)
-- **Agent**: `agents/product/PRODUCT_OWNER.md` (invoked via Task tool, model: sonnet)
+- **Agent**: `agents/product/PRODUCT_OWNER.md` (invoked via Agent tool, model: sonnet)
 - **Template**: `templates/ROADMAP_TEMPLATE.md`
 - **Output**: Roadmap file in `docs/roadmaps/`
 - **Consumed by**: `/plan` workflow command, `/backlog` skill (reads roadmap as input)

@@ -58,7 +58,7 @@ Before launching reviewers, check for a per-project config file:
 
 ### 4 Specialist Reviewers (Parallel)
 
-All 4 launch simultaneously in a single message with multiple Task calls.
+All 4 launch simultaneously in a single message with multiple Agent tool calls.
 
 | Agent | Definition | Model | Focus |
 |-------|-----------|-------|-------|
@@ -93,11 +93,11 @@ Receives the plan AND all 4 reviewer outputs.
 
 ### Step 2: Launch Specialist Reviews
 
-**CRITICAL: Launch ALL 4 agents in a SINGLE message with multiple Task calls.**
+**CRITICAL: Launch ALL 4 agents in a SINGLE message with multiple Agent tool calls.**
 
-**Before launching:** The orchestrator reads each agent's definition file (`agents/review/[agent].md`) and inlines the content into the prompt. Agents should NOT need to read any files.
+**Before launching:** Native agent types auto-load their definitions — no need to read or inline agent definition files. Agents should NOT need to read any files.
 
-**Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the tables above (e.g., `model: "opus"` for Architecture Reviewer, `model: "sonnet"` for Simplicity Reviewer). Each agent's definition file also declares its tier in YAML frontmatter for reference.
+**Model selection:** When spawning each agent via Agent tool, pass the `model` parameter matching the agent's tier from the tables above (e.g., `model: "opus"` for Architecture Reviewer, `model: "sonnet"` for Simplicity Reviewer). Each agent's definition file also declares its tier in YAML frontmatter for reference.
 
 Each reviewer receives ONLY the plan content and their inlined definition (zero conversation context).
 
@@ -139,9 +139,9 @@ SUMMARY: [1-2 sentence assessment]
 
 ### Step 3: Adversarial Validation
 
-Launch Adversarial Validator as a Task tool call after all 4 specialists complete.
+Launch Adversarial Validator as an Agent tool call after all 4 specialists complete.
 
-**Before launching:** The orchestrator reads the adversarial validator definition (`agents/review/adversarial-validator.md`) and inlines it.
+**Before launching:** Native agent types auto-load their definitions — no need to read or inline the adversarial validator definition file.
 
 **Adversarial Validator receives (all inline):**
 - Validator definition (inlined)
@@ -203,8 +203,8 @@ AskUserQuestion:
 2. Wait for user response
 3. **ACTUALLY RUN THE RESEARCH** — launch appropriate research agents:
    - Codebase research: `subagent_type: "Explore"`
-   - Best practices: `subagent_type: "general-purpose"` with web search
-   - Framework docs: `subagent_type: "general-purpose"` with Context7 MCP
+   - Best practices: `subagent_type: "best-practices-researcher"`
+   - Framework docs: `subagent_type: "framework-docs-researcher"`
 4. Present research findings to user
 5. Ask: "Based on this research, what changes should I make to the plan?"
 6. Wait for user response

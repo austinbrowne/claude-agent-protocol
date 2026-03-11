@@ -1,12 +1,12 @@
 ---
 name: workflows:loop
-description: "Autonomous development loop with context rotation via Task subagents"
+description: "Autonomous development loop with context rotation via Agent subagents"
 argument-hint: "<description | --plan PATH | --issue N> [--max-iterations N]"
 ---
 
 # /loop — Autonomous Development Loop
 
-**Workflow command.** Autonomous plan-and-implement loop using Task subagents for context rotation. Each worker gets fresh context and reads files for state. No external plugin dependencies.
+**Workflow command.** Autonomous plan-and-implement loop using Agent subagents for context rotation. Each worker gets fresh context and reads files for state. No external plugin dependencies.
 
 > **CRITICAL:** Do NOT call `EnterPlanMode`. Execute this command directly. The protocol handles its own planning.
 

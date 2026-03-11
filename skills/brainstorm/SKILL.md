@@ -43,9 +43,9 @@ Reusable methodology for structured divergent thinking before committing to a so
 
 Before brainstorming, search `docs/solutions/` for relevant past decisions:
 
-**Launch Learnings Research Agent via Task tool:**
+**Launch Learnings Research Agent via Agent tool:**
 ```
-subagent_type: "general-purpose"
+subagent_type: "learnings-researcher"
 model: "haiku"
 description: "Search past learnings for brainstorm on [topic]"
 prompt: "Follow agents/research/learnings-researcher.md.

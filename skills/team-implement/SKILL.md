@@ -144,7 +144,7 @@ AskUserQuestion:
 
 ### Step 4: Spawn Team Lead
 
-**CRITICAL: The main agent does NOT act as Team Lead. Spawn a dedicated Team Lead agent via the Task tool. This preserves the main agent's context window for user interaction — team coordination overhead stays in the Lead's context.**
+**CRITICAL: The main agent does NOT act as Team Lead. Spawn a dedicated Team Lead agent via the Agent tool. This preserves the main agent's context window for user interaction — team coordination overhead stays in the Lead's context.**
 
 **4a. Status updates (before spawning Lead):**
 
@@ -155,20 +155,17 @@ AskUserQuestion:
 gh issue edit NNN --add-assignee @me --remove-label "ready_for_dev" --add-label "status: in-progress"
 ```
 
-**4b. Read role definitions:**
+**4b. Role definitions:**
 
-Read the following files and inline their content into the Team Lead's spawn prompt:
-- `agents/team/lead.md`
-- `agents/team/implementer.md`
-- `agents/team/analyst.md` (if composition includes an Analyst)
+The `team-lead` native type auto-loads its role definition from `agents/team/lead.md`. You do NOT need to read and inline agent definitions — native types handle this automatically. The Team Lead similarly auto-loads `agents/team/implementer.md` and `agents/team/analyst.md` when spawning teammates.
 
 **4c. Spawn Team Lead:**
 
-Launch a single `godmode:team:team-lead` agent via the Task tool. The Team Lead creates the team, spawns teammates, monitors progress, and returns consolidated results. The main agent waits for the result.
+Launch a single `team-lead` agent via the Agent tool. The Team Lead creates the team, spawns teammates, monitors progress, and returns consolidated results. The main agent waits for the result.
 
 ```
-Task(
-  subagent_type="godmode:team:team-lead",
+Agent(
+  subagent_type="team-lead",
   model="opus",
   prompt="""You are the Team Lead for an implementation team.
 
@@ -258,7 +255,7 @@ Suggest the user proceed to `/review` for fresh-eyes review of the combined diff
 - **Analyst is optional.** Pure parallel plans (70%+ swarmability) skip the analyst — implementers are independent. Complex or mixed plans get an analyst.
 - **Branch strategy.** All teammates work on the same branch. Assessment ensures minimal file overlap.
 - **Fresh-eyes review happens AFTER.** Individual teammates validate their own work. Holistic review happens at `/review` on the combined diff.
-- **Dedicated Team Lead.** The main agent never acts as Team Lead. A spawned `godmode:team:team-lead` agent handles all coordination — team creation, teammate spawning, monitoring, conflict resolution, and result synthesis. This preserves the main agent's context window for user interaction and subsequent workflow steps.
+- **Dedicated Team Lead.** The main agent never acts as Team Lead. A spawned `team-lead` agent handles all coordination — team creation, teammate spawning, monitoring, conflict resolution, and result synthesis. This preserves the main agent's context window for user interaction and subsequent workflow steps.
 - **Token cost.** Each teammate is a full Claude Code instance. Cost scales with team size. Only recommend teams when parallelism or communication adds genuine value.
 - **Replaces swarm-plan.** This skill absorbs all former swarm-plan functionality. The swarmability assessment algorithm is identical.
 - **Max teammates.** Recommend 2-4 teammates. For larger plans, run in waves rather than spawning more.

@@ -42,7 +42,7 @@ Decompose an approved product roadmap into a fully groomed backlog of epics, use
 
 ## Skills Referenced
 
-- **Product Owner Agent** — `agents/product/PRODUCT_OWNER.md` — Invoked via Task tool for backlog generation
+- **Product Owner Agent** — `agents/product/PRODUCT_OWNER.md` — Invoked via Agent tool for backlog generation
 - **Roadmap Skill** — `skills/roadmap/SKILL.md` — Produces the roadmap this skill consumes
 
 ---
@@ -114,17 +114,17 @@ Decompose an approved product roadmap into a fully groomed backlog of epics, use
 
 ### Step 2: Run Product Owner Agent
 
-Invoke the Product Owner agent via Task tool. **If the roadmap was loaded from a file**, pass the file path — the agent reads it itself (keeps roadmap content out of the orchestrator's context). **If the user pasted/described content directly**, inline it in the prompt (no file exists to read).
+Invoke the Product Owner agent via Agent tool. **If the roadmap was loaded from a file**, pass the file path — the agent reads it itself (keeps roadmap content out of the orchestrator's context). **If the user pasted/described content directly**, inline it in the prompt (no file exists to read).
 
 **Template (roadmap from file):**
 ```
-Task(
-  subagent_type="general-purpose",
+Agent(
+  subagent_type="product-owner",
   model="sonnet",
   prompt="""You are a Product Owner agent.
 
 YOUR ROLE DEFINITION:
-[inline content from agents/product/PRODUCT_OWNER.md]
+The product-owner native type auto-loads the agent definition from agents/product/PRODUCT_OWNER.md.
 
 STEP 1 — Read the roadmap:
 Use the Read tool to read: [path to roadmap file, e.g. docs/roadmaps/2026-02-25-roadmap-taskflow.md]
@@ -136,13 +136,13 @@ INSTRUCTIONS:
 
 **Template (user-provided text, no file):**
 ```
-Task(
-  subagent_type="general-purpose",
+Agent(
+  subagent_type="product-owner",
   model="sonnet",
   prompt="""You are a Product Owner agent.
 
 YOUR ROLE DEFINITION:
-[inline content from agents/product/PRODUCT_OWNER.md]
+The product-owner native type auto-loads the agent definition from agents/product/PRODUCT_OWNER.md.
 
 ROADMAP CONTEXT:
 [user-provided text — inlined because no file exists]
@@ -281,7 +281,7 @@ Control returns to `commands/plan.md` Step 3, which presents the post-skill AskU
 ## Integration Points
 
 - **Input from**: Roadmap file in `docs/roadmaps/` or user-provided text
-- **Agent**: `agents/product/PRODUCT_OWNER.md` (invoked via Task tool, model: sonnet)
+- **Agent**: `agents/product/PRODUCT_OWNER.md` (invoked via Agent tool, model: sonnet)
 - **Output**: Backlog file in `docs/backlogs/`
 - **Consumed by**: `/plan` workflow command
 - **Chains to**: `/create-issues` (via `commands/plan.md` post-skill gate) or manual `gh issue create`

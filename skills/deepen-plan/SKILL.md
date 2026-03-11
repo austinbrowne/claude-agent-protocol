@@ -31,7 +31,7 @@ Methodology for enriching a plan with parallel research, multi-agent review, and
 
 **CRITICAL: Launch ALL research agents IN PARALLEL.**
 
-**Before launching:** The orchestrator reads each agent's definition file and inlines the content into the prompt. Research agents still need file access (Grep, Read, Glob) to explore the codebase — that's their job. But they should NOT need to read their own definition file.
+**Agent spawning:** Research agents use native `subagent_type` values. They still need file access (Grep, Read, Glob) to explore the codebase — that's their job. Native types auto-load their agent definitions.
 
 | Agent | Condition | Model | Reference |
 |-------|-----------|-------|-----------|
@@ -46,9 +46,9 @@ Methodology for enriching a plan with parallel research, multi-agent review, and
 
 **CRITICAL: Launch ALL 6 review agents IN PARALLEL.**
 
-**Before launching:** The orchestrator reads each reviewer's definition file and inlines the content. Review agents should NOT need to read any files — they get plan content, research findings, and their definition all inline.
+**Agent spawning:** Use native `subagent_type` values matching each reviewer's name. Native types auto-load their agent definitions. Review agents should NOT need to read any files — they get plan content and research findings inline.
 
-**Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the tables above and in Phase 2. For research agents using `subagent_type: "general-purpose"`, pass `model: "haiku"`. The `Explore` subagent type manages its own model internally. For review agents, pass the model from the table (opus for Architecture/Security, sonnet for others).
+**Model selection:** When spawning each agent via Agent tool, pass the `model` parameter matching the agent's tier from the tables above. The `Explore` subagent type manages its own model internally. For review agents, pass the model from the table (opus for Architecture/Security, sonnet for others).
 
 | Agent | Definition | Model |
 |-------|-----------|-------|

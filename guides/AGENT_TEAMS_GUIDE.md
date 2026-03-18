@@ -12,7 +12,7 @@
 
 Only `team-implement` uses Agent Teams. It checks for `TeamCreate` in its tool list at Step 0. If unavailable, it halts and directs to single-agent `/implement` → `start-issue`.
 
-**CRITICAL: The main agent never acts as Team Lead.** When Agent Teams is used, the main agent spawns a dedicated Team Lead via the Task tool (`godmode:team:team-lead`). The Lead handles team creation, teammate spawning, monitoring, and completion. The main agent's context window is reserved for user interaction — not coordination bookkeeping.
+**CRITICAL: The main agent never acts as Team Lead.** When Agent Teams is used, the main agent spawns a dedicated Team Lead via the Agent tool (`team-lead`). The Lead handles team creation, teammate spawning, monitoring, and completion. The main agent's context window is reserved for user interaction — not coordination bookkeeping.
 
 All other skills (reviews, planning, research) use subagents exclusively — no detection step needed.
 
@@ -112,7 +112,7 @@ When complete, mark your task as done.
 **Structure:**
 ```
 Main Agent = Input loading, assessment, user approval, result presentation
-Team Lead (spawned via Task tool) = Coordinator + Monitor (see agents/team/lead.md)
+Team Lead (spawned via Agent tool) = Coordinator + Monitor (see agents/team/lead.md)
 Teammates = Implementers (one per independent task group, see agents/team/implementer.md)
 Optional: Analyst (for mixed-independence plans, see agents/team/analyst.md)
 ```
@@ -122,7 +122,7 @@ Optional: Analyst (for mixed-independence plans, see agents/team/analyst.md)
 **Main agent responsibilities:**
 - Run swarmability assessment on plan tasks
 - Present assessment to user for approval
-- Spawn dedicated Team Lead via Task tool with all context
+- Spawn dedicated Team Lead via Agent tool with all context
 - Present Team Lead's consolidated results to user
 
 **Team Lead responsibilities (spawned agent):**
@@ -158,7 +158,7 @@ Optional: Analyst (for mixed-independence plans, see agents/team/analyst.md)
 **Structure:**
 ```
 Main Agent = Input loading, complexity assessment, user approval, result presentation
-Team Lead (spawned via Task tool) = Coordinator + Monitor (see agents/team/lead.md)
+Team Lead (spawned via Agent tool) = Coordinator + Monitor (see agents/team/lead.md)
 Analyst = Real-time research support (see agents/team/analyst.md)
 Implementer(s) = Code + tests + validation (see agents/team/implementer.md)
 ```
@@ -168,7 +168,7 @@ Implementer(s) = Code + tests + validation (see agents/team/implementer.md)
 **Main agent responsibilities:**
 - Assess issue complexity
 - Present assessment to user for approval
-- Spawn dedicated Team Lead via Task tool with all context
+- Spawn dedicated Team Lead via Agent tool with all context
 - Present Team Lead's consolidated results to user
 
 **Team Lead responsibilities (spawned agent):**
@@ -358,7 +358,7 @@ When Agent Teams is not available, `team-implement` halts and directs the user t
 - Clean up teams when done (Lead runs cleanup)
 
 ### 7. Spawn Dedicated Team Lead
-- The main agent MUST NOT act as Team Lead — spawn a `godmode:team:team-lead` agent via the Task tool
+- The main agent MUST NOT act as Team Lead — spawn a `team-lead` agent via the Agent tool
 - Team coordination overhead (teammate messages, task monitoring, conflict resolution) stays in the Lead's context
 - The main agent's context window is preserved for user interaction and subsequent workflow steps (e.g. `/review`, `/ship`)
 - The main agent handles pre-team work (input loading, assessment, user approval) and post-team work (presenting results, next steps)
@@ -367,7 +367,7 @@ When Agent Teams is not available, `team-implement` halts and directs the user t
 
 ## Model Strategy
 
-Three-tier model assignment reduces token cost by ~35-40% while preserving quality where it matters. Each agent's definition file declares its model tier in YAML frontmatter (`model: haiku|sonnet|opus`). Skills pass the `model` parameter in Task tool calls at runtime.
+Three-tier model assignment reduces token cost by ~35-40% while preserving quality where it matters. Each agent's definition file declares its model tier in YAML frontmatter (`model: haiku|sonnet|opus`). Skills pass the `model` parameter in Agent tool calls at runtime.
 
 ### Tiers
 
@@ -388,13 +388,13 @@ Three-tier model assignment reduces token cost by ~35-40% while preserving quali
 ### How It Works
 
 1. **Agent YAML frontmatter** (`model: haiku|sonnet|opus`) — source of truth and documentation
-2. **Task tool `model` parameter** — runtime mechanism. Skills pass this when spawning agents
+2. **Agent tool `model` parameter** — runtime mechanism. Skills pass this when spawning agents
 
-Both layers are needed. Frontmatter alone is NOT automatically honored — skills must explicitly pass `model` in the Task tool call. For built-in subagent types (`Explore`, `Plan`), model selection is managed internally by Claude Code — do not pass `model` for these.
+Both layers are needed. Frontmatter alone is NOT automatically honored — skills must explicitly pass `model` in the Agent tool call. For built-in subagent types (`Explore`, `Plan`), model selection is managed internally by Claude Code — do not pass `model` for these.
 
 ### Rollback
 
-Each agent's model is a single YAML field. To promote an agent: change `model: haiku` to `model: sonnet` in its definition file and update the corresponding Task call in the skill file. Rollback can be done per-agent — no need to revert all at once.
+Each agent's model is a single YAML field. To promote an agent: change `model: haiku` to `model: sonnet` in its definition file and update the corresponding Agent call in the skill file. Rollback can be done per-agent — no need to revert all at once.
 
 ---
 

@@ -70,9 +70,9 @@ Extract: Title, Description, Acceptance criteria, Labels, Estimated files, Plan 
 
 ### Step 2: Research
 
-Launch research agents in parallel via Task tool:
+Launch research agents in parallel via Agent tool:
 
-1. **Learnings Research Agent** (`subagent_type: "godmode:research:learnings-researcher"`, `model: "haiku"`): Search `docs/solutions/` for past solutions relevant to this issue. Use multi-pass Grep strategy: tags → category → keywords → full-text.
+1. **Learnings Research Agent** (`subagent_type: "learnings-researcher"`, `model: "haiku"`): Search `docs/solutions/` for past solutions relevant to this issue. Use multi-pass Grep strategy: tags → category → keywords → full-text.
 
 2. **Codebase Research Agent** (`subagent_type: "Explore"`): Explore the areas of the codebase that this issue affects. Identify existing patterns, utilities, conventions, dependencies, and potential gotchas. Note: `Explore` is a built-in subagent type — model is managed internally.
 
@@ -209,18 +209,17 @@ Proceed to Step 6.
 
 #### 5b. Read Role Definitions
 
-Read the following files and inline their content into the Team Lead's spawn prompt:
-- `agents/team/lead.md`
+The Team Lead agent uses native type `team-lead`, which auto-loads its role definition from `agents/team/lead.md`. However, you must still inline the following teammate role definitions into the Team Lead's spawn prompt so it can pass them to teammates:
 - `agents/team/implementer.md`
 - `agents/team/analyst.md`
 
 #### 5c. Spawn Team Lead
 
-Launch a single `godmode:team:team-lead` agent via the Task tool. The Team Lead creates the team, spawns teammates, monitors progress, and returns consolidated results. The main agent waits for the result.
+Launch a single `team-lead` agent via the Agent tool. The Team Lead creates the team, spawns teammates, monitors progress, and returns consolidated results. The main agent waits for the result.
 
 ```
-Task(
-  subagent_type="godmode:team:team-lead",
+Agent(
+  subagent_type="team-lead",
   model="opus",
   prompt="""You are the Team Lead for an issue implementation team.
 

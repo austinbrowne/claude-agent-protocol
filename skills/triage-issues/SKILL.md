@@ -37,7 +37,7 @@ Fetch open GitHub issues, categorize by readiness, and run parallel subagents to
 
 - GitHub CLI (`gh`) is configured and authenticated
 - Repository has open issues to triage
-- No Agent Teams required — this skill uses subagents (Task tool) only
+- No Agent Teams required — this skill uses subagents (Agent tool) only
 
 ---
 
@@ -285,7 +285,7 @@ Next step: Run /implement for each issue.
 ## Integration Points
 
 - **Input**: Open GitHub issues fetched via `gh` CLI
-- **Planning**: Parallel subagents (Task tool) — streamlined version of `skills/enhance-issue/SKILL.md`
+- **Planning**: Parallel subagents (Agent tool) — streamlined version of `skills/enhance-issue/SKILL.md`
 - **Output**: All selected issues are `ready_for_dev` on GitHub
 - **Consumed by**: `/implement` workflow command
 - **Followed by**: `/implement` → `start-issue` or `team-implement` per issue

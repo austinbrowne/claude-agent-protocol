@@ -457,10 +457,10 @@ Coordinator
 
 ```
 1. User: "Explore the codebase for authentication patterns"
-   [Task tool with subagent_type=Explore]
+   [Agent tool with subagent_type=Explore]
 
 2. User: "Based on exploration, create a plan for OAuth integration"
-   [Task tool with subagent_type=Plan]
+   [Agent tool with subagent_type=Plan]
 
 3. User: "Implement the OAuth integration per the plan"
    [Standard execution]

@@ -215,9 +215,9 @@ Proceed with this selection? (yes / customize): ___
 
 **Phase 1: Specialist Reviews (Parallel)**
 
-Launch ALL specialist agents in a **single message** with multiple Task tool calls.
+Launch ALL specialist agents in a **single message** with multiple Agent tool calls.
 
-**Before launching:** The orchestrator reads each agent's definition file (`agents/review/[agent].md`) and inlines it into the prompt. The diff is NOT inlined — agents read it themselves from `.review/`.
+**Before launching:** Native agent types auto-load their definitions — the orchestrator does not need to manually read or inline agent definition files. The diff is NOT inlined — agents read it themselves from `.review/`.
 
 **Each agent receives in its prompt:**
 - Zero conversation context
@@ -225,9 +225,9 @@ Launch ALL specialist agents in a **single message** with multiple Task tool cal
 - Security checklist (inlined, security agent only)
 - File path to its diff (agent reads it via the Read tool)
 
-**Why agents read the diff themselves:** Inlining the diff into every agent prompt puts N copies of the diff into the orchestrator's context (once per Task tool call). With 8+ agents on a large diff, this blows up the main context window before Phase 2 can run. Having each agent read from `.review/` keeps the diff in the agent's context only — the orchestrator never sees it.
+**Why agents read the diff themselves:** Inlining the diff into every agent prompt puts N copies of the diff into the orchestrator's context (once per Agent tool call). With 8+ agents on a large diff, this blows up the main context window before Phase 2 can run. Having each agent read from `.review/` keeps the diff in the agent's context only — the orchestrator never sees it.
 
-**Model selection:** When spawning each agent via Task tool, pass the `model` parameter matching the agent's tier from the roster tables above (e.g., `model: "opus"` for Security Reviewer, `model: "sonnet"` for Code Quality Reviewer, `model: "haiku"` for Documentation Reviewer). The `Explore` subagent type manages its own model internally — do not pass `model` for it. Each agent's definition file also declares its tier in YAML frontmatter for reference.
+**Model selection:** When spawning each agent via Agent tool, pass the `model` parameter matching the agent's tier from the roster tables above (e.g., `model: "opus"` for Security Reviewer, `model: "sonnet"` for Code Quality Reviewer, `model: "haiku"` for Documentation Reviewer). The `Explore` subagent type manages its own model internally — do not pass `model` for it. Each agent's definition file also declares its tier in YAML frontmatter for reference.
 
 **Agent prompt template (core agents — full diff):**
 ```
@@ -336,7 +336,7 @@ If a specialist returns no findings, summarize as: `[Agent]: No findings.`
 
 **Phase 2: Supervisor (Sequential, after Phase 1.5)**
 
-Launch Supervisor as a Task tool call with the **Phase 1.5 summarized findings** (not raw specialist output). **Do NOT include the diff** — the Supervisor's job is consolidation, not re-review. Summarized findings already contain file:line references and fix descriptions.
+Launch Supervisor as an Agent tool call with the **Phase 1.5 summarized findings** (not raw specialist output). **Do NOT include the diff** — the Supervisor's job is consolidation, not re-review. Summarized findings already contain file:line references and fix descriptions.
 
 - Removes false positives (based on specialist evidence, not re-reading code)
 - Consolidates duplicates across specialists
@@ -345,7 +345,7 @@ Launch Supervisor as a Task tool call with the **Phase 1.5 summarized findings**
 
 **Phase 3: Adversarial Validation (Sequential, after Phase 2)**
 
-Launch Adversarial Validator as a Task tool call with the Supervisor report. Include the diff file path (`.review/review-diff.txt`) — the AV reads it to verify claims against actual code.
+Launch Adversarial Validator as an Agent tool call with the Supervisor report. Include the diff file path (`.review/review-diff.txt`) — the AV reads it to verify claims against actual code.
 - Inventories every claim in the Supervisor report
 - Reads the diff to demand evidence for each claim
 - Challenges review findings
@@ -463,7 +463,7 @@ AskUserQuestion:
 
 1. **Group findings by file.** Collect all findings to fix and group them by target file path. Each group becomes one subagent task.
 
-2. **Dispatch one subagent per file** using the Task tool. Launch all subagents in a single message (parallel execution). Each subagent receives:
+2. **Dispatch one subagent per file** using the Agent tool. Launch all subagents in a single message (parallel execution). Each subagent receives:
    - The list of findings for its file (ID, severity, line, description, suggested fix)
    - The file path to edit
    - Instructions to read the file, apply all fixes, and report what it changed

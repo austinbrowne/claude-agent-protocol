@@ -28,7 +28,7 @@ Run SMART SELECTION against the diff content and file list:
 
 ## Phase 3: Run Reviews
 
-For EACH selected specialist, spawn a parallel Agent (subagent_type: `general-purpose`).
+For EACH selected specialist, spawn a parallel Agent using the matching native `subagent_type` (e.g., `security-reviewer`, `code-quality-reviewer`, `edge-case-reviewer`).
 Each subagent runs:
 
   You are a {specialist type} reviewer with ZERO context about this project.

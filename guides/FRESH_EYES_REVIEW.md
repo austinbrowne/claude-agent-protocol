@@ -157,7 +157,7 @@ Show user which agents will run and why, with option to customize.
 
 ### Phase 1: Specialist Reviews (Parallel)
 
-Launch ALL specialist agents simultaneously in a single message with multiple Task tool calls.
+Launch ALL specialist agents simultaneously in a single message with multiple Agent tool calls.
 
 **Each agent receives in its prompt:**
 - Zero conversation context (fresh eyes)

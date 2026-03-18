@@ -38,19 +38,19 @@ Methodology for creating plans with integrated multi-agent research, brainstorm 
 
 ### 1. Parallel Research (Self-Sufficient)
 
-**CRITICAL:** Launch all applicable research agents simultaneously via Task tool in a single message. This skill runs its own research — no prior `/explore` required.
+**CRITICAL:** Launch all applicable research agents simultaneously via Agent tool in a single message. This skill runs its own research — no prior `/explore` required.
 
 **Smart research decision (for agents 3 & 4):**
 - High-risk topics (security, payments, external APIs) → always research
 - Strong local context (good patterns, CLAUDE.md has guidance) → skip external
 - Uncertainty or unfamiliar territory → research
 
-| # | Agent | Condition | Model | Task Tool Config |
+| # | Agent | Condition | Model | Agent Tool Config |
 |---|-------|-----------|-------|-----------------|
 | 1 | **Codebase Research Agent** | Always runs | (built-in) | `subagent_type: "Explore"`, reads `agents/research/codebase-researcher.md` for process |
-| 2 | **Learnings Research Agent** | Always runs (if `docs/solutions/` has files) | haiku | `subagent_type: "general-purpose"`, `model: "haiku"`, searches `docs/solutions/` per `agents/research/learnings-researcher.md` |
-| 3 | **Best Practices Research Agent** | Conditional: unfamiliar technology, external APIs, or user explicitly asks | haiku | `subagent_type: "general-purpose"`, `model: "haiku"`, web search per `agents/research/best-practices-researcher.md` |
-| 4 | **Framework Docs Research Agent** | Conditional: known framework detected in package.json/Gemfile/requirements.txt/go.mod/Cargo.toml | haiku | `subagent_type: "general-purpose"`, `model: "haiku"`, queries Context7 MCP per `agents/research/framework-docs-researcher.md` |
+| 2 | **Learnings Research Agent** | Always runs (if `docs/solutions/` has files) | haiku | `subagent_type: "learnings-researcher"`, `model: "haiku"` |
+| 3 | **Best Practices Research Agent** | Conditional: unfamiliar technology, external APIs, or user explicitly asks | haiku | `subagent_type: "best-practices-researcher"`, `model: "haiku"` |
+| 4 | **Framework Docs Research Agent** | Conditional: known framework detected in package.json/Gemfile/requirements.txt/go.mod/Cargo.toml | haiku | `subagent_type: "framework-docs-researcher"`, `model: "haiku"` |
 
 **Codebase Research Agent prompt:**
 ```

@@ -15,7 +15,7 @@ Products succeed when every piece of work connects to a real user problem and a 
 - **`/roadmap`** — Generates structured product roadmaps from vision and goals
 - **`/backlog`** — Decomposes roadmaps into groomed backlogs with epics, user stories, and acceptance criteria
 
-This agent is NOT a review agent — it is not triggered by file patterns. It is invoked explicitly by the roadmap and backlog skills via the Task tool.
+This agent is NOT a review agent — it is not triggered by file patterns. It is invoked explicitly by the roadmap and backlog skills via the Agent tool.
 
 ## Capabilities
 
